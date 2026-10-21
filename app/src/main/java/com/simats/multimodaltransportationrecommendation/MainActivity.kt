@@ -4,13 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import com.simats.multimodaltransportationrecommendation.ui.home.HomeScreen
+import com.simats.multimodaltransportationrecommendation.ui.onboarding.OnboardingScreen
+import com.simats.multimodaltransportationrecommendation.ui.splash.SplashScreen
 import com.simats.multimodaltransportationrecommendation.ui.theme.MultiModalTransportationRecommendationTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +19,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MultiModalTransportationRecommendationTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                var currentScreen by rememberSaveable { mutableStateOf("splash") }
+
+                when (currentScreen) {
+                    "splash" -> SplashScreen(
+                        onGetStarted = {
+                            currentScreen = "onboarding"
+                        }
                     )
+                    "onboarding" -> OnboardingScreen(
+                        onGetStarted = {
+                            currentScreen = "home"
+                        },
+                        onSignIn = {
+                            currentScreen = "home"
+                        }
+                    )
+                    "home" -> HomeScreen()
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MultiModalTransportationRecommendationTheme {
-        Greeting("Android")
     }
 }
