@@ -60,7 +60,7 @@ fun OnboardingScreen(
                 )
             }
 
-            // Map Graphic Card
+            // Map Graphic Card (Clickable to advance)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,6 +68,7 @@ fun OnboardingScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color(0xFF0B1323))
                     .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                    .clickable { onGetStarted() }
                     .padding(12.dp)
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {

@@ -1,0 +1,295 @@
+package com.simats.multimodaltransportationrecommendation.ui.signup
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun SignUpScreen(
+    viewModel: SignUpViewModel = SignUpViewModel(),
+    onBack: () -> Unit = {},
+    onSignUpSuccess: () -> Unit = {},
+    onSignInClick: () -> Unit = {}
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF070B14))
+            .padding(20.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Top Bar
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF111C2E))
+                            .clickable { onBack() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "←", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "04 / MOVESMART AI",
+                            color = Color(0xFF7A8B9E),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.5.sp
+                        )
+                        Text(
+                            text = "Create account",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                // Logo Box
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF111E16))
+                        .border(1.5.dp, Color(0xFFC6FF00), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "M",
+                        color = Color(0xFFC6FF00),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Make the city yours.",
+                    color = Color.White,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "A few details. A more personal way to move.",
+                    color = Color(0xFF8A99AD),
+                    fontSize = 13.sp
+                )
+            }
+
+            // Form Inputs Section
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                // Full Name field
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = "Full name",
+                        color = Color(0xFF8A99AD),
+                        fontSize = 12.sp
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF0F172A))
+                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "👤", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = uiState.fullName,
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                // Email field
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = "Email address",
+                        color = Color(0xFF8A99AD),
+                        fontSize = 12.sp
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF0F172A))
+                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "✉️", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = uiState.email,
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                // Password field
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = "Password",
+                        color = Color(0xFF8A99AD),
+                        fontSize = 12.sp
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF0F172A))
+                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "🔒", fontSize = 14.sp)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = uiState.password,
+                                color = Color.White,
+                                fontSize = 16.sp
+                            )
+                        }
+                        Text(text = "👁️", fontSize = 14.sp)
+                    }
+                }
+
+                // Password strength helper
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 2.dp)
+                ) {
+                    Text(text = "✓", color = Color(0xFFC6FF00), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Strong password : 12 characters",
+                        color = Color(0xFFC6FF00),
+                        fontSize = 11.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Sign In / Create account Button
+                Button(
+                    onClick = { onSignUpSuccess() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFC6FF00)
+                    )
+                ) {
+                    Text(
+                        text = "Sign in  →",
+                        color = Color(0xFF070B14),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // Footer Section
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.clickable { onSignInClick() },
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Already a member? ",
+                        color = Color(0xFF8A99AD),
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = "Sign in",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Privacy Trust Notice
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF0F172A))
+                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🛡️", fontSize = 10.sp)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "PRIVATE BY DESIGN",
+                            color = Color(0xFF64748B),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF070B14)
+@Composable
+fun SignUpScreenPreview() {
+    SignUpScreen()
+}

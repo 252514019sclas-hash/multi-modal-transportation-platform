@@ -10,6 +10,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.simats.multimodaltransportationrecommendation.ui.home.HomeScreen
 import com.simats.multimodaltransportationrecommendation.ui.onboarding.OnboardingScreen
+import com.simats.multimodaltransportationrecommendation.ui.signin.SignInScreen
+import com.simats.multimodaltransportationrecommendation.ui.signup.CreateAccountScreen
 import com.simats.multimodaltransportationrecommendation.ui.splash.SplashScreen
 import com.simats.multimodaltransportationrecommendation.ui.theme.MultiModalTransportationRecommendationTheme
 
@@ -29,10 +31,32 @@ class MainActivity : ComponentActivity() {
                     )
                     "onboarding" -> OnboardingScreen(
                         onGetStarted = {
-                            currentScreen = "home"
+                            currentScreen = "signin"
                         },
                         onSignIn = {
+                            currentScreen = "signin"
+                        }
+                    )
+                    "signin" -> SignInScreen(
+                        onBack = {
+                            currentScreen = "onboarding"
+                        },
+                        onSignInSuccess = {
                             currentScreen = "home"
+                        },
+                        onCreateAccount = {
+                            currentScreen = "signup"
+                        }
+                    )
+                    "signup" -> CreateAccountScreen(
+                        onBack = {
+                            currentScreen = "signin"
+                        },
+                        onAccountCreated = {
+                            currentScreen = "home"
+                        },
+                        onSignInClicked = {
+                            currentScreen = "signin"
                         }
                     )
                     "home" -> HomeScreen()
