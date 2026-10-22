@@ -8,8 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.simats.multimodaltransportationrecommendation.ui.destination.DestinationScreen
 import com.simats.multimodaltransportationrecommendation.ui.home.HomeScreen
 import com.simats.multimodaltransportationrecommendation.ui.onboarding.OnboardingScreen
+import com.simats.multimodaltransportationrecommendation.ui.options.TripOptionsScreen
 import com.simats.multimodaltransportationrecommendation.ui.preferences.TravelPreferencesScreen
 import com.simats.multimodaltransportationrecommendation.ui.signin.SignInScreen
 import com.simats.multimodaltransportationrecommendation.ui.signup.CreateAccountScreen
@@ -68,7 +70,27 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "home"
                         }
                     )
-                    "home" -> HomeScreen()
+                    "home" -> HomeScreen(
+                        onPlanJourney = {
+                            currentScreen = "destination"
+                        }
+                    )
+                    "destination" -> DestinationScreen(
+                        onBack = {
+                            currentScreen = "home"
+                        },
+                        onUseDestination = {
+                            currentScreen = "tripoptions"
+                        }
+                    )
+                    "tripoptions" -> TripOptionsScreen(
+                        onBack = {
+                            currentScreen = "destination"
+                        },
+                        onShowRoutes = {
+                            currentScreen = "home"
+                        }
+                    )
                 }
             }
         }
