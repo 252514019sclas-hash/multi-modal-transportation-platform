@@ -20,6 +20,7 @@ import com.simats.multimodaltransportationrecommendation.ui.signin.SignInScreen
 import com.simats.multimodaltransportationrecommendation.ui.signup.CreateAccountScreen
 import com.simats.multimodaltransportationrecommendation.ui.splash.SplashScreen
 import com.simats.multimodaltransportationrecommendation.ui.theme.MultiModalTransportationRecommendationTheme
+import com.simats.multimodaltransportationrecommendation.ui.transitservice.TransitServiceScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,6 +116,14 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "compareroutes"
                         },
                         onContinue = {
+                            currentScreen = "transitservice"
+                        }
+                    )
+                    "transitservice" -> TransitServiceScreen(
+                        onBack = {
+                            currentScreen = "recommendedroute"
+                        },
+                        onContinueToBooking = {
                             currentScreen = "home"
                         }
                     )
