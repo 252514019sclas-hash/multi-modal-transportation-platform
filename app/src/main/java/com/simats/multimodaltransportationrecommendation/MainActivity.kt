@@ -8,11 +8,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.simats.multimodaltransportationrecommendation.ui.booking.ReviewBookingScreen
 import com.simats.multimodaltransportationrecommendation.ui.compare.CompareRoutesScreen
 import com.simats.multimodaltransportationrecommendation.ui.destination.DestinationScreen
 import com.simats.multimodaltransportationrecommendation.ui.home.HomeScreen
 import com.simats.multimodaltransportationrecommendation.ui.onboarding.OnboardingScreen
 import com.simats.multimodaltransportationrecommendation.ui.options.TripOptionsScreen
+import com.simats.multimodaltransportationrecommendation.ui.payment.PaymentMethodScreen
 import com.simats.multimodaltransportationrecommendation.ui.preferences.TravelPreferencesScreen
 import com.simats.multimodaltransportationrecommendation.ui.recommended.RecommendedRouteScreen
 import com.simats.multimodaltransportationrecommendation.ui.routes.RouteResultsScreen
@@ -124,6 +126,22 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "recommendedroute"
                         },
                         onContinueToBooking = {
+                            currentScreen = "reviewbooking"
+                        }
+                    )
+                    "reviewbooking" -> ReviewBookingScreen(
+                        onBack = {
+                            currentScreen = "transitservice"
+                        },
+                        onConfirmAndPay = {
+                            currentScreen = "paymentmethod"
+                        }
+                    )
+                    "paymentmethod" -> PaymentMethodScreen(
+                        onBack = {
+                            currentScreen = "reviewbooking"
+                        },
+                        onPaySuccess = {
                             currentScreen = "home"
                         }
                     )
