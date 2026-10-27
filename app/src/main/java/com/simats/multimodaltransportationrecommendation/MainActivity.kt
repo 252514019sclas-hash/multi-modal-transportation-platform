@@ -18,6 +18,7 @@ import com.simats.multimodaltransportationrecommendation.ui.onboarding.Onboardin
 import com.simats.multimodaltransportationrecommendation.ui.options.TripOptionsScreen
 import com.simats.multimodaltransportationrecommendation.ui.payment.PaymentMethodScreen
 import com.simats.multimodaltransportationrecommendation.ui.preferences.TravelPreferencesScreen
+import com.simats.multimodaltransportationrecommendation.ui.profile.ProfileScreen
 import com.simats.multimodaltransportationrecommendation.ui.recommended.RecommendedRouteScreen
 import com.simats.multimodaltransportationrecommendation.ui.reroute.SmarterWayScreen
 import com.simats.multimodaltransportationrecommendation.ui.routes.RouteResultsScreen
@@ -84,6 +85,12 @@ class MainActivity : ComponentActivity() {
                     "home" -> HomeScreen(
                         onPlanJourney = {
                             currentScreen = "destination"
+                        },
+                        onNavigateTab = { tab ->
+                            when (tab) {
+                                "My trips" -> currentScreen = "mytrips"
+                                "Profile" -> currentScreen = "profile"
+                            }
                         }
                     )
                     "destination" -> DestinationScreen(
@@ -193,8 +200,20 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "yourticket"
                         },
                         onNavigateTab = { tab ->
-                            if (tab == "Explore") {
-                                currentScreen = "home"
+                            when (tab) {
+                                "Explore" -> currentScreen = "home"
+                                "Profile" -> currentScreen = "profile"
+                            }
+                        }
+                    )
+                    "profile" -> ProfileScreen(
+                        onSignOut = {
+                            currentScreen = "signin"
+                        },
+                        onNavigateTab = { tab ->
+                            when (tab) {
+                                "Explore" -> currentScreen = "home"
+                                "My trips" -> currentScreen = "mytrips"
                             }
                         }
                     )

@@ -28,7 +28,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = HomeViewModel(),
-    onPlanJourney: () -> Unit = {}
+    onPlanJourney: () -> Unit = {},
+    onNavigateTab: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -357,7 +358,10 @@ fun HomeScreen(
                         val lines = tabInfo.split("\n")
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clickable { viewModel.selectTab(lines[1]) }
+                            modifier = Modifier.clickable {
+                                viewModel.selectTab(lines[1])
+                                onNavigateTab(lines[1])
+                            }
                         ) {
                             Text(text = lines[0], fontSize = 16.sp)
                             Text(
