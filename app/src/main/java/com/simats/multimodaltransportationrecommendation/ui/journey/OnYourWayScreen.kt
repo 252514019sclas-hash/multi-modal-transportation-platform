@@ -30,7 +30,8 @@ import androidx.compose.ui.unit.sp
 fun OnYourWayScreen(
     viewModel: OnYourWayViewModel = OnYourWayViewModel(),
     onBack: () -> Unit = {},
-    onViewTicket: () -> Unit = {}
+    onViewTicket: () -> Unit = {},
+    onSimulateDelay: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -99,13 +100,14 @@ fun OnYourWayScreen(
                         }
                     }
 
-                    // Options dots
+                    // Options dots (Tap to simulate live delay alert)
                     Box(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), CircleShape),
+                            .border(1.dp, Color(0xFF1E293B), CircleShape)
+                            .clickable { onSimulateDelay() },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = "···", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -167,6 +169,7 @@ fun OnYourWayScreen(
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFF0B1323))
                         .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                        .clickable { onSimulateDelay() }
                         .padding(10.dp)
                 ) {
                     Canvas(modifier = Modifier.fillMaxSize()) {

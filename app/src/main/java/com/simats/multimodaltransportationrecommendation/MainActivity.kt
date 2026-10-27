@@ -10,6 +10,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.simats.multimodaltransportationrecommendation.ui.booking.ReviewBookingScreen
 import com.simats.multimodaltransportationrecommendation.ui.compare.CompareRoutesScreen
+import com.simats.multimodaltransportationrecommendation.ui.completed.JourneyCompletedScreen
 import com.simats.multimodaltransportationrecommendation.ui.destination.DestinationScreen
 import com.simats.multimodaltransportationrecommendation.ui.home.HomeScreen
 import com.simats.multimodaltransportationrecommendation.ui.journey.OnYourWayScreen
@@ -18,6 +19,7 @@ import com.simats.multimodaltransportationrecommendation.ui.options.TripOptionsS
 import com.simats.multimodaltransportationrecommendation.ui.payment.PaymentMethodScreen
 import com.simats.multimodaltransportationrecommendation.ui.preferences.TravelPreferencesScreen
 import com.simats.multimodaltransportationrecommendation.ui.recommended.RecommendedRouteScreen
+import com.simats.multimodaltransportationrecommendation.ui.reroute.SmarterWayScreen
 import com.simats.multimodaltransportationrecommendation.ui.routes.RouteResultsScreen
 import com.simats.multimodaltransportationrecommendation.ui.signin.SignInScreen
 import com.simats.multimodaltransportationrecommendation.ui.signup.CreateAccountScreen
@@ -161,6 +163,28 @@ class MainActivity : ComponentActivity() {
                         },
                         onViewTicket = {
                             currentScreen = "yourticket"
+                        },
+                        onSimulateDelay = {
+                            currentScreen = "smarterway"
+                        }
+                    )
+                    "smarterway" -> SmarterWayScreen(
+                        onBack = {
+                            currentScreen = "onyourway"
+                        },
+                        onAcceptRoute = {
+                            currentScreen = "journeycompleted"
+                        },
+                        onKeepRoute = {
+                            currentScreen = "journeycompleted"
+                        }
+                    )
+                    "journeycompleted" -> JourneyCompletedScreen(
+                        onBack = {
+                            currentScreen = "smarterway"
+                        },
+                        onBackToHome = {
+                            currentScreen = "home"
                         }
                     )
                 }
