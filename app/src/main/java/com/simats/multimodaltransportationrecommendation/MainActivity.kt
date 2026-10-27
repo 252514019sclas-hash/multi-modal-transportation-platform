@@ -27,6 +27,7 @@ import com.simats.multimodaltransportationrecommendation.ui.splash.SplashScreen
 import com.simats.multimodaltransportationrecommendation.ui.theme.MultiModalTransportationRecommendationTheme
 import com.simats.multimodaltransportationrecommendation.ui.ticket.YourTicketScreen
 import com.simats.multimodaltransportationrecommendation.ui.transitservice.TransitServiceScreen
+import com.simats.multimodaltransportationrecommendation.ui.trips.MyTripsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -184,7 +185,17 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "smarterway"
                         },
                         onBackToHome = {
-                            currentScreen = "home"
+                            currentScreen = "mytrips"
+                        }
+                    )
+                    "mytrips" -> MyTripsScreen(
+                        onOpenTicket = {
+                            currentScreen = "yourticket"
+                        },
+                        onNavigateTab = { tab ->
+                            if (tab == "Explore") {
+                                currentScreen = "home"
+                            }
                         }
                     )
                 }
