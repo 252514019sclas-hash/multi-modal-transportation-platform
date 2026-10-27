@@ -12,6 +12,7 @@ import com.simats.multimodaltransportationrecommendation.ui.booking.ReviewBookin
 import com.simats.multimodaltransportationrecommendation.ui.compare.CompareRoutesScreen
 import com.simats.multimodaltransportationrecommendation.ui.destination.DestinationScreen
 import com.simats.multimodaltransportationrecommendation.ui.home.HomeScreen
+import com.simats.multimodaltransportationrecommendation.ui.journey.OnYourWayScreen
 import com.simats.multimodaltransportationrecommendation.ui.onboarding.OnboardingScreen
 import com.simats.multimodaltransportationrecommendation.ui.options.TripOptionsScreen
 import com.simats.multimodaltransportationrecommendation.ui.payment.PaymentMethodScreen
@@ -22,6 +23,7 @@ import com.simats.multimodaltransportationrecommendation.ui.signin.SignInScreen
 import com.simats.multimodaltransportationrecommendation.ui.signup.CreateAccountScreen
 import com.simats.multimodaltransportationrecommendation.ui.splash.SplashScreen
 import com.simats.multimodaltransportationrecommendation.ui.theme.MultiModalTransportationRecommendationTheme
+import com.simats.multimodaltransportationrecommendation.ui.ticket.YourTicketScreen
 import com.simats.multimodaltransportationrecommendation.ui.transitservice.TransitServiceScreen
 
 class MainActivity : ComponentActivity() {
@@ -142,7 +144,23 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "reviewbooking"
                         },
                         onPaySuccess = {
-                            currentScreen = "home"
+                            currentScreen = "yourticket"
+                        }
+                    )
+                    "yourticket" -> YourTicketScreen(
+                        onBack = {
+                            currentScreen = "paymentmethod"
+                        },
+                        onStartJourney = {
+                            currentScreen = "onyourway"
+                        }
+                    )
+                    "onyourway" -> OnYourWayScreen(
+                        onBack = {
+                            currentScreen = "yourticket"
+                        },
+                        onViewTicket = {
+                            currentScreen = "yourticket"
                         }
                     )
                 }
