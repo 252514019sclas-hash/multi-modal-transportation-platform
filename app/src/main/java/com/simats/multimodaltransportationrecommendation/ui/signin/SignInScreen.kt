@@ -6,8 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,19 +20,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun SignInScreen(
-    viewModel: SignInViewModel = SignInViewModel(),
+    viewModel: SignInViewModel = viewModel(),
     onBack: () -> Unit = {},
     onSignInSuccess: () -> Unit = {},
     onCreateAccount: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -117,6 +130,30 @@ fun SignInScreen(
 
             // Form Inputs Section
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+
+                // Error Message Banner
+                if (!uiState.errorMessage.isNullOrEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0x22EF4444))
+                            .border(1.dp, Color(0xFFEF4444), RoundedCornerShape(10.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "⚠️", fontSize = 13.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = uiState.errorMessage!!,
+                                color = Color(0xFFFF8B8B),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+
                 // Email field
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
@@ -132,18 +169,35 @@ fun SignInScreen(
                             .background(Color(0xFF0F172A))
                             .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "✉️", fontSize = 14.sp)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = uiState.email,
+                        Text(text = "✉️", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        BasicTextField(
+                            value = uiState.email,
+                            onValueChange = { viewModel.onEmailChanged(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            textStyle = TextStyle(
                                 color = Color.White,
                                 fontSize = 14.sp
-                            )
-                        }
+                            ),
+                            cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Email,
+                                imeAction = ImeAction.Next
+                            ),
+                            decorationBox = { innerTextField ->
+                                if (uiState.email.isEmpty()) {
+                                    Text(
+                                        text = "alex.morgan@example.com",
+                                        color = Color(0xFF475569),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        )
                     }
                 }
 
@@ -165,16 +219,54 @@ fun SignInScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
                             Text(text = "🔒", fontSize = 14.sp)
                             Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = uiState.password,
-                                color = Color.White,
-                                fontSize = 16.sp
+                            BasicTextField(
+                                value = uiState.password,
+                                onValueChange = { viewModel.onPasswordChanged(it) },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                textStyle = TextStyle(
+                                    color = Color.White,
+                                    fontSize = 15.sp
+                                ),
+                                cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Password,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        viewModel.signIn(context = context, onSuccess = onSignInSuccess)
+                                    }
+                                ),
+                                decorationBox = { innerTextField ->
+                                    if (uiState.password.isEmpty()) {
+                                        Text(
+                                            text = "••••••••••",
+                                            color = Color(0xFF475569),
+                                            fontSize = 14.sp
+                                        )
+                                    }
+                                    innerTextField()
+                                }
                             )
                         }
-                        Text(text = "👁️", fontSize = 14.sp)
+                        Box(
+                            modifier = Modifier
+                                .clickable { viewModel.togglePasswordVisibility() }
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = if (uiState.isPasswordVisible) "🙈" else "👁️",
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
 
@@ -196,21 +288,33 @@ fun SignInScreen(
 
                 // Sign In Button
                 Button(
-                    onClick = { onSignInSuccess() },
+                    onClick = {
+                        viewModel.signIn(context = context, onSuccess = onSignInSuccess)
+                    },
+                    enabled = !uiState.isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFC6FF00)
+                        containerColor = Color(0xFFC6FF00),
+                        disabledContainerColor = Color(0x66C6FF00)
                     )
                 ) {
-                    Text(
-                        text = "Sign in  →",
-                        color = Color(0xFF070B14),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color(0xFF070B14),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Sign in  →",
+                            color = Color(0xFF070B14),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 
