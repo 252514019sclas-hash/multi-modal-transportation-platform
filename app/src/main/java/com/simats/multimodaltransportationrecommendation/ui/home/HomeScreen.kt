@@ -534,7 +534,6 @@ fun HomeScreen(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
-                            viewModel.selectTab(lines[1])
                             onNavigateTab(lines[1])
                         }
                     ) {
@@ -715,15 +714,6 @@ private fun TouristPlaceExploreCard(
                     Text(text = "Plan Journey", color = Color(0xFF070B14), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
-        }
-
-        if (showNotificationsDialog) {
-            NotificationsHistoryDialog(
-                onDismiss = {
-                    showNotificationsDialog = false
-                    viewModel.loadNotificationsCount(context)
-                }
-            )
         }
     }
 }
