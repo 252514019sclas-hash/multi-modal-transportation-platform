@@ -17,15 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.simats.multimodaltransportationrecommendation.data.model.routes.RouteOption
 
 @Composable
 fun CompareRoutesScreen(
-    viewModel: CompareRoutesViewModel = CompareRoutesViewModel(),
+    viewModel: CompareRoutesViewModel = viewModel(),
     onBack: () -> Unit = {},
-    onChooseRoute: () -> Unit = {}
+    onChooseRoute: (RouteOption?) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -33,7 +34,7 @@ fun CompareRoutesScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF070B14))
-            .padding(20.dp)
+            .padding(horizontal = 20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -48,7 +49,7 @@ fun CompareRoutesScreen(
                 // Top Bar
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 8.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -123,7 +124,12 @@ fun CompareRoutesScreen(
             }
 
             // Route Comparison Cards List
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 uiState.routes.forEach { route ->
                     val isSelected = uiState.selectedRouteTitle == route.title
                     Box(
@@ -190,7 +196,7 @@ fun CompareRoutesScreen(
                                 Text(text = route.time, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                                 Text(text = route.fare, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                                 Text(text = route.walk, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                Text(text = route.co2, color = if (route.co2 == "0.4 kg" || route.co2 == "0 kg") Color(0xFFC6FF00) else Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Text(text = route.co2, color = if (route.co2.contains("0.4") || route.co2.startsWith("0 ")) Color(0xFFC6FF00) else Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                                 Text(text = route.onTime, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                             }
                         }
@@ -220,9 +226,10 @@ fun CompareRoutesScreen(
 
             // Bottom CTA Button
             Button(
-                onClick = { onChooseRoute() },
+                onClick = { onChooseRoute(uiState.selectedRouteOption) },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(vertical = 8.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -230,7 +237,7 @@ fun CompareRoutesScreen(
                 )
             ) {
                 Text(
-                    text = "Choose N Judah · $3.00  →",
+                    text = "Choose ${uiState.selectedRouteTitle}  →",
                     color = Color(0xFF070B14),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
@@ -238,10 +245,4 @@ fun CompareRoutesScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun CompareRoutesScreenPreview() {
-    CompareRoutesScreen()
 }

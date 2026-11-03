@@ -16,6 +16,7 @@ class SessionManager(context: Context) {
         private const val KEY_FULL_NAME = "full_name"
         private const val KEY_EMAIL = "email"
         private const val KEY_PHONE = "phone"
+        private const val KEY_PROFILE_IMAGE = "profile_image"
 
         @Volatile
         private var instance: SessionManager? = null
@@ -38,6 +39,22 @@ class SessionManager(context: Context) {
         }
     }
 
+    fun updateUserDetails(fullName: String, phone: String?) {
+        prefs.edit().apply {
+            putString(KEY_FULL_NAME, fullName)
+            putString(KEY_PHONE, phone)
+            apply()
+        }
+    }
+
+    fun saveProfileImage(imagePath: String?) {
+        prefs.edit().putString(KEY_PROFILE_IMAGE, imagePath).apply()
+    }
+
+    fun getProfileImage(): String? {
+        return prefs.getString(KEY_PROFILE_IMAGE, null)
+    }
+
     fun isLoggedIn(): Boolean {
         return prefs.getBoolean(KEY_IS_LOGGED_IN, false)
     }
@@ -48,6 +65,10 @@ class SessionManager(context: Context) {
         val email = prefs.getString(KEY_EMAIL, "") ?: ""
         val phone = prefs.getString(KEY_PHONE, null)
         return UserData(userId = userId, fullName = fullName, email = email, phone = phone)
+    }
+
+    fun getUserId(): Int? {
+        return prefs.getString(KEY_USER_ID, null)?.toIntOrNull()
     }
 
     fun clearSession() {

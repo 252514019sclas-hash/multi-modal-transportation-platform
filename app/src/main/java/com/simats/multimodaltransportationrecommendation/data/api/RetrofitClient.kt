@@ -1,5 +1,6 @@
 package com.simats.multimodaltransportationrecommendation.data.api
 
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -14,8 +15,19 @@ object RetrofitClient {
         }
     }
 
+    private val headerInterceptor = Interceptor { chain ->
+        val original = chain.request()
+        val request = original.newBuilder()
+            .header("ngrok-skip-browser-warning", "69420")
+            .header("Accept", "application/json")
+            .method(original.method, original.body)
+            .build()
+        chain.proceed(request)
+    }
+
     private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            .addInterceptor(headerInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -25,7 +37,7 @@ object RetrofitClient {
 
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(ApiConstants.BASE_URL)
+            .baseUrl(ApiConstants.BASE_URL.trim())
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

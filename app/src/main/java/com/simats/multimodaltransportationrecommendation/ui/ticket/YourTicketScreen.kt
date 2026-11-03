@@ -11,6 +11,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,23 +21,35 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.simats.multimodaltransportationrecommendation.data.model.trips.BookedJourneyData
+import com.simats.multimodaltransportationrecommendation.data.model.trips.TripItem
 
 @Composable
 fun YourTicketScreen(
-    viewModel: YourTicketViewModel = YourTicketViewModel(),
+    viewModel: YourTicketViewModel = viewModel(),
+    bookedJourney: BookedJourneyData? = null,
+    trip: TripItem? = null,
     onBack: () -> Unit = {},
     onStartJourney: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(bookedJourney, trip) {
+        if (bookedJourney != null) {
+            viewModel.setTicketFromBooking(bookedJourney)
+        } else if (trip != null) {
+            viewModel.setTicketFromTrip(trip)
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF070B14))
-            .padding(20.dp)
+            .padding(horizontal = 20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -52,7 +65,7 @@ fun YourTicketScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .padding(top = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -115,9 +128,9 @@ fun YourTicketScreen(
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "You're all set, ${uiState.userName}.",
+                            text = "You're all set!",
                             color = Color.White,
-                            fontSize = 18.sp,
+                            fontSize = 17.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
@@ -169,20 +182,20 @@ fun YourTicketScreen(
                             )
                         }
 
-                        // Destination & Time
+                        // Origin -> Destination & Time
                         Column(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.Start
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             Text(
-                                text = uiState.destination,
+                                text = "${uiState.origin} → ${uiState.destination}",
                                 color = Color.White,
-                                fontSize = 17.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = uiState.dateTime,
+                                text = "${uiState.dateTime} · ${uiState.durationText}",
                                 color = Color(0xFF8A99AD),
                                 fontSize = 11.sp
                             )
@@ -191,143 +204,95 @@ fun YourTicketScreen(
                         // QR Code Visual Box
                         Box(
                             modifier = Modifier
-                                .size(170.dp)
+                                .size(160.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(Color.White)
                                 .padding(12.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Draw a simulated QR code matrix pattern
                             Canvas(modifier = Modifier.fillMaxSize()) {
-                                val w = size.width
-                                val cellSize = w / 12f
-                                val qrColor = Color(0xFF070B14)
+                                val blockSize = size.width / 15f
+                                drawRect(color = Color.Black, topLeft = Offset(0f, 0f), size = Size(blockSize * 4, blockSize * 4))
+                                drawRect(color = Color.White, topLeft = Offset(blockSize, blockSize), size = Size(blockSize * 2, blockSize * 2))
+                                drawRect(color = Color.Black, topLeft = Offset(size.width - blockSize * 4, 0f), size = Size(blockSize * 4, blockSize * 4))
+                                drawRect(color = Color.White, topLeft = Offset(size.width - blockSize * 3, blockSize), size = Size(blockSize * 2, blockSize * 2))
+                                drawRect(color = Color.Black, topLeft = Offset(0f, size.height - blockSize * 4), size = Size(blockSize * 4, blockSize * 4))
+                                drawRect(color = Color.White, topLeft = Offset(blockSize, size.height - blockSize * 3), size = Size(blockSize * 2, blockSize * 2))
 
-                                for (r in 0 until 12) {
-                                    for (c in 0 until 12) {
-                                        val isFinder = (r < 3 && c < 3) || (r < 3 && c > 8) || (r > 8 && c < 3)
-                                        val isDot = (r + c) % 2 == 0 || r % 3 == 0 || c % 3 == 0
-                                        if (isFinder || isDot) {
-                                            drawRect(
-                                                color = qrColor,
-                                                topLeft = Offset(c * cellSize, r * cellSize),
-                                                size = Size(cellSize * 0.9f, cellSize * 0.9f)
-                                            )
+                                for (i in 4..10) {
+                                    for (j in 4..10) {
+                                        if ((i + j) % 2 == 0) {
+                                            drawRect(color = Color.Black, topLeft = Offset(i * blockSize, j * blockSize), size = Size(blockSize, blockSize))
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // Code & Notice
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = uiState.ticketCode,
-                                color = Color.White,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.5.sp
-                            )
-                            Text(
-                                text = "DEMO TICKET · NOT VALID FOR TRAVEL",
-                                color = Color(0xFF64748B),
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            )
-                        }
+                        // Ticket Code
+                        Text(
+                            text = uiState.ticketCode,
+                            color = Color(0xFFC6FF00),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
 
-                        // Validity Strip
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF162238))
-                                .padding(10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "⏰", fontSize = 12.sp)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Column {
-                                    Text(
-                                        text = uiState.ticketValidity,
-                                        color = Color.White,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = uiState.ticketNotice,
-                                        color = Color(0xFF8A99AD),
-                                        fontSize = 9.sp
-                                    )
-                                }
-                            }
-                        }
+                        Text(
+                            text = uiState.ticketValidity,
+                            color = Color(0xFF8A99AD),
+                            fontSize = 10.sp
+                        )
                     }
                 }
             }
 
-            // Links below card
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "View payment receipt",
-                    color = Color(0xFFC6FF00),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { /* Receipt action */ }
-                )
-                Text(
-                    text = "Need help?",
-                    color = Color(0xFF8A99AD),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { /* Help action */ }
-                )
-            }
-
-            // Bottom CTA Button & Notice
+            // Bottom CTA Buttons
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 2.dp)
+                    .padding(bottom = 6.dp)
             ) {
                 Text(
-                    text = "Ticket activates when your journey starts",
+                    text = uiState.ticketNotice,
                     color = Color(0xFF64748B),
-                    fontSize = 10.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    fontSize = 10.sp
                 )
 
                 Button(
                     onClick = { onStartJourney() },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFC6FF00)
-                    )
+                        .height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC6FF00))
                 ) {
                     Text(
-                        text = "Start journey  →",
+                        text = "Start journey now  →",
                         color = Color(0xFF070B14),
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Button(
+                    onClick = { onBack() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp),
+                    shape = RoundedCornerShape(22.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F172A))
+                ) {
+                    Text(
+                        text = "View in My Trips",
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun YourTicketScreenPreview() {
-    YourTicketScreen()
 }
