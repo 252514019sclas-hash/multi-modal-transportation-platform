@@ -20,14 +20,15 @@ import java.util.Locale
 
 data class HomeUiState(
     val userName: String = "Traveler",
-    val origin: String = "Ferry Building",
+    val origin: String = "Chennai Central",
     val destination: String = "",
     val dateTime: String = "Today, 9:15 AM",
-    val location: String = "Ferry Building · Current location",
-    val temperature: String = "17°C · Sunny",
-    val recentDestination: String = "California Academy of Sciences",
-    val recentLocationInfo: String = "Golden Gate Park · 6.8 km away",
+    val location: String = "Chennai Central · Current location",
+    val temperature: String = "29°C · Pleasant Breeze",
+    val recentDestination: String = "Marina Beach & Promenade",
+    val recentLocationInfo: String = "Chennai · 2.5 km away",
     val selectedCategory: String = "All",
+    val searchQuery: String = "",
     val touristPlaces: List<TouristPlace> = emptyList(),
     val isLoadingPlaces: Boolean = false,
     val selectedTab: String = "Explore",
@@ -112,8 +113,12 @@ class HomeViewModel(
         _uiState.value = _uiState.value.copy(destination = destination)
     }
 
+    fun onSearchQueryChange(query: String) {
+        _uiState.value = _uiState.value.copy(searchQuery = query)
+    }
+
     fun useCurrentLocation(context: Context) {
-        var detected = "Market St & 4th, SF (GPS)"
+        var detected = "Chennai Central (GPS)"
         try {
             val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
             if (locationManager != null) {
@@ -130,12 +135,12 @@ class HomeViewModel(
                             if (!list.isNullOrEmpty()) {
                                 val addr = list[0]
                                 val street = addr.thoroughfare ?: addr.featureName ?: addr.locality
-                                detected = "${street ?: "Current GPS"}, ${addr.locality ?: "SF"}"
+                                detected = "${street ?: "Current GPS"}, ${addr.locality ?: "Tamil Nadu"}"
                             } else {
                                 detected = "Current Location (${String.format(Locale.US, "%.3f", loc.latitude)}, ${String.format(Locale.US, "%.3f", loc.longitude)})"
                             }
                         } catch (_: Exception) {
-                            detected = "Current GPS Location"
+                            detected = "Chennai Central (GPS)"
                         }
                     }
                 }

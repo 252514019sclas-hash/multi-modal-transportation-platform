@@ -8,18 +8,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class YourTicketUiState(
-    val userName: String = "Alex",
-    val confirmationText: String = "Booking confirmed · $3.00 paid",
-    val transportLine: String = "MUNI · N JUDAH",
-    val passengerType: String = "1 adult",
-    val origin: String = "Ferry Building",
-    val destination: String = "California Academy of Sciences",
-    val dateTime: String = "Today, Oct 20 - 9:15–9:57 AM",
-    val ticketCode: String = "MS-261020-N042",
-    val ticketValidity: String = "Valid for 2 hours after activation",
-    val ticketNotice: String = "Keep this digital ticket ready for fare inspection.",
-    val durationText: String = "42 min",
-    val fareText: String = "$3.00"
+    val userName: String = "Traveler",
+    val confirmationText: String = "Booking confirmed · ₹30 paid",
+    val transportLine: String = "CMRL · BLUE LINE METRO",
+    val passengerType: String = "1 Passenger Pass",
+    val origin: String = "Chennai Central",
+    val destination: String = "Marina Beach, Chennai",
+    val dateTime: String = "Today, 09:30 AM",
+    val ticketCode: String = "TN-MS-928174",
+    val ticketValidity: String = "Valid for 4 hours across Tamil Nadu transit networks",
+    val ticketNotice: String = "Present this digital QR pass at metro gates or transit conductors.",
+    val durationText: String = "18 min",
+    val fareText: String = "₹30"
 )
 
 class YourTicketViewModel : ViewModel() {

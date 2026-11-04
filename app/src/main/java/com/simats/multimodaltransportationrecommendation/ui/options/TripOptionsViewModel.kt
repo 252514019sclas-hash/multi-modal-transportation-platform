@@ -5,6 +5,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+data class TripOptionsUiState(
+    val origin: String = "Chennai Central",
+    val destination: String = "Marina Beach, Chennai",
+    val timeMode: String = "Depart at",
+    val dateText: String = "Today",
+    val timeText: String = "09:30 AM",
+    val passengers: Int = 1,
+    val selectedModes: Set<String> = setOf("Walk", "Cycle", "Bus", "Metro", "Train", "Taxi", "Car"),
+    val walkingMinutes: Float = 10f,
+    val optimizeBy: String = "Fastest Route",
+    val accessibleRoutes: Boolean = false
+)
+
 class TripOptionsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(TripOptionsUiState())
     val uiState: StateFlow<TripOptionsUiState> = _uiState.asStateFlow()
@@ -31,16 +44,3 @@ class TripOptionsViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(accessibleRoutes = !_uiState.value.accessibleRoutes)
     }
 }
-
-data class TripOptionsUiState(
-    val origin: String = "Ferry Building",
-    val destination: String = "California Academy of Sciences",
-    val timeMode: String = "Depart at",
-    val dateText: String = "Today, Oct 20",
-    val timeText: String = "9:15 AM",
-    val passengers: Int = 1,
-    val selectedModes: Set<String> = setOf("Walk", "Cycle", "Bus", "Metro", "Rideshare"),
-    val walkingMinutes: Float = 10f,
-    val optimizeBy: String = "Low-carbon",
-    val accessibleRoutes: Boolean = false
-)

@@ -19,9 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun OnboardingScreen(
@@ -31,7 +31,7 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
             .padding(20.dp)
     ) {
         Column(
@@ -45,29 +45,29 @@ fun OnboardingScreen(
             // Top Header
             Column(modifier = Modifier.padding(top = 8.dp)) {
                 Text(
-                    text = "02 / MOVESMART AI",
-                    color = Color(0xFF7A8B9E),
+                    text = "02 / DISCOVER TAMIL NADU",
+                    color = SkyBluePrimary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.5.sp
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "A smarter way to go",
-                    color = Color.White,
+                    text = "Smart Tourism & Seamless Transit",
+                    color = TextNavyDark,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            // Map Graphic Card (Clickable to advance)
+            // Map Graphic Card (Pastel Blue & White)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(175.dp)
+                    .height(180.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0B1323))
-                    .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                    .background(SurfaceWhite)
+                    .border(1.dp, BorderLight, RoundedCornerShape(16.dp))
                     .clickable { onGetStarted() }
                     .padding(12.dp)
             ) {
@@ -75,8 +75,8 @@ fun OnboardingScreen(
                     val width = size.width
                     val height = size.height
 
-                    // Grid lines
-                    val gridColor = Color(0xFF162238)
+                    // Grid
+                    val gridColor = BorderLight
                     val cols = 6
                     val rows = 5
                     val dx = width / cols
@@ -99,83 +99,65 @@ fun OnboardingScreen(
                         )
                     }
 
-                    // Secondary blue route
-                    val bluePath = Path().apply {
+                    // Route Lines
+                    val tealPath = Path().apply {
                         moveTo(width * 0.1f, height * 0.7f)
                         lineTo(width * 0.4f, height * 0.7f)
                         cubicTo(width * 0.5f, height * 0.7f, width * 0.5f, height * 0.3f, width * 0.6f, height * 0.3f)
                         lineTo(width * 0.9f, height * 0.3f)
                     }
                     drawPath(
-                        path = bluePath,
-                        color = Color(0xFF38BDF8).copy(alpha = 0.4f),
-                        style = Stroke(width = 2.dp.toPx())
+                        path = tealPath,
+                        color = TealSecondary.copy(alpha = 0.6f),
+                        style = Stroke(width = 3.dp.toPx())
                     )
 
-                    // Primary lime green route
-                    val greenPath = Path().apply {
-                        moveTo(width * 0.25f, height * 0.75f)
-                        lineTo(width * 0.25f, height * 0.55f)
-                        lineTo(width * 0.55f, height * 0.55f)
+                    val skyPath = Path().apply {
+                        moveTo(width * 0.25f, height * 0.8f)
+                        lineTo(width * 0.25f, height * 0.5f)
+                        lineTo(width * 0.6f, height * 0.5f)
                         lineTo(width * 0.88f, height * 0.22f)
                     }
                     drawPath(
-                        path = greenPath,
-                        color = Color(0xFFC6FF00),
+                        path = skyPath,
+                        color = SkyBluePrimary,
                         style = Stroke(width = 3.5.dp.toPx())
                     )
                 }
 
-                // Map Labels Overlay
-                Text(
-                    text = "RICHMOND",
-                    color = Color(0xFF64748B),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.TopStart).padding(4.dp)
-                )
+                // Node Badges
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(PastelCardTeal)
+                        .border(1.dp, TealLight, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(text = "🏛️ Mahabalipuram", color = TealDark, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                }
 
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFF1E293B))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(PastelCardPeach)
+                        .border(1.dp, WarmOrangeLight, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
-                    Text(
-                        text = "Ferry Building",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Text(text = "🛕 Thanjavur Big Temple", color = WarmOrangeDark, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Box(
                     modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .offset(x = 12.dp, y = (-20).dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFF112218))
-                        .border(1.dp, Color(0xFF1E4028), RoundedCornerShape(6.dp))
-                        .padding(horizontal = 6.dp, vertical = 3.dp)
+                        .align(Alignment.BottomEnd)
+                        .offset(y = (-4).dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(PastelCardBlue)
+                        .border(1.dp, SkyBlueSoft, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
-                    Text(
-                        text = "Academy of Sciences",
-                        color = Color(0xFFC6FF00),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .offset(x = (-30.dp), y = 10.dp)
-                        .size(20.dp)
-                        .background(Color(0xFFC6FF00), RoundedCornerShape(4.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "N", color = Color(0xFF070B14), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "🌊 Kanyakumari Memorial", color = SkyBlueDark, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -183,16 +165,16 @@ fun OnboardingScreen(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF101D17))
-                    .border(1.dp, Color(0xFF1E3F2A), RoundedCornerShape(12.dp))
+                    .background(PastelCardTeal)
+                    .border(1.dp, TealSoft, RoundedCornerShape(12.dp))
                     .padding(horizontal = 10.dp, vertical = 5.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "☘️", fontSize = 11.sp)
+                    Text(text = "🌴", fontSize = 11.sp)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "POWERED BY MOVE AI",
-                        color = Color(0xFFC6FF00),
+                        text = "TAMIL NADU TOURISM & COMMUTE ENGINE",
+                        color = TealDark,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp
@@ -203,29 +185,30 @@ fun OnboardingScreen(
             // Main Headline & Subtitle
             Column {
                 Text(
-                    text = "Your city. Your pace.\nYour best route.",
-                    color = Color.White,
+                    text = "Your journey. Your heritage.\nYour best route.",
+                    color = TextNavyDark,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 30.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Walk, ride or roll. AI connects the best ways to travel, all in one personal journey.",
-                    color = Color(0xFF8A99AD),
+                    text = "Discover popular temples, serene beaches, hill stations, and waterfalls connected by Metro, MTC, TNSTC, and Southern Railway.",
+                    color = TextNavyBody,
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
             }
 
-            // Feature Cards (2 rows)
+            // Feature Cards
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 // Card 1
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF0F172A))
+                        .background(PastelCardBlue)
+                        .border(1.dp, SkyBlueSoft, RoundedCornerShape(12.dp))
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -235,34 +218,27 @@ fun OnboardingScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF162238)),
+                                .background(SurfaceWhite),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "🔄", fontSize = 16.sp)
+                            Text(text = "🗺️", fontSize = 16.sp)
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "Every mode, one plan",
-                                color = Color.White,
+                                text = "Tamil Nadu Tourist Discovery",
+                                color = TextNavyDark,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Transit, bikes and rides that work together.",
-                                color = Color(0xFF8A99AD),
+                                text = "Meenakshi Amman, Marina Beach, Ooty, Kodaikanal.",
+                                color = TextNavyBody,
                                 fontSize = 11.sp
                             )
                         }
                     }
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(Color(0xFF162238), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "✓", color = Color(0xFFC6FF00), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
+                    Text(text = "✓", color = SkyBluePrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
 
                 // Card 2
@@ -270,7 +246,8 @@ fun OnboardingScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF0F172A))
+                        .background(PastelCardTeal)
+                        .border(1.dp, TealSoft, RoundedCornerShape(12.dp))
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -280,38 +257,31 @@ fun OnboardingScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF162238)),
+                                .background(SurfaceWhite),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "🌿", fontSize = 16.sp)
+                            Text(text = "🚇", fontSize = 16.sp)
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "Better for you. Lighter on the planet.",
-                                color = Color.White,
+                                text = "Unified Multi-Modal Transit",
+                                color = TextNavyDark,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Balance time, cost and your carbon footprint.",
-                                color = Color(0xFF8A99AD),
+                                text = "Chennai Metro, MTC buses, TNSTC, and Railways.",
+                                color = TextNavyBody,
                                 fontSize = 11.sp
                             )
                         }
                     }
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(Color(0xFF162238), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "✓", color = Color(0xFFC6FF00), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
+                    Text(text = "✓", color = TealSecondary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
-            // Bottom CTA & Sign In Footer
+            // Bottom CTA
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
@@ -324,41 +294,47 @@ fun OnboardingScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .width(18.dp)
+                            .width(22.dp)
                             .height(4.dp)
                             .clip(RoundedCornerShape(2.dp))
-                            .background(Color(0xFFC6FF00))
+                            .background(SkyBluePrimary)
                     )
                     Box(
                         modifier = Modifier
                             .size(6.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF334155))
+                            .background(BorderLight)
                     )
                     Box(
                         modifier = Modifier
                             .size(6.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF334155))
+                            .background(BorderLight)
                     )
                 }
 
                 Button(
-                    onClick = { onGetStarted() },
+                    onClick = onGetStarted,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFC6FF00)
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text(
-                        text = "Get started  →",
-                        color = Color(0xFF070B14),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(PrimaryGradient),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Get started  ➔",
+                            color = SurfaceWhite,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -369,12 +345,12 @@ fun OnboardingScreen(
                 ) {
                     Text(
                         text = "Already have an account? ",
-                        color = Color(0xFF8A99AD),
+                        color = TextMuted,
                         fontSize = 12.sp
                     )
                     Text(
                         text = "Sign in",
-                        color = Color.White,
+                        color = SkyBluePrimary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -382,10 +358,4 @@ fun OnboardingScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun OnboardingScreenPreview() {
-    OnboardingScreen()
 }

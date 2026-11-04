@@ -47,8 +47,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MultiModalTransportationRecommendationTheme {
                 var currentScreen by rememberSaveable { mutableStateOf("splash") }
-                var searchOrigin by rememberSaveable { mutableStateOf("Ferry Building") }
-                var searchDestination by rememberSaveable { mutableStateOf("California Academy of Sciences") }
+                var searchOrigin by rememberSaveable { mutableStateOf("Chennai Central") }
+                var searchDestination by rememberSaveable { mutableStateOf("Marina Beach & Promenade") }
                 var preferencesReturnScreen by rememberSaveable { mutableStateOf("home") }
 
                 var selectedTouristPlace by androidx.compose.runtime.remember { mutableStateOf<TouristPlace?>(null) }
@@ -126,7 +126,7 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "home"
                         },
                         onPlanJourneyToPlace = { destinationName ->
-                            searchOrigin = "Ferry Building"
+                            searchOrigin = "Chennai Central"
                             searchDestination = destinationName
                             currentScreen = "routeresults"
                         }
@@ -204,9 +204,13 @@ class MainActivity : ComponentActivity() {
                             onBack = {
                                 currentScreen = "routeresults"
                             },
+                            onBookingSuccess = { booked ->
+                                activeTicketBooking = booked
+                                activeTicketTrip = null
+                                currentScreen = "yourticket"
+                            },
                             onConfirmAndPay = { route ->
                                 if (route != null) selectedRouteOption = route
-                                currentScreen = "paymentmethod"
                             }
                         )
                     }

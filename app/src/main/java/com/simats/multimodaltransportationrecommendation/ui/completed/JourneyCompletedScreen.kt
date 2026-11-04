@@ -4,22 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun JourneyCompletedScreen(
@@ -28,55 +29,62 @@ fun JourneyCompletedScreen(
     onBackToHome: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scrollState = rememberScrollState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
-            .padding(20.dp)
+            .background(BackgroundSoftCream)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .navigationBarsPadding(),
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top Header & Arrival Greeting
             Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 // Top Screen Label
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(42.dp)
+                            .shadow(2.dp, CircleShape)
                             .clip(CircleShape)
-                            .background(Color(0xFF111C2E))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, CircleShape)
                             .clickable { onBack() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "←", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
                     Column {
                         Text(
-                            text = "18 / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            text = "TAMIL NADU SMART TRANSIT",
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp
                         )
                         Text(
-                            text = "Journey completed",
-                            color = Color.White,
-                            fontSize = 18.sp,
+                            text = "Journey Completed",
+                            color = TextNavyDark,
+                            fontSize = 19.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -87,177 +95,172 @@ fun JourneyCompletedScreen(
                 // Location Pin Icon Badge
                 Box(
                     modifier = Modifier
-                        .size(54.dp)
-                        .background(Color(0xFF112017), CircleShape)
-                        .border(1.5.dp, Color(0xFF1E4D2B), CircleShape),
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(PastelCardTeal)
+                        .border(1.5.dp, TealSecondary, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "📍", fontSize = 24.sp)
+                    Text(text = "📍", fontSize = 26.sp)
                 }
 
                 // Greeting & Subtitle
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = uiState.arrivalTitle,
-                        color = Color.White,
-                        fontSize = 24.sp,
+                        color = TextNavyDark,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = uiState.arrivalSubtitle,
-                        color = Color(0xFF8A99AD),
+                        color = TextMutedSlate,
                         fontSize = 13.sp
                     )
                 }
 
                 // Trip Summary Card
-                Box(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
-                        .padding(16.dp)
+                        .shadow(3.dp, RoundedCornerShape(18.dp)),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.size(7.dp).background(Color(0xFFC6FF00), CircleShape))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = uiState.origin, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                            Box(modifier = Modifier.size(9.dp).background(SkyBluePrimary, CircleShape))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(text = uiState.origin, color = TextNavyDark, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.size(7.dp).background(Color(0xFF38BDF8), CircleShape))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = uiState.destination, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                            Box(modifier = Modifier.size(9.dp).background(WarmOrangeAccent, CircleShape))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(text = uiState.destination, color = TextNavyDark, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         }
 
-                        Spacer(modifier = Modifier.height(2.dp))
+                        HorizontalDivider(color = BorderLight, thickness = 1.dp)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text(text = uiState.travelTime, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "Total travel time", color = Color(0xFF8A99AD), fontSize = 10.sp)
+                                Text(text = uiState.travelTime, color = TextNavyDark, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Text(text = "Travel time", color = TextMutedSlate, fontSize = 11.sp)
                             }
                             Column {
-                                Text(text = uiState.totalFare, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "Total fare", color = Color(0xFF8A99AD), fontSize = 10.sp)
+                                Text(text = uiState.totalFare, color = SkyBluePrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Text(text = "Total fare", color = TextMutedSlate, fontSize = 11.sp)
                             }
                             Column {
-                                Text(text = uiState.routeLine, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "0 transfers", color = Color(0xFF8A99AD), fontSize = 10.sp)
+                                Text(text = uiState.routeLine, color = TealSecondary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                Text(text = "Transit line", color = TextMutedSlate, fontSize = 11.sp)
                             }
                         }
                     }
                 }
 
-                // Carbon Savings Card
-                Box(
+                // Nearby Tourist Highlights Card
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF112017))
-                        .border(1.5.dp, Color(0xFF1E4D2B), RoundedCornerShape(14.dp))
-                        .padding(14.dp)
+                        .shadow(2.dp, RoundedCornerShape(16.dp)),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = PastelCardPeach)
                 ) {
-                    Row(verticalAlignment = Alignment.Top) {
-                        Text(text = "🌿", fontSize = 18.sp)
-                        Spacer(modifier = Modifier.width(10.dp))
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Text(text = "🏛️", fontSize = 22.sp)
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
-                                text = uiState.co2Saved,
-                                color = Color(0xFFC6FF00),
+                                text = uiState.touristTipTitle,
+                                color = WarmOrangeAccent,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = uiState.co2Details,
-                                color = Color(0xFF8A99AD),
-                                fontSize = 11.sp,
-                                lineHeight = 15.sp
+                                text = uiState.touristTipDetails,
+                                color = TextNavyDark,
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp
                             )
                         }
                     }
                 }
+
+                // Rating Section
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(2.dp, RoundedCornerShape(16.dp)),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "How was your journey?",
+                            color = TextNavyDark,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            for (i in 1..5) {
+                                val isFilled = i <= uiState.selectedRating
+                                Text(
+                                    text = if (isFilled) "★" else "☆",
+                                    color = if (isFilled) WarmOrangeAccent else TextMutedSlate,
+                                    fontSize = 26.sp,
+                                    modifier = Modifier.clickable { viewModel.setRating(i) }
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = uiState.ratingPrompt,
+                            color = TextMutedSlate,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
             }
 
-            // Rating & Bottom CTA Section
+            // Bottom CTA Buttons
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-                modifier = Modifier.fillMaxWidth()
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp)
             ) {
-                // Rating Section
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(PrimaryGradient)
+                        .clickable { onBackToHome() },
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = "How was your journey?",
+                        text = "Explore More Places  ➔",
                         color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        for (i in 1..5) {
-                            val isFilled = i <= uiState.selectedRating
-                            Text(
-                                text = if (isFilled) "★" else "☆",
-                                color = if (isFilled) Color(0xFFC6FF00) else Color(0xFF475569),
-                                fontSize = 24.sp,
-                                modifier = Modifier.clickable { viewModel.setRating(i) }
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = uiState.ratingPrompt,
-                        color = Color(0xFF8A99AD),
-                        fontSize = 11.sp
-                    )
-                }
-
-                // Save Route Button
-                Button(
-                    onClick = { /* Save route */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp),
-                    shape = RoundedCornerShape(23.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF0F172A)
-                    )
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Save this route",
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "🔖", fontSize = 12.sp)
-                    }
-                }
-
-                // Back to Home Button
-                Button(
-                    onClick = { onBackToHome() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFC6FF00)
-                    )
-                ) {
-                    Text(
-                        text = "Back to home  →",
-                        color = Color(0xFF070B14),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -265,10 +268,4 @@ fun JourneyCompletedScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun JourneyCompletedScreenPreview() {
-    JourneyCompletedScreen()
 }

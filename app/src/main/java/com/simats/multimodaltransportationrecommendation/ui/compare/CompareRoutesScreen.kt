@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.simats.multimodaltransportationrecommendation.data.model.routes.RouteOption
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun CompareRoutesScreen(
@@ -33,7 +34,7 @@ fun CompareRoutesScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
             .padding(horizontal = 20.dp)
     ) {
         Column(
@@ -55,24 +56,25 @@ fun CompareRoutesScreen(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF111C2E))
+                            .background(PastelCardBlue)
+                            .border(1.dp, SkyBlueSoft, CircleShape)
                             .clickable { onBack() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "←", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "←", color = SkyBluePrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "10 / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            text = "COMPARE TAMIL NADU ROUTES",
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp
+                            letterSpacing = 1.2.sp
                         )
                         Text(
-                            text = "Compare your routes",
-                            color = Color.White,
+                            text = "Compare Transit Options",
+                            color = TextNavyDark,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -84,27 +86,27 @@ fun CompareRoutesScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                         .padding(10.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.size(7.dp).background(Color(0xFFC6FF00), CircleShape))
+                            Box(modifier = Modifier.size(8.dp).background(SkyBluePrimary, CircleShape))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = uiState.origin, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                            Text(text = uiState.origin, color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.size(7.dp).background(Color(0xFF38BDF8), CircleShape))
+                            Box(modifier = Modifier.size(8.dp).background(WarmOrangeAccent, CircleShape))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = uiState.destination, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                            Text(text = uiState.destination, color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
 
                 Text(
-                    text = "See the trade-offs. Choose what feels right.",
-                    color = Color(0xFF8A99AD),
+                    text = "Compare duration, fare and comfort across Tamil Nadu modes:",
+                    color = TextNavyBody,
                     fontSize = 12.sp
                 )
 
@@ -115,11 +117,11 @@ fun CompareRoutesScreen(
                         .padding(horizontal = 12.dp, vertical = 2.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "TIME", color = Color(0xFF64748B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "FARE", color = Color(0xFF64748B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "WALK", color = Color(0xFF64748B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "CO₂", color = Color(0xFF64748B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "ON TIME", color = Color(0xFF64748B), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "TIME", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "FARE", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "WALK", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "TRANSIT", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "ON TIME", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -136,10 +138,10 @@ fun CompareRoutesScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(if (isSelected) Color(0xFF112017) else Color(0xFF0F172A))
+                            .background(if (isSelected) PastelCardBlue else SurfaceWhite)
                             .border(
                                 width = if (isSelected) 1.5.dp else 1.dp,
-                                color = if (isSelected) Color(0xFF1E4D2B) else Color(0xFF1E293B),
+                                color = if (isSelected) SkyBluePrimary else BorderLight,
                                 shape = RoundedCornerShape(14.dp)
                             )
                             .clickable { viewModel.selectRoute(route.title) }
@@ -153,7 +155,7 @@ fun CompareRoutesScreen(
                             ) {
                                 Text(
                                     text = route.title,
-                                    color = Color.White,
+                                    color = TextNavyDark,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -162,13 +164,14 @@ fun CompareRoutesScreen(
                                     if (route.isAiPick) {
                                         Box(
                                             modifier = Modifier
-                                                .clip(RoundedCornerShape(4.dp))
-                                                .background(Color(0xFF1A3824))
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(PastelCardTeal)
+                                                .border(1.dp, TealLight, RoundedCornerShape(6.dp))
                                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {
                                             Text(
                                                 text = "AI PICK",
-                                                color = Color(0xFFC6FF00),
+                                                color = TealDark,
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.Bold
                                             )
@@ -177,12 +180,12 @@ fun CompareRoutesScreen(
                                     }
                                     Box(
                                         modifier = Modifier
-                                            .size(18.dp)
-                                            .background(if (isSelected) Color(0xFFC6FF00) else Color(0xFF1E293B), CircleShape),
+                                            .size(20.dp)
+                                            .background(if (isSelected) SkyBluePrimary else BorderLight, CircleShape),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (isSelected) {
-                                            Text(text = "✓", color = Color(0xFF070B14), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                            Text(text = "✓", color = SurfaceWhite, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                         }
                                     }
                                 }
@@ -193,11 +196,11 @@ fun CompareRoutesScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(text = route.time, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                Text(text = route.fare, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                Text(text = route.walk, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                Text(text = route.co2, color = if (route.co2.contains("0.4") || route.co2.startsWith("0 ")) Color(0xFFC6FF00) else Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                Text(text = route.onTime, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Text(text = route.time, color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Text(text = route.fare, color = WarmOrangeDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text(text = route.walk, color = TextNavyBody, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Text(text = route.co2, color = TealDark, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Text(text = route.onTime, color = SkyBlueDark, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                             }
                         }
                     }
@@ -207,20 +210,20 @@ fun CompareRoutesScreen(
             // AI Insight Footer & Note
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🌿", fontSize = 13.sp)
+                    Text(text = "💡", fontSize = 13.sp)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = uiState.aiInsight,
-                        color = Color(0xFF8A99AD),
+                        color = TextNavyBody,
                         fontSize = 11.sp
                     )
                 }
 
                 Text(
                     text = uiState.note,
-                    color = Color(0xFF475569),
-                    fontSize = 9.sp,
-                    lineHeight = 12.sp
+                    color = TextMuted,
+                    fontSize = 10.sp,
+                    lineHeight = 13.sp
                 )
             }
 
@@ -232,16 +235,22 @@ fun CompareRoutesScreen(
                     .padding(vertical = 8.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFC6FF00)
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                contentPadding = PaddingValues(0.dp)
             ) {
-                Text(
-                    text = "Choose ${uiState.selectedRouteTitle}  →",
-                    color = Color(0xFF070B14),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(PrimaryGradient),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Choose ${uiState.selectedRouteTitle}  ➔",
+                        color = SurfaceWhite,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

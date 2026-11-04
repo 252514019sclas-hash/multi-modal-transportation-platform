@@ -5,20 +5,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class OnYourWayViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(OnYourWayUiState())
-    val uiState: StateFlow<OnYourWayUiState> = _uiState.asStateFlow()
-}
-
 data class OnYourWayUiState(
-    val currentTime: String = "9:57 AM",
-    val remainingTimeText: String = "22 min remaining - On time",
-    val activeStatusTitle: String = "You're on N Judah",
-    val nextStopInfo: String = "Next: Carl & Cole · 9:38 AM",
-    val reminderText: String = "We'll remind you at 8th Ave & Irving",
+    val currentTime: String = "09:36 AM",
+    val remainingTimeText: String = "12 min remaining · On time",
+    val activeStatusTitle: String = "You're on CMRL Blue Line",
+    val nextStopInfo: String = "Next: Thousand Lights Metro · 09:38 AM",
+    val reminderText: String = "We'll remind you 1 station before Government Estate",
     val upcomingSteps: List<JourneyUpcomingStep> = listOf(
-        JourneyUpcomingStep("9:49 AM", "🚊", "Exit at 9th Ave & Irving", "14 min left on N Judah"),
-        JourneyUpcomingStep("9:57 AM", "🚶", "Arrive at California Academy of Sciences", "8-minute walk through Golden Gate Park")
+        JourneyUpcomingStep("09:44 AM", "🚇", "Exit at Government Estate Metro Station", "Direct interchange exit for Marina Promenade"),
+        JourneyUpcomingStep("09:48 AM", "🚶", "Arrive at Marina Beach & Promenade", "4-minute walk along Kamarajar Salai")
     )
 )
 
@@ -28,3 +23,8 @@ data class JourneyUpcomingStep(
     val title: String,
     val subtitle: String
 )
+
+class OnYourWayViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(OnYourWayUiState())
+    val uiState: StateFlow<OnYourWayUiState> = _uiState.asStateFlow()
+}

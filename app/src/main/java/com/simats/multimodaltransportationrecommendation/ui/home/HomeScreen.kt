@@ -6,6 +6,8 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,6 +40,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.simats.multimodaltransportationrecommendation.data.model.places.TouristPlace
 import com.simats.multimodaltransportationrecommendation.ui.notifications.NotificationsHistoryDialog
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun HomeScreen(
@@ -70,10 +73,25 @@ fun HomeScreen(
         }
     }
 
+    // Filter tourist places based on search query and category
+    val displayedPlaces = remember(uiState.touristPlaces, uiState.searchQuery) {
+        if (uiState.searchQuery.isBlank()) {
+            uiState.touristPlaces
+        } else {
+            val q = uiState.searchQuery.trim().lowercase()
+            uiState.touristPlaces.filter {
+                it.name.lowercase().contains(q) ||
+                it.city.lowercase().contains(q) ||
+                it.category.lowercase().contains(q) ||
+                it.description.lowercase().contains(q)
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
     ) {
         Column(
             modifier = Modifier
@@ -94,21 +112,21 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(
                             text = "06 / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp
                         )
                         Text(
-                            text = "Multi-Modal Explorer",
-                            color = Color.White,
+                            text = "Tamil Nadu Explorer",
+                            color = TextNavyDark,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -122,8 +140,8 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(Color(0xFF0F172A))
-                                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                                .background(PastelCardBlue)
+                                .border(1.dp, SkyBlueSoft, RoundedCornerShape(16.dp))
                                 .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -131,7 +149,7 @@ fun HomeScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = uiState.temperature,
-                                    color = Color.White,
+                                    color = SkyBlueDark,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -141,40 +159,75 @@ fun HomeScreen(
                         // Notification Icon with Unread Badge
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(38.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF0F172A))
-                                .border(1.dp, Color(0xFF1E293B), CircleShape)
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderLight, CircleShape)
                                 .clickable { showNotificationsDialog = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "🔔", fontSize = 14.sp)
+                            Text(text = "🔔", fontSize = 15.sp)
                             if (uiState.unreadNotifications > 0) {
                                 Box(
                                     modifier = Modifier
-                                        .size(8.dp)
+                                        .size(9.dp)
                                         .align(Alignment.TopEnd)
-                                        .background(Color(0xFFC6FF00), CircleShape)
+                                        .offset(x = (-2).dp, y = 2.dp)
+                                        .background(WarmOrangeAccent, CircleShape)
                                 )
                             }
                         }
                     }
                 }
 
-                // Greeting
+                // Greeting & Subtitle
                 Column {
                     Text(
-                        text = "Good day, ${uiState.userName}",
-                        color = Color(0xFF8A99AD),
-                        fontSize = 13.sp
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Where are you heading today?",
-                        color = Color.White,
+                        text = "Vanakkam, ${uiState.userName} 🙏",
+                        color = TextNavyDark,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Where would you like to explore across Tamil Nadu today?",
+                        color = TextNavyBody,
+                        fontSize = 13.sp
+                    )
+                }
+
+                // Explore Tamil Nadu Hero Banner
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(HeroBannerGradient)
+                        .padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "🌴", fontSize = 16.sp)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "ENCHANTING TAMIL NADU",
+                                color = SurfaceWhite,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            )
+                        }
+                        Text(
+                            text = "Temples · Beaches · Hill Stations · Waterfalls",
+                            color = SurfaceWhite,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Connected by Chennai Metro, MTC, TNSTC & Southern Railway",
+                            color = SurfaceWhite.copy(alpha = 0.9f),
+                            fontSize = 11.sp
+                        )
+                    }
                 }
 
                 // Multi-Modal Journey Search Card
@@ -182,21 +235,21 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(16.dp))
                         .padding(14.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         // Starting Location Input
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(text = "STARTING FROM", color = Color(0xFF8A99AD), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "STARTING FROM", color = TextNavyBody, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(44.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(Color(0xFF070B14))
-                                    .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp))
+                                    .background(PastelCardBlue)
+                                    .border(1.dp, SkyBlueSoft, RoundedCornerShape(10.dp))
                                     .padding(horizontal = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -206,19 +259,19 @@ fun HomeScreen(
                                     value = uiState.origin,
                                     onValueChange = { viewModel.onOriginChange(it) },
                                     singleLine = true,
-                                    textStyle = TextStyle(color = Color.White, fontSize = 13.sp),
-                                    cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                                    textStyle = TextStyle(color = TextNavyDark, fontSize = 13.sp),
+                                    cursorBrush = SolidColor(SkyBluePrimary),
                                     decorationBox = { inner ->
                                         if (uiState.origin.isEmpty()) {
-                                            Text(text = "Enter starting location", color = Color(0xFF64748B), fontSize = 13.sp)
+                                            Text(text = "Enter starting location (e.g. Chennai Central)", color = TextLight, fontSize = 13.sp)
                                         }
                                         inner()
                                     },
                                     modifier = Modifier.weight(1f)
                                 )
                                 Text(
-                                    text = "Current",
-                                    color = Color(0xFFC6FF00),
+                                    text = "GPS",
+                                    color = SkyBluePrimary,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.clickable {
@@ -238,14 +291,14 @@ fun HomeScreen(
 
                         // Destination Input
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(text = "DESTINATION", color = Color(0xFF8A99AD), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "DESTINATION / TOURIST PLACE", color = TextNavyBody, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(44.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(Color(0xFF070B14))
-                                    .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(10.dp))
+                                    .background(SurfaceWhite)
+                                    .border(1.dp, SkyBluePrimary, RoundedCornerShape(10.dp))
                                     .padding(horizontal = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -255,11 +308,11 @@ fun HomeScreen(
                                     value = uiState.destination,
                                     onValueChange = { viewModel.onDestinationChange(it) },
                                     singleLine = true,
-                                    textStyle = TextStyle(color = Color.White, fontSize = 13.sp),
-                                    cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                                    textStyle = TextStyle(color = TextNavyDark, fontSize = 13.sp),
+                                    cursorBrush = SolidColor(SkyBluePrimary),
                                     decorationBox = { inner ->
                                         if (uiState.destination.isEmpty()) {
-                                            Text(text = "Search destination or tourist place...", color = Color(0xFF64748B), fontSize = 13.sp)
+                                            Text(text = "Search destination (e.g. Marina Beach)", color = TextLight, fontSize = 13.sp)
                                         }
                                         inner()
                                     },
@@ -268,7 +321,7 @@ fun HomeScreen(
                                 if (uiState.destination.isNotEmpty()) {
                                     Text(
                                         text = "✕",
-                                        color = Color(0xFF8A99AD),
+                                        color = TextMuted,
                                         fontSize = 13.sp,
                                         modifier = Modifier.clickable { viewModel.onDestinationChange("") }
                                     )
@@ -287,72 +340,91 @@ fun HomeScreen(
                                     .weight(1f)
                                     .height(44.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(Color(0xFF070B14))
-                                    .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp))
+                                    .background(PastelCardTeal)
+                                    .border(1.dp, TealLight, RoundedCornerShape(10.dp))
                                     .padding(horizontal = 10.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(text = "🕒", fontSize = 12.sp)
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = uiState.dateTime, color = Color(0xFF8A99AD), fontSize = 11.sp)
+                                    Text(text = uiState.dateTime, color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.Medium)
                                 }
                             }
 
                             Button(
                                 onClick = {
-                                    val dest = if (uiState.destination.isBlank()) "California Academy of Sciences" else uiState.destination
-                                    val start = if (uiState.origin.isBlank()) "Ferry Building" else uiState.origin
+                                    val dest = if (uiState.destination.isBlank()) "Marina Beach & Promenade" else uiState.destination
+                                    val start = if (uiState.origin.isBlank()) "Chennai Central" else uiState.origin
                                     onPlanJourney(start, dest)
                                 },
                                 modifier = Modifier
                                     .weight(1.3f)
                                     .height(44.dp),
                                 shape = RoundedCornerShape(22.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC6FF00))
+                                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                                contentPadding = PaddingValues(0.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(text = "Search Routes", color = Color(0xFF070B14), fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(text = "→", color = Color(0xFF070B14), fontSize = 13.sp)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(PrimaryGradient),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(text = "Search Routes", color = SurfaceWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = "➔", color = SurfaceWhite, fontSize = 12.sp)
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                // Quick Action Chips
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    val quickDestinations = listOf(
-                        "🏠 Home" to "Noe Valley, SF",
-                        "💼 Work" to "2nd & Howard, SoMa",
-                        "🌿 Park" to "Dolores Park"
+                // Transportation Mode Shortcuts
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "MULTI-MODAL MODES IN TAMIL NADU",
+                        color = TextMuted,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
                     )
-                    quickDestinations.forEach { (label, dest) ->
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF0F172A))
-                                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp))
-                                .clickable { viewModel.setQuickDestination(dest) }
-                                .padding(vertical = 8.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
-                            )
+
+                    val transportShortcuts = listOf(
+                        "🚇 Metro (CMRL)" to "Chennai Metro",
+                        "🚌 Bus (MTC/TNSTC)" to "MTC Bus",
+                        "🚆 Rail (SR)" to "Southern Railway",
+                        "🚲 Cycling" to "Smart Cycle Track",
+                        "🚶 Walking" to "Heritage Corridor",
+                        "🚕 Taxi / Auto" to "Prepaid Auto"
+                    )
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(transportShortcuts) { (label, modeDesc) ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(PastelCardBlue)
+                                    .border(1.dp, SkyBlueSoft, RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = SkyBlueDark,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
                 }
 
-                // Section: Tourist Attractions Discovery Module
+                // Section: Tamil Nadu Tourist Places Discovery
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -361,44 +433,81 @@ fun HomeScreen(
                     ) {
                         Column {
                             Text(
-                                text = "TOURIST ATTRACTIONS & PLACES",
-                                color = Color(0xFF7A8B9E),
+                                text = "TAMIL NADU TOURIST PLACES",
+                                color = SkyBluePrimary,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
                             Text(
-                                text = "Discover places to visit",
-                                color = Color.White,
-                                fontSize = 16.sp,
+                                text = "Discover Famous Attractions",
+                                color = TextNavyDark,
+                                fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                     }
 
+                    // Search tourist places filter bar
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "🔍", fontSize = 13.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        BasicTextField(
+                            value = uiState.searchQuery,
+                            onValueChange = { viewModel.onSearchQueryChange(it) },
+                            singleLine = true,
+                            textStyle = TextStyle(color = TextNavyDark, fontSize = 12.sp),
+                            cursorBrush = SolidColor(SkyBluePrimary),
+                            decorationBox = { inner ->
+                                if (uiState.searchQuery.isEmpty()) {
+                                    Text(text = "Search by city, temple, beach, or hill station...", color = TextLight, fontSize = 12.sp)
+                                }
+                                inner()
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (uiState.searchQuery.isNotEmpty()) {
+                            Text(
+                                text = "✕",
+                                color = TextMuted,
+                                fontSize = 12.sp,
+                                modifier = Modifier.clickable { viewModel.onSearchQueryChange("") }
+                            )
+                        }
+                    }
+
                     // Category Filter Pills
-                    val categories = listOf("All", "Historical", "Temple/Cultural", "Beach/Park", "Museum", "Nature")
+                    val categories = listOf("All", "Temples", "Historical", "Beaches", "Nature")
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(categories) { cat ->
-                            val isSel = uiState.selectedCategory == cat
+                            val isSel = uiState.selectedCategory.equals(cat, ignoreCase = true)
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSel) Color(0xFF13201C) else Color(0xFF0F172A))
+                                    .background(if (isSel) SkyBluePrimary else SurfaceWhite)
                                     .border(
                                         1.dp,
-                                        if (isSel) Color(0xFFC6FF00) else Color(0xFF1E293B),
+                                        if (isSel) SkyBluePrimary else BorderLight,
                                         RoundedCornerShape(16.dp)
                                     )
                                     .clickable { viewModel.selectCategory(cat, context) }
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    .padding(horizontal = 14.dp, vertical = 6.dp)
                             ) {
                                 Text(
                                     text = cat,
-                                    color = if (isSel) Color(0xFFC6FF00) else Color(0xFF8A99AD),
+                                    color = if (isSel) SurfaceWhite else TextNavyBody,
                                     fontSize = 11.sp,
                                     fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal
                                 )
@@ -412,19 +521,20 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0x22C6FF00))
-                                .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(8.dp))
+                                .background(PastelCardTeal)
+                                .border(1.dp, TealSoft, RoundedCornerShape(8.dp))
                                 .padding(8.dp)
                         ) {
                             Text(
                                 text = "✓ ${uiState.successMessage}",
-                                color = Color(0xFFC6FF00),
-                                fontSize = 11.sp
+                                color = TealDark,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
 
-                    // Tourist Places Horizontal / List Cards
+                    // Tourist Places Vertical Cards List
                     if (uiState.isLoadingPlaces) {
                         Box(
                             modifier = Modifier
@@ -432,25 +542,33 @@ fun HomeScreen(
                                 .height(140.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(color = Color(0xFFC6FF00), modifier = Modifier.size(24.dp))
+                            CircularProgressIndicator(color = SkyBluePrimary, modifier = Modifier.size(26.dp))
                         }
-                    } else if (uiState.touristPlaces.isEmpty()) {
-                        Text(
-                            text = "No attractions found for this filter.",
-                            color = Color(0xFF64748B),
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
+                    } else if (displayedPlaces.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp)
+                                .background(SurfaceWhite, RoundedCornerShape(12.dp))
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No attractions match your query. Try a different city or category.",
+                                color = TextMuted,
+                                fontSize = 12.sp
+                            )
+                        }
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            uiState.touristPlaces.forEach { place ->
+                            displayedPlaces.forEach { place ->
                                 TouristPlaceExploreCard(
                                     place = place,
                                     onViewDetails = { onOpenPlaceDetail(place) },
                                     onToggleSave = { viewModel.toggleSavePlace(context, place) },
                                     onPlanHere = {
                                         viewModel.setQuickDestination(place.name)
-                                        val start = if (uiState.origin.isBlank()) "Ferry Building" else uiState.origin
+                                        val start = if (uiState.origin.isBlank()) "Chennai Central" else uiState.origin
                                         onPlanJourney(start, place.name)
                                     }
                                 )
@@ -459,11 +577,11 @@ fun HomeScreen(
                     }
                 }
 
-                // Pick up where you left off
+                // Recent Commute Shortcut
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "RECENT COMMUTE",
-                        color = Color(0xFF7A8B9E),
+                        text = "RECENT COMMUTE SHORTCUT",
+                        color = TextMuted,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
@@ -473,10 +591,10 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                             .clickable {
-                                onPlanJourney("Ferry Building", uiState.recentDestination)
+                                onPlanJourney("Chennai Central", uiState.recentDestination)
                             }
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -487,7 +605,7 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFF162238)),
+                                    .background(PastelCardTeal),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(text = "🕒", fontSize = 14.sp)
@@ -496,18 +614,18 @@ fun HomeScreen(
                             Column {
                                 Text(
                                     text = uiState.recentDestination,
-                                    color = Color.White,
+                                    color = TextNavyDark,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = uiState.recentLocationInfo,
-                                    color = Color(0xFF8A99AD),
+                                    color = TextNavyBody,
                                     fontSize = 11.sp
                                 )
                             }
                         }
-                        Text(text = "Re-route ➔", color = Color(0xFFC6FF00), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "Re-route ➔", color = SkyBluePrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -518,8 +636,9 @@ fun HomeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF0B111E))
-                    .padding(vertical = 8.dp),
+                    .background(SurfaceWhite)
+                    .border(1.dp, BorderLight)
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -540,7 +659,7 @@ fun HomeScreen(
                         Text(text = lines[0], fontSize = 16.sp)
                         Text(
                             text = lines[1],
-                            color = if (isActive) Color(0xFFC6FF00) else Color(0xFF64748B),
+                            color = if (isActive) SkyBluePrimary else TextMuted,
                             fontSize = 10.sp,
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
                         )
@@ -572,30 +691,31 @@ private fun TouristPlaceExploreCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFF0F172A))
+            .clip(RoundedCornerShape(16.dp))
+            .background(SurfaceWhite)
             .border(
                 1.dp,
-                if (place.isRecommended) Color(0xFF1E4D2B) else Color(0xFF1E293B),
-                RoundedCornerShape(14.dp)
+                if (place.isRecommended) SkyBlueSoft else BorderLight,
+                RoundedCornerShape(16.dp)
             )
             .padding(12.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Recommendation Tag
             if (place.isRecommended || !place.aiReason.isNullOrBlank()) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFF13201C))
-                        .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(6.dp))
+                        .background(PastelCardTeal)
+                        .border(1.dp, TealLight, RoundedCornerShape(6.dp))
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "✨", fontSize = 10.sp)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = place.aiReason ?: "AI Personalized Pick",
-                            color = Color(0xFFC6FF00),
+                            text = place.aiReason ?: "AI Recommendation",
+                            color = TealDark,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -607,12 +727,12 @@ private fun TouristPlaceExploreCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Thumbnail
+                // Image Thumbnail
                 Box(
                     modifier = Modifier
-                        .size(76.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF162238))
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PastelCardBlue)
                 ) {
                     if (!place.imageUrl.isNullOrBlank()) {
                         AsyncImage(
@@ -641,7 +761,7 @@ private fun TouristPlaceExploreCard(
                     ) {
                         Text(
                             text = place.name,
-                            color = Color.White,
+                            color = TextNavyDark,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
@@ -649,9 +769,9 @@ private fun TouristPlaceExploreCard(
                         )
                         Box(
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(30.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF162238))
+                                .background(PastelCardPeach)
                                 .clickable { onToggleSave() },
                             contentAlignment = Alignment.Center
                         ) {
@@ -661,25 +781,25 @@ private fun TouristPlaceExploreCard(
 
                     Text(
                         text = "📍 ${place.city} · ${place.category}",
-                        color = Color(0xFF8A99AD),
+                        color = TextNavyBody,
                         fontSize = 11.sp
                     )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "★ ${place.rating}", color = Color(0xFFC6FF00), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "★ ${place.rating}", color = WarmOrangeDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "🎟️ ${place.entryFee}", color = Color(0xFF94A3B8), fontSize = 10.sp)
+                        Text(text = "🎟️ ${place.entryFee}", color = TextMuted, fontSize = 10.sp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "🧭 ${place.distanceKm} km", color = Color(0xFF94A3B8), fontSize = 10.sp)
+                        Text(text = "🧭 ${place.distanceKm} km", color = TextMuted, fontSize = 10.sp)
                     }
                 }
             }
 
             Text(
                 text = place.description,
-                color = Color(0xFF94A3B8),
+                color = TextNavyBody,
                 fontSize = 12.sp,
                 maxLines = 2,
                 lineHeight = 16.sp
@@ -694,24 +814,24 @@ private fun TouristPlaceExploreCard(
                     onClick = onViewDetails,
                     modifier = Modifier
                         .weight(1f)
-                        .height(34.dp),
-                    shape = RoundedCornerShape(17.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF162238)),
+                        .height(36.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PastelCardBlue),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                 ) {
-                    Text(text = "View Details", color = Color.White, fontSize = 11.sp)
+                    Text(text = "View Details", color = SkyBlueDark, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                 }
 
                 Button(
                     onClick = onPlanHere,
                     modifier = Modifier
                         .weight(1f)
-                        .height(34.dp),
-                    shape = RoundedCornerShape(17.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC6FF00)),
+                        .height(36.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                 ) {
-                    Text(text = "Plan Journey", color = Color(0xFF070B14), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Plan Journey", color = SurfaceWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

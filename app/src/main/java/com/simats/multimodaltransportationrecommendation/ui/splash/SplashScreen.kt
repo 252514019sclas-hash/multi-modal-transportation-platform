@@ -1,5 +1,6 @@
 package com.simats.multimodaltransportationrecommendation.ui.splash
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,29 +8,44 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun SplashScreen(
     onGetStarted: () -> Unit = {}
 ) {
+    // Smooth pulsing logo animation
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.96f,
+        targetValue = 1.04f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "logoPulse"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
             .padding(24.dp)
     ) {
         Column(
@@ -45,30 +61,36 @@ fun SplashScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(top = 16.dp)
             ) {
-                Text(
-                    text = "01 / WELCOME TO MOVESMART",
-                    color = Color(0xFF7A8B9E),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp
-                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PastelCardBlue)
+                        .border(1.dp, SkyBlueSoft, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "TAMIL NADU SMART TOURISM & TRANSIT",
+                        color = SkyBluePrimary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Logo Box
+                // Logo Box with Sky Blue & Teal
                 Box(
                     modifier = Modifier
-                        .size(68.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF111E16))
-                        .border(1.5.dp, Color(0xFFC6FF00), RoundedCornerShape(16.dp)),
+                        .scale(pulseScale)
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(PrimaryGradient),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "M",
-                        color = Color(0xFFC6FF00),
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold
+                        text = "🌴",
+                        fontSize = 34.sp
                     )
                 }
 
@@ -76,195 +98,160 @@ fun SplashScreen(
 
                 Text(
                     text = "MoveSmart AI",
-                    color = Color.White,
-                    fontSize = 26.sp,
+                    color = TextNavyDark,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "Smarter Routes. Better Journeys.",
-                    color = Color(0xFF8A99AD),
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
+                    text = "Discover Enchanting Tamil Nadu · Intelligent Multi-Modal Transit",
+                    color = TextNavyBody,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 18.sp
                 )
             }
 
-            // Center Route Map Graphic
+            // Center Interactive Map Illustration
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(260.dp)
-                    .padding(vertical = 8.dp),
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(SurfaceWhite)
+                    .border(1.dp, BorderLight, RoundedCornerShape(20.dp))
+                    .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Background Grid Dots and Route Paths
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val width = size.width
                     val height = size.height
 
-                    // Draw subtle grid dots
-                    val dotColor = Color(0xFF1E293B)
-                    val rows = 6
-                    val cols = 8
+                    // Grid points
+                    val rows = 5
+                    val cols = 7
                     val dx = width / (cols - 1)
                     val dy = height / (rows - 1)
 
                     for (r in 0 until rows) {
                         for (c in 0 until cols) {
                             drawCircle(
-                                color = dotColor,
+                                color = BorderLight,
                                 radius = 2.dp.toPx(),
                                 center = Offset(c * dx, r * dy)
                             )
                         }
                     }
 
-                    // Draw secondary blue path
-                    val bluePath = Path().apply {
-                        moveTo(width * 0.05f, height * 0.75f)
+                    // Teal Transit Path
+                    val tealPath = Path().apply {
+                        moveTo(width * 0.1f, height * 0.75f)
                         lineTo(width * 0.35f, height * 0.75f)
                         cubicTo(width * 0.45f, height * 0.75f, width * 0.45f, height * 0.45f, width * 0.55f, height * 0.45f)
-                        lineTo(width * 0.85f, height * 0.45f)
+                        lineTo(width * 0.88f, height * 0.45f)
                     }
                     drawPath(
-                        path = bluePath,
-                        color = Color(0xFF38BDF8).copy(alpha = 0.4f),
-                        style = Stroke(width = 2.dp.toPx())
+                        path = tealPath,
+                        color = TealSecondary.copy(alpha = 0.5f),
+                        style = Stroke(width = 3.dp.toPx())
                     )
 
-                    // Draw primary lime green path
-                    val greenPath = Path().apply {
-                        moveTo(width * 0.1f, height * 0.65f)
-                        lineTo(width * 0.25f, height * 0.65f)
-                        cubicTo(width * 0.35f, height * 0.65f, width * 0.35f, height * 0.35f, width * 0.55f, height * 0.35f)
-                        cubicTo(width * 0.65f, height * 0.35f, width * 0.65f, height * 0.48f, width * 0.88f, height * 0.48f)
+                    // Sky Blue Rail Path
+                    val skyPath = Path().apply {
+                        moveTo(width * 0.15f, height * 0.65f)
+                        lineTo(width * 0.3f, height * 0.65f)
+                        cubicTo(width * 0.4f, height * 0.65f, width * 0.4f, height * 0.3f, width * 0.6f, height * 0.3f)
+                        cubicTo(width * 0.7f, height * 0.3f, width * 0.7f, height * 0.5f, width * 0.9f, height * 0.5f)
                     }
                     drawPath(
-                        path = greenPath,
-                        color = Color(0xFFC6FF00),
-                        style = Stroke(width = 3.5.dp.toPx())
+                        path = skyPath,
+                        color = SkyBluePrimary,
+                        style = Stroke(width = 4.dp.toPx())
                     )
                 }
 
-                // Node Icons / Badges overlaid on canvas
-                // Bottom-left node (Walking)
+                // Node Badges
+                // Marina Beach Node
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .offset(x = 48.dp, y = (-50).dp)
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
+                        .offset(x = 24.dp, y = (-20).dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PastelCardBlue)
+                        .border(1.dp, SkyBlueSoft, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 8.dp, vertical = 6.dp)
                 ) {
-                    Text(text = "🚶", fontSize = 16.sp)
+                    Text(text = "🏖️ Marina Beach", color = SkyBlueDark, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                 }
 
-                // Center node (Transit)
+                // Chennai Metro Node
                 Box(
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .offset(x = 10.dp, y = 10.dp)
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF38BDF8), RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
+                        .offset(x = (-10).dp, y = (-10).dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PastelCardTeal)
+                        .border(1.dp, TealSoft, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 8.dp, vertical = 6.dp)
                 ) {
-                    Text(text = "🚆", fontSize = 16.sp)
+                    Text(text = "🚇 Chennai Metro", color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                 }
 
-                // Top-right node (Bicycle)
+                // Meenakshi Temple Node
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .offset(x = (-48.dp), y = 36.dp)
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
+                        .offset(x = (-20).dp, y = 20.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PastelCardPeach)
+                        .border(1.dp, WarmOrangeLight, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 8.dp, vertical = 6.dp)
                 ) {
-                    Text(text = "🚲", fontSize = 16.sp)
-                }
-
-                // Bottom Pill Badge: ONE CITY. EVERY WAY TO MOVE.
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFF101D17))
-                        .border(1.dp, Color(0xFF1E3F2A), RoundedCornerShape(20.dp))
-                        .clickable { onGetStarted() }
-                        .padding(horizontal = 20.dp, vertical = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .background(Color(0xFFC6FF00), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .background(Color(0xFF070B14), CircleShape)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "ONE CITY. EVERY WAY TO MOVE.",
-                            color = Color(0xFFC6FF00),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp
-                        )
-                    }
+                    Text(text = "🛕 Madurai Temple", color = WarmOrangeDark, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
 
-            // Footer Section (Loader & Subtitle)
+            // Bottom CTA Section
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             ) {
-                // Progress Bar Indicator
-                Box(
+                Button(
+                    onClick = onGetStarted,
                     modifier = Modifier
-                        .width(100.dp)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(Color(0xFF1E293B))
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(26.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.4f)
-                            .fillMaxHeight()
-                            .background(Color(0xFFC6FF00), RoundedCornerShape(2.dp))
-                    )
+                            .fillMaxSize()
+                            .background(PrimaryGradient),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Explore Tamil Nadu  ➔",
+                            color = SurfaceWhite,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = "Intelligent mobility, made for you",
-                    color = Color(0xFF64748B),
-                    fontSize = 13.sp
+                    text = "Vanakkam! Smart mobility across temples, beaches & hills",
+                    color = TextMuted,
+                    fontSize = 12.sp
                 )
             }
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun SplashScreenPreview() {
-    SplashScreen()
 }

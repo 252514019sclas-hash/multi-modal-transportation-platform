@@ -28,10 +28,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun SignInScreen(
@@ -46,7 +46,7 @@ fun SignInScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
             .padding(24.dp)
     ) {
         Column(
@@ -65,48 +65,46 @@ fun SignInScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF111C2E))
+                            .background(PastelCardBlue)
+                            .border(1.dp, SkyBlueSoft, CircleShape)
                             .clickable { onBack() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "←", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "←", color = SkyBluePrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
                             text = "03 / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp
                         )
                         Text(
                             text = "Sign in",
-                            color = Color.White,
+                            color = TextNavyDark,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Logo Box
                 Box(
                     modifier = Modifier
                         .size(54.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF111E16))
-                        .border(1.5.dp, Color(0xFFC6FF00), RoundedCornerShape(14.dp)),
+                        .background(PrimaryGradient),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "M",
-                        color = Color(0xFFC6FF00),
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold
+                        text = "🌴",
+                        fontSize = 26.sp
                     )
                 }
 
@@ -114,7 +112,7 @@ fun SignInScreen(
 
                 Text(
                     text = "Welcome back, traveler.",
-                    color = Color.White,
+                    color = TextNavyDark,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -122,8 +120,8 @@ fun SignInScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Your next great journey starts here.",
-                    color = Color(0xFF8A99AD),
+                    text = "Sign in to plan multi-modal journeys across Tamil Nadu.",
+                    color = TextNavyBody,
                     fontSize = 13.sp
                 )
             }
@@ -137,8 +135,8 @@ fun SignInScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x22EF4444))
-                            .border(1.dp, Color(0xFFEF4444), RoundedCornerShape(10.dp))
+                            .background(Color(0xFFFEF2F2))
+                            .border(1.dp, Color(0xFFFCA5A5), RoundedCornerShape(10.dp))
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -146,7 +144,7 @@ fun SignInScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = uiState.errorMessage!!,
-                                color = Color(0xFFFF8B8B),
+                                color = Color(0xFFDC2626),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -158,16 +156,17 @@ fun SignInScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         text = "Email address",
-                        color = Color(0xFF8A99AD),
-                        fontSize = 12.sp
+                        color = TextNavyBody,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -179,10 +178,10 @@ fun SignInScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             textStyle = TextStyle(
-                                color = Color.White,
+                                color = TextNavyDark,
                                 fontSize = 14.sp
                             ),
-                            cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                            cursorBrush = SolidColor(SkyBluePrimary),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
                                 imeAction = ImeAction.Next
@@ -191,7 +190,7 @@ fun SignInScreen(
                                 if (uiState.email.isEmpty()) {
                                     Text(
                                         text = "alex.morgan@example.com",
-                                        color = Color(0xFF475569),
+                                        color = TextLight,
                                         fontSize = 14.sp
                                     )
                                 }
@@ -205,16 +204,17 @@ fun SignInScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         text = "Password",
-                        color = Color(0xFF8A99AD),
-                        fontSize = 12.sp
+                        color = TextNavyBody,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -232,10 +232,10 @@ fun SignInScreen(
                                 singleLine = true,
                                 visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                 textStyle = TextStyle(
-                                    color = Color.White,
+                                    color = TextNavyDark,
                                     fontSize = 15.sp
                                 ),
-                                cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                                cursorBrush = SolidColor(SkyBluePrimary),
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Password,
                                     imeAction = ImeAction.Done
@@ -249,7 +249,7 @@ fun SignInScreen(
                                     if (uiState.password.isEmpty()) {
                                         Text(
                                             text = "••••••••••",
-                                            color = Color(0xFF475569),
+                                            color = TextLight,
                                             fontSize = 14.sp
                                         )
                                     }
@@ -277,10 +277,9 @@ fun SignInScreen(
                 ) {
                     Text(
                         text = "Forgot password?",
-                        color = Color(0xFFC6FF00),
+                        color = SkyBluePrimary,
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.clickable { /* Handle forgot password */ }
+                        fontWeight = FontWeight.Medium
                     )
                 }
 
@@ -296,24 +295,29 @@ fun SignInScreen(
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFC6FF00),
-                        disabledContainerColor = Color(0x66C6FF00)
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color(0xFF070B14),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            text = "Sign in  →",
-                            color = Color(0xFF070B14),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(PrimaryGradient),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = SurfaceWhite,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Sign in  ➔",
+                                color = SurfaceWhite,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -323,34 +327,25 @@ fun SignInScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "— or continue with —",
-                    color = Color(0xFF475569),
-                    fontSize = 11.sp
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
                 Row(
                     modifier = Modifier.clickable { onCreateAccount() },
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = "New to MoveSmart? ",
-                        color = Color(0xFF8A99AD),
-                        fontSize = 12.sp
+                        color = TextMuted,
+                        fontSize = 13.sp
                     )
                     Text(
                         text = "Create an account",
-                        color = Color.White,
-                        fontSize = 12.sp,
+                        color = SkyBluePrimary,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Privacy Trust Notice
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
@@ -358,18 +353,12 @@ fun SignInScreen(
                     Text(text = "🛡️", fontSize = 11.sp)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Your data stays private. Your city opens up.",
-                        color = Color(0xFF64748B),
+                        text = "Secure Tamil Nadu Smart Mobility Account",
+                        color = TextMuted,
                         fontSize = 11.sp
                     )
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun SignInScreenPreview() {
-    SignInScreen()
 }

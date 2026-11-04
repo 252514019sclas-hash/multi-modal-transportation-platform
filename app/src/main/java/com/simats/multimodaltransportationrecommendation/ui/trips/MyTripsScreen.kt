@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.simats.multimodaltransportationrecommendation.data.model.trips.TripItem
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun MyTripsScreen(
@@ -51,7 +52,7 @@ fun MyTripsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
             .padding(horizontal = 20.dp)
     ) {
         Column(
@@ -72,21 +73,21 @@ fun MyTripsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 12.dp),
+                        .padding(top = 10.dp, bottom = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(
-                            text = "19 / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            text = "TAMIL NADU JOURNEYS",
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp
+                            letterSpacing = 1.2.sp
                         )
                         Text(
-                            text = "My trips",
-                            color = Color.White,
+                            text = "My Trips",
+                            color = TextNavyDark,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -97,8 +98,8 @@ fun MyTripsScreen(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), CircleShape)
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, CircleShape)
                             .clickable { viewModel.loadTrips(context) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -112,7 +113,8 @@ fun MyTripsScreen(
                         .fillMaxWidth()
                         .height(44.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF0F172A))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                         .padding(4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -123,13 +125,13 @@ fun MyTripsScreen(
                                 .weight(1f)
                                 .fillMaxHeight()
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) Color(0xFF162238) else Color.Transparent)
+                                .background(if (isSelected) PastelCardBlue else Color.Transparent)
                                 .clickable { viewModel.selectTab(tab) },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = tab,
-                                color = if (isSelected) Color(0xFFC6FF00) else Color(0xFF8A99AD),
+                                color = if (isSelected) SkyBluePrimary else TextMuted,
                                 fontSize = 11.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                             )
@@ -146,7 +148,7 @@ fun MyTripsScreen(
                             .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Color(0xFFC6FF00), modifier = Modifier.size(36.dp))
+                        CircularProgressIndicator(color = SkyBluePrimary, modifier = Modifier.size(36.dp))
                     }
                 } else {
                     when (uiState.selectedTab) {
@@ -163,18 +165,18 @@ fun MyTripsScreen(
                                         verticalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
                                         Text(text = "🎫", fontSize = 36.sp)
-                                        Text(text = "No upcoming journeys", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                        Text(text = "No upcoming journeys", color = TextNavyDark, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                                         Text(
-                                            text = "Plan your next eco-friendly multi-modal ride now.",
-                                            color = Color(0xFF8A99AD),
-                                            fontSize = 11.sp
+                                            text = "Plan your next Tamil Nadu multi-modal ride now.",
+                                            color = TextMuted,
+                                            fontSize = 12.sp
                                         )
                                         Button(
                                             onClick = onPlanNewJourney,
-                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC6FF00)),
+                                            colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
                                             shape = RoundedCornerShape(20.dp)
                                         ) {
-                                            Text(text = "Plan New Journey", color = Color(0xFF070B14), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                            Text(text = "Plan New Journey", color = SurfaceWhite, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                         }
                                     }
                                 }
@@ -204,30 +206,29 @@ fun MyTripsScreen(
                                     .weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                // Impact summary card
                                 item {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(14.dp))
-                                            .background(Color(0xFF102015))
-                                            .border(1.dp, Color(0xFF1E4D2B), RoundedCornerShape(14.dp))
+                                            .background(PastelCardTeal)
+                                            .border(1.dp, TealLight, RoundedCornerShape(14.dp))
                                             .padding(12.dp)
                                     ) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(text = "🌿", fontSize = 20.sp)
+                                            Text(text = "🌴", fontSize = 20.sp)
                                             Spacer(modifier = Modifier.width(10.dp))
                                             Column {
                                                 Text(
-                                                    text = "${uiState.totalCo2SavedKg} kg CO₂ saved in total",
-                                                    color = Color(0xFFC6FF00),
+                                                    text = "${uiState.completedTrips.size} Journeys Completed",
+                                                    color = TealDark,
                                                     fontSize = 13.sp,
                                                     fontWeight = FontWeight.Bold
                                                 )
                                                 Text(
-                                                    text = "${uiState.completedTrips.size} low-carbon journeys completed",
-                                                    color = Color(0xFF8A99AD),
-                                                    fontSize = 10.sp
+                                                    text = "Seamless travel across Tamil Nadu transit networks",
+                                                    color = TextNavyBody,
+                                                    fontSize = 11.sp
                                                 )
                                             }
                                         }
@@ -242,7 +243,7 @@ fun MyTripsScreen(
                                                 .padding(top = 40.dp),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(text = "No completed trips yet.", color = Color(0xFF8A99AD), fontSize = 12.sp)
+                                            Text(text = "No completed trips yet.", color = TextMuted, fontSize = 12.sp)
                                         }
                                     }
                                 } else {
@@ -261,7 +262,7 @@ fun MyTripsScreen(
                                         .weight(1f),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(text = "No cancelled journeys.", color = Color(0xFF8A99AD), fontSize = 12.sp)
+                                    Text(text = "No cancelled journeys.", color = TextMuted, fontSize = 12.sp)
                                 }
                             } else {
                                 LazyColumn(
@@ -284,7 +285,9 @@ fun MyTripsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                    .background(SurfaceWhite)
+                    .border(1.dp, BorderLight)
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -298,7 +301,7 @@ fun MyTripsScreen(
                         Text(text = lines[0], fontSize = 16.sp)
                         Text(
                             text = lines[1],
-                            color = if (isActive) Color(0xFFC6FF00) else Color(0xFF64748B),
+                            color = if (isActive) SkyBluePrimary else TextMuted,
                             fontSize = 10.sp,
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
                         )
@@ -311,14 +314,15 @@ fun MyTripsScreen(
         tripToCancel?.let { trip ->
             AlertDialog(
                 onDismissRequest = { tripToCancel = null },
-                containerColor = Color(0xFF0F172A),
+                containerColor = SurfaceWhite,
+                shape = RoundedCornerShape(18.dp),
                 title = {
-                    Text(text = "Cancel Journey?", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Cancel Journey?", color = TextNavyDark, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 },
                 text = {
                     Text(
                         text = "Are you sure you want to cancel journey ${trip.bookingReference} to ${trip.destination}?",
-                        color = Color(0xFF8A99AD),
+                        color = TextNavyBody,
                         fontSize = 12.sp
                     )
                 },
@@ -328,17 +332,19 @@ fun MyTripsScreen(
                             viewModel.cancelTrip(context, trip.journeyId)
                             tripToCancel = null
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252))
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
+                        shape = RoundedCornerShape(20.dp)
                     ) {
-                        Text(text = "Cancel Journey", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(text = "Cancel Journey", color = SurfaceWhite, fontWeight = FontWeight.Bold)
                     }
                 },
                 dismissButton = {
                     Button(
                         onClick = { tripToCancel = null },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                        colors = ButtonDefaults.buttonColors(containerColor = PastelCardBlue),
+                        shape = RoundedCornerShape(20.dp)
                     ) {
-                        Text(text = "Keep Journey", color = Color(0xFF8A99AD))
+                        Text(text = "Keep Journey", color = SkyBlueDark)
                     }
                 }
             )
@@ -357,8 +363,8 @@ private fun UpcomingTripCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF112017))
-            .border(1.5.dp, Color(0xFF1E4D2B), RoundedCornerShape(16.dp))
+            .background(SurfaceWhite)
+            .border(1.dp, BorderLight, RoundedCornerShape(16.dp))
             .padding(14.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -370,33 +376,34 @@ private fun UpcomingTripCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFF1A3824))
+                        .background(PastelCardTeal)
+                        .border(1.dp, TealLight, RoundedCornerShape(6.dp))
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
                         text = "READY · ${trip.bookingReference}",
-                        color = Color(0xFFC6FF00),
+                        color = TealDark,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Text(
                     text = trip.journeyDate,
-                    color = Color(0xFF8A99AD),
+                    color = TextMuted,
                     fontSize = 11.sp
                 )
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(7.dp).background(Color(0xFFC6FF00), CircleShape))
+                    Box(modifier = Modifier.size(8.dp).background(SkyBluePrimary, CircleShape))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = trip.origin, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text(text = trip.origin, color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(7.dp).background(Color(0xFF38BDF8), CircleShape))
+                    Box(modifier = Modifier.size(8.dp).background(WarmOrangeAccent, CircleShape))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = trip.destination, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text(text = trip.destination, color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
 
@@ -407,13 +414,13 @@ private fun UpcomingTripCard(
             ) {
                 Text(
                     text = "${trip.routeTitle} · ${trip.durationMinutes} min",
-                    color = Color.White,
+                    color = TextNavyDark,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = trip.fareText,
-                    color = Color(0xFFC6FF00),
+                    color = WarmOrangeDark,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -430,9 +437,17 @@ private fun UpcomingTripCard(
                         .weight(1.2f)
                         .height(38.dp),
                     shape = RoundedCornerShape(19.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC6FF00))
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text(text = "Open ticket 🎫", color = Color(0xFF070B14), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(PrimaryGradient),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Open Ticket 🎫", color = SurfaceWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
 
                 Button(
@@ -441,9 +456,9 @@ private fun UpcomingTripCard(
                         .weight(1f)
                         .height(38.dp),
                     shape = RoundedCornerShape(19.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B))
+                    colors = ButtonDefaults.buttonColors(containerColor = PastelCardTeal)
                 ) {
-                    Text(text = "Complete", color = Color.White, fontSize = 10.sp)
+                    Text(text = "Complete", color = TealDark, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
                 }
 
                 Button(
@@ -452,9 +467,9 @@ private fun UpcomingTripCard(
                         .weight(0.9f)
                         .height(38.dp),
                     shape = RoundedCornerShape(19.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D1619))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEE2E2))
                 ) {
-                    Text(text = "Cancel", color = Color(0xFFFF5252), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Cancel", color = Color(0xFFDC2626), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -467,29 +482,29 @@ private fun PastTripCard(trip: TripItem) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF0F172A))
-            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+            .background(SurfaceWhite)
+            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(3.dp), modifier = Modifier.weight(1f)) {
-            Text(text = trip.journeyDate.uppercase(), color = Color(0xFF8A99AD), fontSize = 9.sp, fontWeight = FontWeight.Bold)
-            Text(text = trip.routeTitle, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            Text(text = "${trip.origin} → ${trip.destination}", color = Color(0xFF8A99AD), fontSize = 10.sp)
-            Text(text = "${trip.durationMinutes} min · ${trip.distanceKm} km · ${trip.co2SavedKg} kg CO₂ saved", color = Color(0xFF38BDF8), fontSize = 9.sp)
+            Text(text = trip.journeyDate.uppercase(), color = TextMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+            Text(text = trip.routeTitle, color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(text = "${trip.origin} → ${trip.destination}", color = TextNavyBody, fontSize = 10.sp)
+            Text(text = "${trip.durationMinutes} min · ${trip.distanceKm} km", color = SkyBlueDark, fontSize = 10.sp)
         }
 
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xFF102015))
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(PastelCardTeal)
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             ) {
-                Text(text = "Completed", color = Color(0xFFC6FF00), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Completed", color = TealDark, fontSize = 9.sp, fontWeight = FontWeight.Bold)
             }
-            Text(text = trip.fareText, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(text = trip.fareText, color = TextNavyDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -500,28 +515,28 @@ private fun CancelledTripCard(trip: TripItem) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF0C101B))
-            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+            .background(SurfaceWhite)
+            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(3.dp), modifier = Modifier.weight(1f)) {
-            Text(text = trip.journeyDate.uppercase(), color = Color(0xFF64748B), fontSize = 9.sp)
-            Text(text = trip.routeTitle, color = Color(0xFF8A99AD), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            Text(text = "${trip.origin} → ${trip.destination}", color = Color(0xFF64748B), fontSize = 10.sp)
+            Text(text = trip.journeyDate.uppercase(), color = TextMuted, fontSize = 9.sp)
+            Text(text = trip.routeTitle, color = TextNavyBody, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(text = "${trip.origin} → ${trip.destination}", color = TextMuted, fontSize = 10.sp)
         }
 
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xFF2D1619))
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color(0xFFFEE2E2))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             ) {
-                Text(text = "Cancelled", color = Color(0xFFFF5252), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Cancelled", color = Color(0xFFDC2626), fontSize = 9.sp, fontWeight = FontWeight.Bold)
             }
-            Text(text = trip.fareText, color = Color(0xFF64748B), fontSize = 12.sp)
+            Text(text = trip.fareText, color = TextMuted, fontSize = 12.sp)
         }
     }
 }

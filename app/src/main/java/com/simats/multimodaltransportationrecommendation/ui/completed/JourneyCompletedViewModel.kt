@@ -5,6 +5,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+data class JourneyCompletedUiState(
+    val arrivalTitle: String = "Vanakkam, Marina Beach!",
+    val arrivalSubtitle: String = "You arrived at 09:48 AM. Smooth & on time.",
+    val origin: String = "Chennai Central",
+    val destination: String = "Marina Beach, Chennai",
+    val travelTime: String = "18 min",
+    val totalFare: String = "₹30",
+    val routeLine: String = "CMRL Blue Line",
+    val touristTipTitle: String = "Nearby Tamil Nadu Highlights",
+    val touristTipDetails: String = "Kapaleeshwarar Temple is just 3.5 km away, easily accessible via MTC City Bus 21G.",
+    val selectedRating: Int = 5,
+    val ratingPrompt: String = "Rate your Tamil Nadu journey experience"
+)
+
 class JourneyCompletedViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(JourneyCompletedUiState())
     val uiState: StateFlow<JourneyCompletedUiState> = _uiState.asStateFlow()
@@ -13,17 +27,3 @@ class JourneyCompletedViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(selectedRating = rating)
     }
 }
-
-data class JourneyCompletedUiState(
-    val arrivalTitle: String = "Hello, Golden Gate Park.",
-    val arrivalSubtitle: String = "You arrived at 9:57 AM. Right on time.",
-    val origin: String = "Ferry Building",
-    val destination: String = "California Academy of Sciences",
-    val travelTime: String = "42 min",
-    val totalFare: String = "$3.00",
-    val routeLine: String = "N Judah",
-    val co2Saved: String = "2.4 kg CO₂ avoided",
-    val co2Details: String = "86% less than a rideshare. Your trip emitted an estimated 0.4 kg CO₂.",
-    val selectedRating: Int = 4,
-    val ratingPrompt: String = "Great trip · Tap a star to rate"
-)

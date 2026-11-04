@@ -5,11 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.simats.multimodaltransportationrecommendation.data.model.trips.BookedJourneyData
 import com.simats.multimodaltransportationrecommendation.data.model.trips.TripItem
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun YourTicketScreen(
@@ -36,6 +38,7 @@ fun YourTicketScreen(
     onStartJourney: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(bookedJourney, trip) {
         if (bookedJourney != null) {
@@ -48,111 +51,121 @@ fun YourTicketScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
-            .padding(horizontal = 20.dp)
+            .background(BackgroundSoftCream)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .navigationBarsPadding(),
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top Bar, Confirmation Header & Ticket Pass Card
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
                 // Top Bar
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(42.dp)
+                                .shadow(2.dp, CircleShape)
                                 .clip(CircleShape)
-                                .background(Color(0xFF111C2E))
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderLight, CircleShape)
                                 .clickable { onBack() },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "←", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(14.dp))
                         Column {
                             Text(
-                                text = "15 / MOVESMART AI",
-                                color = Color(0xFF7A8B9E),
+                                text = "TAMIL NADU SMART TRANSIT",
+                                color = SkyBluePrimary,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.5.sp
                             )
                             Text(
-                                text = "Your ticket",
-                                color = Color.White,
-                                fontSize = 18.sp,
+                                text = "Digital Transit Pass",
+                                color = TextNavyDark,
+                                fontSize = 19.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                     }
 
-                    // Download Icon
+                    // Download / Share Action
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(42.dp)
+                            .shadow(2.dp, CircleShape)
                             .clip(CircleShape)
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), CircleShape),
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "📥", fontSize = 14.sp)
+                        Text(text = "📥", fontSize = 16.sp)
                     }
                 }
 
-                // Confirmation Header
+                // Confirmation Badge Card
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(PastelCardTeal)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(28.dp)
-                            .background(Color(0xFF112017), CircleShape)
-                            .border(1.dp, Color(0xFF1E4D2B), CircleShape),
+                            .size(32.dp)
+                            .background(TealSecondary, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "✓", color = Color(0xFFC6FF00), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "✓", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "You're all set!",
-                            color = Color.White,
-                            fontSize = 17.sp,
+                            text = "Ticket Confirmed & Active!",
+                            color = TealSecondary,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = uiState.confirmationText,
-                            color = Color(0xFF8A99AD),
-                            fontSize = 11.sp
+                            color = TextNavyDark,
+                            fontSize = 12.sp
                         )
                     }
                 }
 
-                // Main Ticket Pass Card
-                Box(
+                // Ticket Pass Card
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
-                        .padding(14.dp)
+                        .shadow(4.dp, RoundedCornerShape(20.dp)),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
                 ) {
                     Column(
+                        modifier = Modifier.padding(18.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         // Card Header
                         Row(
@@ -162,21 +175,20 @@ fun YourTicketScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(Color(0xFF112017))
-                                    .border(1.dp, Color(0xFF1E4D2B), RoundedCornerShape(6.dp))
-                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(PastelCardBlue)
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = "🚊  ${uiState.transportLine}",
-                                    color = Color(0xFFC6FF00),
-                                    fontSize = 10.sp,
+                                    text = "🚇  ${uiState.transportLine}",
+                                    color = SkyBluePrimary,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
                             Text(
                                 text = uiState.passengerType,
-                                color = Color(0xFF8A99AD),
+                                color = TextMutedSlate,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -186,43 +198,46 @@ fun YourTicketScreen(
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
                                 text = "${uiState.origin} → ${uiState.destination}",
-                                color = Color.White,
-                                fontSize = 15.sp,
+                                color = TextNavyDark,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "${uiState.dateTime} · ${uiState.durationText}",
-                                color = Color(0xFF8A99AD),
-                                fontSize = 11.sp
+                                text = "${uiState.dateTime} · ${uiState.durationText} journey",
+                                color = TextMutedSlate,
+                                fontSize = 12.sp
                             )
                         }
+
+                        HorizontalDivider(color = BorderLight, thickness = 1.dp)
 
                         // QR Code Visual Box
                         Box(
                             modifier = Modifier
-                                .size(160.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .size(170.dp)
+                                .clip(RoundedCornerShape(14.dp))
                                 .background(Color.White)
+                                .border(1.5.dp, BorderLight, RoundedCornerShape(14.dp))
                                 .padding(12.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Canvas(modifier = Modifier.fillMaxSize()) {
                                 val blockSize = size.width / 15f
-                                drawRect(color = Color.Black, topLeft = Offset(0f, 0f), size = Size(blockSize * 4, blockSize * 4))
+                                drawRect(color = Color(0xFF0F172A), topLeft = Offset(0f, 0f), size = Size(blockSize * 4, blockSize * 4))
                                 drawRect(color = Color.White, topLeft = Offset(blockSize, blockSize), size = Size(blockSize * 2, blockSize * 2))
-                                drawRect(color = Color.Black, topLeft = Offset(size.width - blockSize * 4, 0f), size = Size(blockSize * 4, blockSize * 4))
+                                drawRect(color = Color(0xFF0F172A), topLeft = Offset(size.width - blockSize * 4, 0f), size = Size(blockSize * 4, blockSize * 4))
                                 drawRect(color = Color.White, topLeft = Offset(size.width - blockSize * 3, blockSize), size = Size(blockSize * 2, blockSize * 2))
-                                drawRect(color = Color.Black, topLeft = Offset(0f, size.height - blockSize * 4), size = Size(blockSize * 4, blockSize * 4))
+                                drawRect(color = Color(0xFF0F172A), topLeft = Offset(0f, size.height - blockSize * 4), size = Size(blockSize * 4, blockSize * 4))
                                 drawRect(color = Color.White, topLeft = Offset(blockSize, size.height - blockSize * 3), size = Size(blockSize * 2, blockSize * 2))
 
                                 for (i in 4..10) {
                                     for (j in 4..10) {
                                         if ((i + j) % 2 == 0) {
-                                            drawRect(color = Color.Black, topLeft = Offset(i * blockSize, j * blockSize), size = Size(blockSize, blockSize))
+                                            drawRect(color = Color(0xFF0F172A), topLeft = Offset(i * blockSize, j * blockSize), size = Size(blockSize, blockSize))
                                         }
                                     }
                                 }
@@ -230,21 +245,25 @@ fun YourTicketScreen(
                         }
 
                         // Ticket Code
-                        Text(
-                            text = uiState.ticketCode,
-                            color = Color(0xFFC6FF00),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
-                        )
-
-                        Text(
-                            text = uiState.ticketValidity,
-                            color = Color(0xFF8A99AD),
-                            fontSize = 10.sp
-                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = uiState.ticketCode,
+                                color = SkyBluePrimary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.5.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = uiState.ticketValidity,
+                                color = TextMutedSlate,
+                                fontSize = 11.sp
+                            )
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
             // Bottom CTA Buttons
@@ -253,43 +272,46 @@ fun YourTicketScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 6.dp)
+                    .padding(vertical = 12.dp)
             ) {
                 Text(
                     text = uiState.ticketNotice,
-                    color = Color(0xFF64748B),
-                    fontSize = 10.sp
+                    color = TextMutedSlate,
+                    fontSize = 11.sp
                 )
 
-                Button(
-                    onClick = { onStartJourney() },
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC6FF00))
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(PrimaryGradient)
+                        .clickable { onStartJourney() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Start journey now  →",
-                        color = Color(0xFF070B14),
-                        fontSize = 14.sp,
+                        text = "Start Journey Now  ➔",
+                        color = Color.White,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Button(
-                    onClick = { onBack() },
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(44.dp),
-                    shape = RoundedCornerShape(22.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F172A))
+                        .height(46.dp)
+                        .clip(RoundedCornerShape(23.dp))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(23.dp))
+                        .clickable { onBack() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "View in My Trips",
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium
+                        color = TextNavyDark,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }

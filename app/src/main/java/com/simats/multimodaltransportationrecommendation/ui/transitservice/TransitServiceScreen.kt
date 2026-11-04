@@ -4,22 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun TransitServiceScreen(
@@ -28,12 +29,13 @@ fun TransitServiceScreen(
     onContinueToBooking: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scrollState = rememberScrollState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
-            .padding(20.dp)
+            .background(BackgroundSoftCream)
+            .padding(horizontal = 20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -43,79 +45,79 @@ fun TransitServiceScreen(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top Bar & Header Card
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
                 // Top Bar
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 10.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(42.dp)
+                            .shadow(2.dp, CircleShape)
                             .clip(CircleShape)
-                            .background(Color(0xFF111C2E))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, CircleShape)
                             .clickable { onBack() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "←", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
                     Column {
                         Text(
-                            text = "12 / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            text = "TAMIL NADU SMART TRANSIT",
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp
                         )
                         Text(
-                            text = "Transit service",
-                            color = Color.White,
-                            fontSize = 18.sp,
+                            text = "Transit Service Details",
+                            color = TextNavyDark,
+                            fontSize = 19.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
                 // Transit Line Header Card
-                Box(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF112017))
-                        .border(1.5.dp, Color(0xFF1E4D2B), RoundedCornerShape(14.dp))
-                        .padding(14.dp)
+                        .shadow(3.dp, RoundedCornerShape(18.dp)),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(44.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFFC6FF00)),
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(PastelCardBlue),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "N",
-                                color = Color(0xFF070B14),
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text(text = "🚇", fontSize = 22.sp)
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(14.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
                                 text = uiState.lineName,
-                                color = Color.White,
-                                fontSize = 16.sp,
+                                color = TextNavyDark,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = uiState.direction,
-                                color = Color(0xFF8A99AD),
+                                color = TextMutedSlate,
                                 fontSize = 12.sp
                             )
                             Spacer(modifier = Modifier.height(2.dp))
@@ -124,9 +126,9 @@ fun TransitServiceScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = uiState.status,
-                                    color = Color(0xFFC6FF00),
+                                    color = TealSecondary,
                                     fontSize = 10.sp,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
@@ -139,26 +141,27 @@ fun TransitServiceScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Embarcadero departures", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "Live times", color = Color(0xFFC6FF00), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(text = "Live Departures", color = TextNavyDark, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Real-time sync", color = SkyBluePrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     uiState.departures.forEach { (time, tag) ->
                         val isSelected = uiState.selectedDeparture == time
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(56.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) Color(0xFF112017) else Color(0xFF0F172A))
+                                .height(60.dp)
+                                .shadow(if (isSelected) 2.dp else 1.dp, RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(if (isSelected) PastelCardBlue else SurfaceWhite)
                                 .border(
                                     width = if (isSelected) 1.5.dp else 1.dp,
-                                    color = if (isSelected) Color(0xFFC6FF00) else Color(0xFF1E293B),
-                                    shape = RoundedCornerShape(12.dp)
+                                    color = if (isSelected) SkyBluePrimary else BorderLight,
+                                    shape = RoundedCornerShape(14.dp)
                                 )
                                 .clickable { viewModel.selectDeparture(time) }
                                 .padding(8.dp),
@@ -167,62 +170,13 @@ fun TransitServiceScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = time,
-                                    color = if (isSelected) Color(0xFFC6FF00) else Color.White,
+                                    color = if (isSelected) SkyBluePrimary else TextNavyDark,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = tag,
-                                    color = Color(0xFF8A99AD),
-                                    fontSize = 9.sp
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Station Sequence & Fare Card
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "Your station sequence", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    Text(text = uiState.rideDuration, color = Color(0xFFC6FF00), fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                }
-
-                // Timeline List
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    uiState.stations.forEachIndexed { index, (station, desc) ->
-                        val isEndpoint = index == 0 || index == uiState.stations.size - 1
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(20.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(if (isEndpoint) 8.dp else 5.dp)
-                                        .background(if (isEndpoint) Color(0xFFC6FF00) else Color(0xFF334155), CircleShape)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = station,
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = desc,
-                                    color = Color(0xFF8A99AD),
+                                    color = TextMutedSlate,
                                     fontSize = 10.sp
                                 )
                             }
@@ -230,58 +184,117 @@ fun TransitServiceScreen(
                     }
                 }
 
-                // Fare / Accessibility Card
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
-                        .padding(12.dp)
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                // Station Sequence & Fare Card
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Station Stops", color = TextNavyDark, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Text(text = uiState.rideDuration, color = TealSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(2.dp, RoundedCornerShape(16.dp)),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(text = uiState.fareType, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            Text(text = uiState.fareAmount, color = Color(0xFFC6FF00), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            uiState.stations.forEachIndexed { index, (station, desc) ->
+                                val isEndpoint = index == 0 || index == uiState.stations.size - 1
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier.width(22.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(if (isEndpoint) 10.dp else 6.dp)
+                                                .background(
+                                                    if (isEndpoint) SkyBluePrimary else TextMutedSlate.copy(alpha = 0.5f),
+                                                    CircleShape
+                                                )
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = station,
+                                            color = TextNavyDark,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = desc,
+                                            color = TextMutedSlate,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
                         }
-                        Text(
-                            text = uiState.fareDetails,
-                            color = Color(0xFF8A99AD),
-                            fontSize = 10.sp,
-                            lineHeight = 14.sp
-                        )
+                    }
+
+                    // Fare Card
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(2.dp, RoundedCornerShape(16.dp)),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = PastelCardTeal)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(text = uiState.fareType, color = TextNavyDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                Text(text = uiState.fareAmount, color = TealSecondary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Text(
+                                text = uiState.fareDetails,
+                                color = TextNavyDark.copy(alpha = 0.8f),
+                                fontSize = 11.sp,
+                                lineHeight = 15.sp
+                            )
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(10.dp))
             }
 
             // Bottom CTA Button
-            Button(
-                onClick = { onContinueToBooking() },
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFC6FF00)
-                )
+                    .padding(vertical = 12.dp)
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(25.dp))
+                    .background(PrimaryGradient)
+                    .clickable { onContinueToBooking() },
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Continue to booking  →",
-                    color = Color(0xFF070B14),
-                    fontSize = 14.sp,
+                    text = "Continue to Booking  ➔",
+                    color = Color.White,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun TransitServiceScreenPreview() {
-    TransitServiceScreen()
 }

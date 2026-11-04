@@ -26,6 +26,7 @@ import com.simats.multimodaltransportationrecommendation.data.local.SessionManag
 import com.simats.multimodaltransportationrecommendation.data.model.notifications.NotificationItem
 import com.simats.multimodaltransportationrecommendation.data.repository.AuthRepository
 import com.simats.multimodaltransportationrecommendation.data.repository.NetworkResult
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,7 +64,8 @@ fun NotificationsHistoryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF0F172A),
+        containerColor = SurfaceWhite,
+        shape = RoundedCornerShape(18.dp),
         title = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -75,7 +77,7 @@ fun NotificationsHistoryDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Notifications",
-                        color = Color.White,
+                        color = TextNavyDark,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -84,11 +86,11 @@ fun NotificationsHistoryDialog(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF13201C))
-                                .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(10.dp))
+                                .background(PastelCardPeach)
+                                .border(1.dp, WarmOrangeLight, RoundedCornerShape(10.dp))
                                 .padding(horizontal = 7.dp, vertical = 2.dp)
                         ) {
-                            Text(text = "$unreadCount new", color = Color(0xFFC6FF00), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "$unreadCount new", color = WarmOrangeDark, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -96,9 +98,9 @@ fun NotificationsHistoryDialog(
                 if (notifications.isNotEmpty() && unreadCount > 0) {
                     Text(
                         text = "Mark read",
-                        color = Color(0xFF38BDF8),
+                        color = SkyBluePrimary,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
                             scope.launch {
                                 authRepository.markNotificationRead(userId, markAll = true)
@@ -117,14 +119,14 @@ fun NotificationsHistoryDialog(
             ) {
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFFC6FF00), modifier = Modifier.size(32.dp))
+                        CircularProgressIndicator(color = SkyBluePrimary, modifier = Modifier.size(32.dp))
                     }
                 } else if (notifications.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text(text = "🔕", fontSize = 28.sp)
-                            Text(text = "No notifications yet", color = Color(0xFF8A99AD), fontSize = 13.sp)
-                            Text(text = "Your journey reminders and travel alerts will appear here.", color = Color(0xFF64748B), fontSize = 10.sp)
+                            Text(text = "No notifications yet", color = TextNavyDark, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                            Text(text = "Your journey reminders and travel alerts will appear here.", color = TextMuted, fontSize = 11.sp)
                         }
                     }
                 } else {
@@ -134,17 +136,17 @@ fun NotificationsHistoryDialog(
                                 "journey_reminder" -> "🎫"
                                 "tourist_recommendation" -> "🧭"
                                 "travel_alert" -> "⚠️"
-                                else -> "🌿"
+                                else -> "🌴"
                             }
 
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(if (item.isRead) Color(0xFF070B14) else Color(0xFF13201C))
+                                    .background(if (item.isRead) SurfaceWhite else PastelCardBlue)
                                     .border(
                                         1.dp,
-                                        if (item.isRead) Color(0xFF1E293B) else Color(0xFF1E4D2B),
+                                        if (item.isRead) BorderLight else SkyBlueSoft,
                                         RoundedCornerShape(12.dp)
                                     )
                                     .clickable {
@@ -160,12 +162,12 @@ fun NotificationsHistoryDialog(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(32.dp)
+                                        .size(34.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF162238)),
+                                        .background(if (item.isRead) BackgroundSoftCream else PastelCardTeal),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(text = icon, fontSize = 14.sp)
+                                    Text(text = icon, fontSize = 15.sp)
                                 }
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -176,7 +178,7 @@ fun NotificationsHistoryDialog(
                                     ) {
                                         Text(
                                             text = item.title,
-                                            color = Color.White,
+                                            color = TextNavyDark,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -184,19 +186,19 @@ fun NotificationsHistoryDialog(
                                             Box(
                                                 modifier = Modifier
                                                     .size(7.dp)
-                                                    .background(Color(0xFFC6FF00), CircleShape)
+                                                    .background(WarmOrangeAccent, CircleShape)
                                             )
                                         }
                                     }
                                     Text(
                                         text = item.message,
-                                        color = Color(0xFF94A3B8),
+                                        color = TextNavyBody,
                                         fontSize = 11.sp,
                                         lineHeight = 15.sp
                                     )
                                     Text(
                                         text = item.createdAt,
-                                        color = Color(0xFF64748B),
+                                        color = TextMuted,
                                         fontSize = 9.sp
                                     )
                                 }
@@ -209,10 +211,10 @@ fun NotificationsHistoryDialog(
         confirmButton = {
             Button(
                 onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
+                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(text = "Close", color = Color.White, fontSize = 12.sp)
+                Text(text = "Close", color = SurfaceWhite, fontSize = 12.sp)
             }
         }
     )

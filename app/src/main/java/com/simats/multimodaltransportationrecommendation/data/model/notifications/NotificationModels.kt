@@ -40,3 +40,4 @@ data class MarkReadRequest(
     @SerializedName("mark_all")
     val markAll: Boolean = false
 )
+

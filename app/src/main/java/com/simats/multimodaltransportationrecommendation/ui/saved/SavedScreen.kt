@@ -30,6 +30,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.simats.multimodaltransportationrecommendation.data.model.places.TouristPlace
 import com.simats.multimodaltransportationrecommendation.data.model.routes.SavedRoute
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun SavedScreen(
@@ -49,7 +50,7 @@ fun SavedScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
     ) {
         Column(
             modifier = Modifier
@@ -68,21 +69,21 @@ fun SavedScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(
-                            text = "SAVED ITEMS / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            text = "TAMIL NADU SAVED ITEMS",
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp
+                            letterSpacing = 1.2.sp
                         )
                         Text(
-                            text = "Your Saved Collection",
-                            color = Color.White,
+                            text = "Saved Collection",
+                            color = TextNavyDark,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -93,8 +94,8 @@ fun SavedScreen(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), CircleShape)
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, CircleShape)
                             .clickable { viewModel.loadSavedData(context) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -108,7 +109,8 @@ fun SavedScreen(
                         .fillMaxWidth()
                         .height(44.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF0F172A))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                         .padding(4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -121,15 +123,15 @@ fun SavedScreen(
                                 .weight(1f)
                                 .fillMaxHeight()
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSel) Color(0xFF162238) else Color.Transparent)
+                                .background(if (isSel) PastelCardBlue else Color.Transparent)
                                 .clickable { viewModel.selectTab(tab) },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "$tab ($count)",
-                                color = if (isSel) Color.White else Color(0xFF8A99AD),
+                                color = if (isSel) SkyBluePrimary else TextMuted,
                                 fontSize = 12.sp,
-                                fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium
                             )
                         }
                     }
@@ -141,14 +143,15 @@ fun SavedScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0x22C6FF00))
-                            .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(8.dp))
+                            .background(PastelCardTeal)
+                            .border(1.dp, TealSoft, RoundedCornerShape(8.dp))
                             .padding(8.dp)
                     ) {
                         Text(
                             text = "✓ ${uiState.successMessage}",
-                            color = Color(0xFFC6FF00),
-                            fontSize = 11.sp
+                            color = TealDark,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -161,13 +164,13 @@ fun SavedScreen(
                             .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Color(0xFFC6FF00))
+                        CircularProgressIndicator(color = SkyBluePrimary)
                     }
                 } else if (uiState.selectedTab == "Places") {
                     if (uiState.savedPlaces.isEmpty()) {
                         EmptySavedState(
-                            title = "No saved places yet",
-                            subtitle = "Explore top destinations and tap the heart to save them for quick planning.",
+                            title = "No saved Tamil Nadu places yet",
+                            subtitle = "Explore top attractions like Marina Beach, Meenakshi Amman Temple or Ooty Lake and save them here.",
                             buttonText = "Explore Destinations",
                             onAction = onExploreMore
                         )
@@ -189,7 +192,7 @@ fun SavedScreen(
                     if (uiState.savedRoutes.isEmpty()) {
                         EmptySavedState(
                             title = "No saved travel routes yet",
-                            subtitle = "Search for a route on Explore and save your favorite multi-modal commutes.",
+                            subtitle = "Search for multi-modal routes on Explore and bookmark your favorite commutes.",
                             buttonText = "Search Routes",
                             onAction = onExploreMore
                         )
@@ -214,8 +217,9 @@ fun SavedScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF0B111E))
-                    .padding(vertical = 8.dp),
+                    .background(SurfaceWhite)
+                    .border(1.dp, BorderLight)
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -236,7 +240,7 @@ fun SavedScreen(
                         Text(text = lines[0], fontSize = 16.sp)
                         Text(
                             text = lines[1],
-                            color = if (isActive) Color(0xFFC6FF00) else Color(0xFF64748B),
+                            color = if (isActive) SkyBluePrimary else TextMuted,
                             fontSize = 10.sp,
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
                         )
@@ -259,8 +263,8 @@ private fun SavedPlaceCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFF0F172A))
-            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(14.dp))
+            .background(SurfaceWhite)
+            .border(1.dp, BorderLight, RoundedCornerShape(14.dp))
             .clickable { onOpen() }
             .padding(12.dp)
     ) {
@@ -273,7 +277,7 @@ private fun SavedPlaceCard(
                 modifier = Modifier
                     .size(68.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFF162238))
+                    .background(PastelCardBlue)
             ) {
                 if (!place.imageUrl.isNullOrBlank()) {
                     AsyncImage(
@@ -297,21 +301,21 @@ private fun SavedPlaceCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = place.name,
-                    color = Color.White,
+                    color = TextNavyDark,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
                 Text(
                     text = "📍 ${place.city} · ${place.category}",
-                    color = Color(0xFF8A99AD),
+                    color = TextNavyBody,
                     fontSize = 11.sp
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "★ ${place.rating}", color = Color(0xFFC6FF00), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "★ ${place.rating}", color = WarmOrangeDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "🎟️ ${place.entryFee}", color = Color(0xFF94A3B8), fontSize = 11.sp)
+                    Text(text = "🎟️ ${place.entryFee}", color = TextMuted, fontSize = 11.sp)
                 }
             }
 
@@ -320,7 +324,7 @@ private fun SavedPlaceCard(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color(0x33EF4444))
+                    .background(Color(0xFFFEE2E2))
                     .clickable { onRemove() },
                 contentAlignment = Alignment.Center
             ) {
@@ -340,8 +344,8 @@ private fun SavedRouteCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFF0F172A))
-            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(14.dp))
+            .background(SurfaceWhite)
+            .border(1.dp, BorderLight, RoundedCornerShape(14.dp))
             .padding(14.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -354,20 +358,20 @@ private fun SavedRouteCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFF13201C))
-                            .border(1.dp, Color(0xFF1E4D2B), RoundedCornerShape(6.dp))
+                            .background(PastelCardTeal)
+                            .border(1.dp, TealLight, RoundedCornerShape(6.dp))
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
-                        Text(text = route.mode, color = Color(0xFFC6FF00), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text(text = route.mode, color = TealDark, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = route.durationText, color = Color(0xFF8A99AD), fontSize = 11.sp)
+                    Text(text = route.durationText, color = TextNavyBody, fontSize = 11.sp)
                 }
                 Box(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(Color(0x33EF4444))
+                        .background(Color(0xFFFEE2E2))
                         .clickable { onRemove() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -377,7 +381,7 @@ private fun SavedRouteCard(
 
             Text(
                 text = "${route.origin} → ${route.destination}",
-                color = Color.White,
+                color = TextNavyDark,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -387,19 +391,15 @@ private fun SavedRouteCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "💵 ${route.costText}", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "🌿 ${route.co2Text}", color = Color(0xFFC6FF00), fontSize = 11.sp)
-                }
+                Text(text = "Fare: ${route.costText}", color = WarmOrangeDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 Button(
                     onClick = { onPlan() },
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC6FF00)),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    modifier = Modifier.height(32.dp)
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+                    modifier = Modifier.height(34.dp)
                 ) {
-                    Text(text = "Plan Journey", color = Color(0xFF070B14), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Plan Journey", color = SurfaceWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -422,11 +422,11 @@ private fun EmptySavedState(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "🔖", fontSize = 40.sp)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = title, color = TextNavyDark, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = subtitle,
-                color = Color(0xFF8A99AD),
+                color = TextMuted,
                 fontSize = 12.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
@@ -434,11 +434,10 @@ private fun EmptySavedState(
             Button(
                 onClick = onAction,
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC6FF00))
+                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
             ) {
-                Text(text = buttonText, color = Color(0xFF070B14), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(text = buttonText, color = SurfaceWhite, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
 }
-

@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.simats.multimodaltransportationrecommendation.data.model.places.TouristPlace
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun TouristPlaceDetailScreen(
@@ -52,11 +51,11 @@ fun TouristPlaceDetailScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
     ) {
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFFC6FF00))
+                CircularProgressIndicator(color = SkyBluePrimary)
             }
         } else if (place != null) {
             Column(
@@ -91,19 +90,12 @@ fun TouristPlaceDetailScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color(0xFF0F172A)),
+                                    .background(PastelCardBlue),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(text = "🏛️", fontSize = 64.sp)
                             }
                         }
-
-                        // Gradient overlay at top for controls visibility
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0x44000000))
-                        )
 
                         // Top Controls Row
                         Row(
@@ -117,11 +109,12 @@ fun TouristPlaceDetailScreen(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xCC070B14))
+                                    .background(SurfaceWhite)
+                                    .border(1.dp, BorderLight, CircleShape)
                                     .clickable { onBack() },
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = "←", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                                Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                             }
 
                             // Save / Unsave button
@@ -129,14 +122,15 @@ fun TouristPlaceDetailScreen(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xCC070B14))
+                                    .background(SurfaceWhite)
+                                    .border(1.dp, BorderLight, CircleShape)
                                     .clickable { viewModel.toggleSavePlace(context) },
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (uiState.isSaving) {
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(18.dp),
-                                        color = Color(0xFFC6FF00),
+                                        color = SkyBluePrimary,
                                         strokeWidth = 2.dp
                                     )
                                 } else {
@@ -153,14 +147,14 @@ fun TouristPlaceDetailScreen(
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
                                 .padding(16.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xEE070B14))
-                                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderLight, RoundedCornerShape(10.dp))
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(
                                 text = "📍 ${place.city} · ${place.category}",
-                                color = Color(0xFFC6FF00),
+                                color = SkyBluePrimary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -183,27 +177,27 @@ fun TouristPlaceDetailScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = place.name,
-                                    color = Color.White,
+                                    color = TextNavyDark,
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = place.locationAddress,
-                                    color = Color(0xFF8A99AD),
+                                    color = TextNavyBody,
                                     fontSize = 13.sp
                                 )
                             }
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(Color(0xFF112017))
-                                    .border(1.dp, Color(0xFF1E4D2B), RoundedCornerShape(10.dp))
+                                    .background(PastelCardPeach)
+                                    .border(1.dp, WarmOrangeLight, RoundedCornerShape(10.dp))
                                     .padding(horizontal = 10.dp, vertical = 4.dp)
                             ) {
                                 Text(
                                     text = "★ ${place.rating}",
-                                    color = Color(0xFFC6FF00),
+                                    color = WarmOrangeDark,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -216,14 +210,15 @@ fun TouristPlaceDetailScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0x22C6FF00))
-                                    .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(8.dp))
+                                    .background(PastelCardTeal)
+                                    .border(1.dp, TealSoft, RoundedCornerShape(8.dp))
                                     .padding(8.dp)
                             ) {
                                 Text(
                                     text = "✓ ${uiState.successMessage}",
-                                    color = Color(0xFFC6FF00),
-                                    fontSize = 12.sp
+                                    color = TealDark,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
@@ -235,7 +230,7 @@ fun TouristPlaceDetailScreen(
                         ) {
                             InfoBadgeCard(
                                 icon = "⏱️",
-                                title = "Duration",
+                                title = "Visit Duration",
                                 value = place.durationVisit ?: "2-3 hours",
                                 modifier = Modifier.weight(1f)
                             )
@@ -258,22 +253,22 @@ fun TouristPlaceDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(Color(0xFF0F172A))
-                                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(14.dp))
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderLight, RoundedCornerShape(14.dp))
                                 .padding(14.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "🕒", fontSize = 16.sp)
+                                Text(text = "🕒", fontSize = 18.sp)
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     Text(
-                                        text = "Available Visiting Hours",
-                                        color = Color(0xFF8A99AD),
+                                        text = "Visiting Hours & Schedule",
+                                        color = TextMuted,
                                         fontSize = 11.sp
                                     )
                                     Text(
                                         text = place.visitingHours ?: "Open daily",
-                                        color = Color.White,
+                                        color = TextNavyDark,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -285,35 +280,36 @@ fun TouristPlaceDetailScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text(
                                 text = "ABOUT THIS DESTINATION",
-                                color = Color(0xFF8A99AD),
+                                color = SkyBluePrimary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
                             Text(
                                 text = place.description,
-                                color = Color(0xFFCBD5E1),
+                                color = TextNavyBody,
                                 fontSize = 14.sp,
-                                lineHeight = 20.sp
+                                lineHeight = 21.sp
                             )
                         }
 
-                        // Environmental / Transit Tip
+                        // Public Transit Tip
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(Color(0xFF112017))
-                                .border(1.dp, Color(0xFF1E4D2B), RoundedCornerShape(14.dp))
+                                .background(PastelCardTeal)
+                                .border(1.dp, TealLight, RoundedCornerShape(14.dp))
                                 .padding(14.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "🌿", fontSize = 18.sp)
+                                Text(text = "🚌", fontSize = 18.sp)
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
-                                    text = "Taking public transit, walking, or cycling here avoids up to 1.5 kg of CO₂ compared to a car ride.",
-                                    color = Color(0xFFC6FF00),
-                                    fontSize = 12.sp
+                                    text = "Conveniently accessible via Tamil Nadu public transit: Chennai Metro, MTC buses, TNSTC, and Southern Railway.",
+                                    color = TealDark,
+                                    fontSize = 12.sp,
+                                    lineHeight = 17.sp
                                 )
                             }
                         }
@@ -324,7 +320,8 @@ fun TouristPlaceDetailScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF0B111E))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight)
                         .padding(16.dp)
                 ) {
                     Button(
@@ -333,14 +330,18 @@ fun TouristPlaceDetailScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                         shape = RoundedCornerShape(25.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFC6FF00)
-                        )
+                        colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(PrimaryGradient),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(
-                                text = "Plan Journey Here  →",
-                                color = Color(0xFF070B14),
+                                text = "Plan Journey Here  ➔",
+                                color = SurfaceWhite,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -357,7 +358,7 @@ fun TouristPlaceDetailScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Place not found", color = Color.White, fontSize = 16.sp)
+                    Text(text = "Place not found", color = TextNavyDark, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(onClick = { onBack() }) {
                         Text(text = "Go Back")
@@ -378,17 +379,16 @@ private fun InfoBadgeCard(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF0F172A))
-            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+            .background(SurfaceWhite)
+            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
             .padding(10.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = icon, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = title, color = Color(0xFF8A99AD), fontSize = 10.sp)
-            Text(text = value, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(text = title, color = TextMuted, fontSize = 10.sp)
+            Text(text = value, color = TextNavyDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
-

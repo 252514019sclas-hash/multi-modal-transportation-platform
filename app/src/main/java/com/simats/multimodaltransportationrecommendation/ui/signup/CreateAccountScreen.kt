@@ -28,10 +28,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun CreateAccountScreen(
@@ -46,7 +46,7 @@ fun CreateAccountScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
             .padding(24.dp)
     ) {
         Column(
@@ -65,65 +65,63 @@ fun CreateAccountScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF111C2E))
+                            .background(PastelCardBlue)
+                            .border(1.dp, SkyBlueSoft, CircleShape)
                             .clickable { onBack() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "←", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "←", color = SkyBluePrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
                             text = "04 / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp
                         )
                         Text(
                             text = "Create account",
-                            color = Color.White,
+                            color = TextNavyDark,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 // Logo Box
                 Box(
                     modifier = Modifier
                         .size(54.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF111E16))
-                        .border(1.5.dp, Color(0xFFC6FF00), RoundedCornerShape(14.dp)),
+                        .background(PrimaryGradient),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "M",
-                        color = Color(0xFFC6FF00),
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold
+                        text = "🌴",
+                        fontSize = 26.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Make the city yours.",
-                    color = Color.White,
-                    fontSize = 24.sp,
+                    text = "Welcome to MoveSmart AI.",
+                    color = TextNavyDark,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "A few details. A more personal way to move.",
-                    color = Color(0xFF8A99AD),
+                    text = "Sign up to explore Tamil Nadu with smart routes.",
+                    color = TextNavyBody,
                     fontSize = 13.sp
                 )
             }
@@ -137,8 +135,8 @@ fun CreateAccountScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x22EF4444))
-                            .border(1.dp, Color(0xFFEF4444), RoundedCornerShape(10.dp))
+                            .background(Color(0xFFFEF2F2))
+                            .border(1.dp, Color(0xFFFCA5A5), RoundedCornerShape(10.dp))
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -146,7 +144,7 @@ fun CreateAccountScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = uiState.errorMessage!!,
-                                color = Color(0xFFFF8B8B),
+                                color = Color(0xFFDC2626),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -158,16 +156,17 @@ fun CreateAccountScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = "Full name",
-                        color = Color(0xFF8A99AD),
-                        fontSize = 12.sp
+                        color = TextNavyBody,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -179,10 +178,10 @@ fun CreateAccountScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             textStyle = TextStyle(
-                                color = Color.White,
+                                color = TextNavyDark,
                                 fontSize = 14.sp
                             ),
-                            cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                            cursorBrush = SolidColor(SkyBluePrimary),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Text,
                                 imeAction = ImeAction.Next
@@ -190,8 +189,8 @@ fun CreateAccountScreen(
                             decorationBox = { innerTextField ->
                                 if (uiState.fullName.isEmpty()) {
                                     Text(
-                                        text = "Alex Morgan",
-                                        color = Color(0xFF475569),
+                                        text = "Sundar Raman",
+                                        color = TextLight,
                                         fontSize = 14.sp
                                     )
                                 }
@@ -205,16 +204,17 @@ fun CreateAccountScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = "Email address",
-                        color = Color(0xFF8A99AD),
-                        fontSize = 12.sp
+                        color = TextNavyBody,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -226,10 +226,10 @@ fun CreateAccountScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             textStyle = TextStyle(
-                                color = Color.White,
+                                color = TextNavyDark,
                                 fontSize = 14.sp
                             ),
-                            cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                            cursorBrush = SolidColor(SkyBluePrimary),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
                                 imeAction = ImeAction.Next
@@ -237,8 +237,8 @@ fun CreateAccountScreen(
                             decorationBox = { innerTextField ->
                                 if (uiState.email.isEmpty()) {
                                     Text(
-                                        text = "alex.morgan@example.com",
-                                        color = Color(0xFF475569),
+                                        text = "sundar@example.com",
+                                        color = TextLight,
                                         fontSize = 14.sp
                                     )
                                 }
@@ -252,16 +252,17 @@ fun CreateAccountScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = "Password",
-                        color = Color(0xFF8A99AD),
-                        fontSize = 12.sp
+                        color = TextNavyBody,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -279,10 +280,10 @@ fun CreateAccountScreen(
                                 singleLine = true,
                                 visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                 textStyle = TextStyle(
-                                    color = Color.White,
+                                    color = TextNavyDark,
                                     fontSize = 15.sp
                                 ),
-                                cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                                cursorBrush = SolidColor(SkyBluePrimary),
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Password,
                                     imeAction = ImeAction.Done
@@ -296,7 +297,7 @@ fun CreateAccountScreen(
                                     if (uiState.password.isEmpty()) {
                                         Text(
                                             text = "••••••••••",
-                                            color = Color(0xFF475569),
+                                            color = TextLight,
                                             fontSize = 14.sp
                                         )
                                     }
@@ -330,7 +331,7 @@ fun CreateAccountScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = uiState.passwordStrength,
-                        color = if (isStrong) Color(0xFFC6FF00) else Color(0xFF8A99AD),
+                        color = if (isStrong) TealSecondary else TextMuted,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -338,7 +339,7 @@ fun CreateAccountScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Sign in / Create account Button
+                // Create Account Button
                 Button(
                     onClick = {
                         viewModel.createAccount(context = context, onSuccess = onAccountCreated)
@@ -348,24 +349,29 @@ fun CreateAccountScreen(
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFC6FF00),
-                        disabledContainerColor = Color(0x66C6FF00)
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color(0xFF070B14),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            text = "Create account  →",
-                            color = Color(0xFF070B14),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(PrimaryGradient),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = SurfaceWhite,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Create account  ➔",
+                                color = SurfaceWhite,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -381,41 +387,32 @@ fun CreateAccountScreen(
                 ) {
                     Text(
                         text = "Already a member? ",
-                        color = Color(0xFF8A99AD),
-                        fontSize = 12.sp
+                        color = TextMuted,
+                        fontSize = 13.sp
                     )
                     Text(
                         text = "Sign in",
-                        color = Color.White,
-                        fontSize = 12.sp,
+                        color = SkyBluePrimary,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Private by design notice
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "🛡️", fontSize = 10.sp)
+                    Text(text = "🛡️", fontSize = 11.sp)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "PRIVATE BY DESIGN",
-                        color = Color(0xFF64748B),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
+                        text = "Private by design · MoveSmart AI",
+                        color = TextMuted,
+                        fontSize = 11.sp
                     )
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun CreateAccountScreenPreview() {
-    CreateAccountScreen()
 }

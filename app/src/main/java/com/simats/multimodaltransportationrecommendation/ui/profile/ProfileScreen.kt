@@ -38,12 +38,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
 fun ProfileScreen(
@@ -65,7 +65,6 @@ fun ProfileScreen(
         uri?.let { viewModel.uploadSelectedImage(context, it) }
     }
 
-    // Initialize user profile from session / database
     LaunchedEffect(Unit) {
         viewModel.initProfile(context)
     }
@@ -73,7 +72,7 @@ fun ProfileScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14))
+            .background(BackgroundSoftCream)
     ) {
         Column(
             modifier = Modifier
@@ -94,21 +93,21 @@ fun ProfileScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(
                             text = "20 / MOVESMART AI",
-                            color = Color(0xFF7A8B9E),
+                            color = SkyBluePrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp
                         )
                         Text(
-                            text = "Profile & settings",
-                            color = Color.White,
+                            text = "Profile & Settings",
+                            color = TextNavyDark,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -123,8 +122,8 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF0F172A))
-                                .border(1.dp, Color(0xFF1E293B), CircleShape)
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderLight, CircleShape)
                                 .clickable { viewModel.fetchProfile(context = context) },
                             contentAlignment = Alignment.Center
                         ) {
@@ -136,18 +135,16 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .height(36.dp)
                                 .clip(RoundedCornerShape(18.dp))
-                                .background(
-                                    if (uiState.isEditMode) Color(0x33EF4444) else Color(0xFF0F172A)
-                                )
+                                .background(if (uiState.isEditMode) Color(0xFFFEE2E2) else PastelCardBlue)
                                 .border(
                                     1.dp,
-                                    if (uiState.isEditMode) Color(0xFFEF4444) else Color(0xFF1E293B),
+                                    if (uiState.isEditMode) Color(0xFFEF4444) else SkyBlueSoft,
                                     RoundedCornerShape(18.dp)
                                 )
                                 .clickable {
                                     if (uiState.isEditMode) viewModel.cancelEditMode() else viewModel.enterEditMode()
                                 }
-                                .padding(horizontal = 12.dp),
+                                .padding(horizontal = 14.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -157,7 +154,7 @@ fun ProfileScreen(
                                 )
                                 Text(
                                     text = if (uiState.isEditMode) "Cancel" else "Edit",
-                                    color = if (uiState.isEditMode) Color(0xFFFF8B8B) else Color.White,
+                                    color = if (uiState.isEditMode) Color(0xFFDC2626) else SkyBlueDark,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -172,21 +169,21 @@ fun ProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0xFF0F172A))
-                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(10.dp))
                             .padding(10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(16.dp),
-                                color = Color(0xFFC6FF00),
+                                color = SkyBluePrimary,
                                 strokeWidth = 2.dp
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Syncing profile with database...",
-                                color = Color(0xFF8A99AD),
+                                color = TextMuted,
                                 fontSize = 12.sp
                             )
                         }
@@ -198,8 +195,8 @@ fun ProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x22C6FF00))
-                            .border(1.dp, Color(0xFFC6FF00), RoundedCornerShape(10.dp))
+                            .background(PastelCardTeal)
+                            .border(1.dp, TealSoft, RoundedCornerShape(10.dp))
                             .padding(12.dp)
                     ) {
                         Row(
@@ -208,18 +205,18 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "✓", color = Color(0xFFC6FF00), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Text(text = "✓", color = TealDark, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = uiState.successMessage!!,
-                                    color = Color(0xFFC6FF00),
+                                    color = TealDark,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
                             Text(
                                 text = "✕",
-                                color = Color(0xFFC6FF00),
+                                color = TealDark,
                                 fontSize = 12.sp,
                                 modifier = Modifier.clickable { viewModel.clearMessages() }
                             )
@@ -232,8 +229,8 @@ fun ProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x22EF4444))
-                            .border(1.dp, Color(0xFFEF4444), RoundedCornerShape(10.dp))
+                            .background(Color(0xFFFEF2F2))
+                            .border(1.dp, Color(0xFFFCA5A5), RoundedCornerShape(10.dp))
                             .padding(12.dp)
                     ) {
                         Row(
@@ -246,14 +243,14 @@ fun ProfileScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = uiState.errorMessage!!,
-                                    color = Color(0xFFFF8B8B),
+                                    color = Color(0xFFDC2626),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
                             Text(
                                 text = "✕",
-                                color = Color(0xFFFF8B8B),
+                                color = Color(0xFFDC2626),
                                 fontSize = 12.sp,
                                 modifier = Modifier.clickable { viewModel.clearMessages() }
                             )
@@ -266,8 +263,8 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(18.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(18.dp))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(18.dp))
                         .padding(16.dp)
                 ) {
                     Row(
@@ -283,8 +280,8 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .size(74.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF112017))
-                                    .border(2.dp, Color(0xFFC6FF00), CircleShape),
+                                    .background(PastelCardBlue)
+                                    .border(2.dp, SkyBluePrimary, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (!uiState.profileImageUrl.isNullOrBlank()) {
@@ -300,7 +297,7 @@ fun ProfileScreen(
                                 } else {
                                     Text(
                                         text = uiState.initials,
-                                        color = Color(0xFFC6FF00),
+                                        color = SkyBluePrimary,
                                         fontSize = 24.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -315,7 +312,7 @@ fun ProfileScreen(
                                     ) {
                                         CircularProgressIndicator(
                                             modifier = Modifier.size(24.dp),
-                                            color = Color(0xFFC6FF00),
+                                            color = SurfaceWhite,
                                             strokeWidth = 2.dp
                                         )
                                     }
@@ -327,8 +324,8 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .size(26.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFC6FF00))
-                                    .border(2.dp, Color(0xFF070B14), CircleShape)
+                                    .background(SkyBluePrimary)
+                                    .border(2.dp, SurfaceWhite, CircleShape)
                                     .clickable {
                                         imagePickerLauncher.launch("image/*")
                                     },
@@ -343,7 +340,7 @@ fun ProfileScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                             Text(
                                 text = uiState.fullName,
-                                color = Color.White,
+                                color = TextNavyDark,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -351,7 +348,7 @@ fun ProfileScreen(
                                 Text(text = "✉️ ", fontSize = 11.sp)
                                 Text(
                                     text = uiState.email,
-                                    color = Color(0xFF8A99AD),
+                                    color = TextNavyBody,
                                     fontSize = 12.sp
                                 )
                             }
@@ -359,14 +356,14 @@ fun ProfileScreen(
                                 Text(text = "📞 ", fontSize = 11.sp)
                                 Text(
                                     text = if (uiState.phone.isNotBlank()) uiState.phone else "No phone set",
-                                    color = if (uiState.phone.isNotBlank()) Color(0xFFC6FF00) else Color(0xFF64748B),
+                                    color = if (uiState.phone.isNotBlank()) TealDark else TextMuted,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
                             Text(
                                 text = uiState.userMeta,
-                                color = Color(0xFF64748B),
+                                color = TextMuted,
                                 fontSize = 10.sp
                             )
                         }
@@ -378,8 +375,8 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(16.dp))
                         .padding(16.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -390,7 +387,7 @@ fun ProfileScreen(
                         ) {
                             Text(
                                 text = if (uiState.isEditMode) "✏️ EDIT PERSONAL DETAILS" else "PERSONAL DETAILS",
-                                color = Color(0xFF8A99AD),
+                                color = SkyBluePrimary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
@@ -398,7 +395,7 @@ fun ProfileScreen(
                             if (!uiState.isEditMode) {
                                 Text(
                                     text = "Edit ✎",
-                                    color = Color(0xFFC6FF00),
+                                    color = SkyBluePrimary,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.clickable { viewModel.enterEditMode() }
@@ -409,7 +406,7 @@ fun ProfileScreen(
                         if (!uiState.isEditMode) {
                             // View Mode: Clean informative layout
                             DetailRow(icon = "👤", label = "Full name", value = uiState.fullName)
-                            HorizontalDivider(color = Color(0xFF1E293B), thickness = 0.8.dp)
+                            HorizontalDivider(color = BorderLight, thickness = 0.8.dp)
 
                             DetailRow(
                                 icon = "✉️",
@@ -417,28 +414,28 @@ fun ProfileScreen(
                                 value = uiState.email,
                                 badge = "Verified"
                             )
-                            HorizontalDivider(color = Color(0xFF1E293B), thickness = 0.8.dp)
+                            HorizontalDivider(color = BorderLight, thickness = 0.8.dp)
 
                             DetailRow(
                                 icon = "📞",
                                 label = "Phone number",
                                 value = if (uiState.phone.isNotBlank()) uiState.phone else "Not provided"
                             )
-                            HorizontalDivider(color = Color(0xFF1E293B), thickness = 0.8.dp)
+                            HorizontalDivider(color = BorderLight, thickness = 0.8.dp)
 
                             DetailRow(
                                 icon = "📍",
                                 label = "Home city / Address",
-                                value = if (uiState.address.isNotBlank()) uiState.address else "Not specified"
+                                value = if (uiState.address.isNotBlank()) uiState.address else "Chennai, Tamil Nadu"
                             )
-                            HorizontalDivider(color = Color(0xFF1E293B), thickness = 0.8.dp)
+                            HorizontalDivider(color = BorderLight, thickness = 0.8.dp)
 
                             DetailRow(
                                 icon = "📝",
                                 label = "Bio / Note",
-                                value = if (uiState.bio.isNotBlank()) uiState.bio else "Smart transit traveler"
+                                value = if (uiState.bio.isNotBlank()) uiState.bio else "Tamil Nadu Explorer"
                             )
-                            HorizontalDivider(color = Color(0xFF1E293B), thickness = 0.8.dp)
+                            HorizontalDivider(color = BorderLight, thickness = 0.8.dp)
 
                             DetailRow(
                                 icon = "⚧️",
@@ -460,7 +457,7 @@ fun ProfileScreen(
                                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Text(
                                         text = "Email Address (Account ID)",
-                                        color = Color(0xFF8A99AD),
+                                        color = TextMuted,
                                         fontSize = 11.sp
                                     )
                                     Row(
@@ -468,8 +465,8 @@ fun ProfileScreen(
                                             .fillMaxWidth()
                                             .height(46.dp)
                                             .clip(RoundedCornerShape(10.dp))
-                                            .background(Color(0xFF070B14))
-                                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp))
+                                            .background(BackgroundSoftCream)
+                                            .border(1.dp, BorderLight, RoundedCornerShape(10.dp))
                                             .padding(horizontal = 12.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -477,7 +474,7 @@ fun ProfileScreen(
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
                                             text = uiState.email,
-                                            color = Color(0xFF64748B),
+                                            color = TextMuted,
                                             fontSize = 13.sp
                                         )
                                     }
@@ -486,7 +483,7 @@ fun ProfileScreen(
                                 ProfileInputField(
                                     label = "Phone Number",
                                     value = uiState.editPhone,
-                                    placeholder = "+1 555-019-2834",
+                                    placeholder = "+91 98765 43210",
                                     icon = "📞",
                                     keyboardType = KeyboardType.Phone,
                                     onValueChange = { viewModel.onEditPhoneChange(it) }
@@ -495,15 +492,15 @@ fun ProfileScreen(
                                 ProfileInputField(
                                     label = "Home City / Address",
                                     value = uiState.editAddress,
-                                    placeholder = "San Francisco, CA",
+                                    placeholder = "Chennai, Tamil Nadu",
                                     icon = "📍",
                                     onValueChange = { viewModel.onEditAddressChange(it) }
                                 )
 
                                 ProfileInputField(
-                                    label = "Bio / Commute Preference",
+                                    label = "Bio / Travel Preference",
                                     value = uiState.editBio,
-                                    placeholder = "Eco-conscious commuter",
+                                    placeholder = "Tamil Nadu Heritage & Temple Explorer",
                                     icon = "📝",
                                     onValueChange = { viewModel.onEditBioChange(it) }
                                 )
@@ -511,7 +508,7 @@ fun ProfileScreen(
                                 ProfileInputField(
                                     label = "Gender",
                                     value = uiState.editGender,
-                                    placeholder = "e.g. Female, Male, Non-binary",
+                                    placeholder = "Female, Male, or Prefer not to say",
                                     icon = "⚧️",
                                     onValueChange = { viewModel.onEditGenderChange(it) }
                                 )
@@ -529,11 +526,9 @@ fun ProfileScreen(
                                             .weight(1f)
                                             .height(46.dp),
                                         shape = RoundedCornerShape(23.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(0xFF1E293B)
-                                        )
+                                        colors = ButtonDefaults.buttonColors(containerColor = PastelCardBlue)
                                     ) {
-                                        Text(text = "Cancel", color = Color.White, fontSize = 13.sp)
+                                        Text(text = "Cancel", color = SkyBlueDark, fontSize = 13.sp)
                                     }
 
                                     Button(
@@ -543,24 +538,29 @@ fun ProfileScreen(
                                             .weight(1.4f)
                                             .height(46.dp),
                                         shape = RoundedCornerShape(23.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(0xFFC6FF00),
-                                            disabledContainerColor = Color(0x66C6FF00)
-                                        )
+                                        colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                                        contentPadding = PaddingValues(0.dp)
                                     ) {
-                                        if (uiState.isSaving) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(18.dp),
-                                                color = Color(0xFF070B14),
-                                                strokeWidth = 2.dp
-                                            )
-                                        } else {
-                                            Text(
-                                                text = "Save Changes ✓",
-                                                color = Color(0xFF070B14),
-                                                fontSize = 13.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(PrimaryGradient),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (uiState.isSaving) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(18.dp),
+                                                    color = SurfaceWhite,
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "Save Changes ✓",
+                                                    color = SurfaceWhite,
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -574,14 +574,14 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF0F172A))
-                        .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight, RoundedCornerShape(16.dp))
                         .padding(16.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
                             text = "SECURITY & CREDENTIALS",
-                            color = Color(0xFF8A99AD),
+                            color = SkyBluePrimary,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
@@ -591,8 +591,8 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF070B14))
-                                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                                .background(PastelCardBlue)
+                                .border(1.dp, SkyBlueSoft, RoundedCornerShape(12.dp))
                                 .clickable { viewModel.openChangePasswordDialog() }
                                 .padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -604,20 +604,20 @@ fun ProfileScreen(
                                 Column {
                                     Text(
                                         text = "Change Password",
-                                        color = Color.White,
+                                        color = TextNavyDark,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = "Update your login security credentials",
-                                        color = Color(0xFF8A99AD),
+                                        text = "Update your login security password",
+                                        color = TextNavyBody,
                                         fontSize = 10.sp
                                     )
                                 }
                             }
                             Text(
                                 text = "Update ›",
-                                color = Color(0xFFC6FF00),
+                                color = SkyBluePrimary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -625,41 +625,12 @@ fun ProfileScreen(
                     }
                 }
 
-                // Impact Card
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF112017))
-                        .border(1.5.dp, Color(0xFF1E4D2B), RoundedCornerShape(14.dp))
-                        .padding(14.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "🌿", fontSize = 20.sp)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text(
-                                text = uiState.co2Impact,
-                                color = Color(0xFFC6FF00),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = uiState.co2Subtitle,
-                                color = Color(0xFF8A99AD),
-                                fontSize = 10.sp
-                            )
-                        }
-                    }
-                }
-
-                // Account Preferences Shortcuts
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                // Account Preferences Shortcuts (No Payment Methods, No CO2 Impact)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     val settingsItems = listOf(
                         Triple("Travel preferences", uiState.travelPreferences, "⚙️"),
                         Triple("Notifications", uiState.notifications, "🔔"),
-                        Triple("Saved places", uiState.savedPlacesCount, "📍"),
-                        Triple("Payment methods", uiState.paymentMethod, "💳")
+                        Triple("Saved places", uiState.savedPlacesCount, "📍")
                     )
 
                     settingsItems.forEach { (title, subtitle, icon) ->
@@ -667,14 +638,13 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF0F172A))
-                                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                                 .clickable {
                                     when (title) {
                                         "Travel preferences" -> onOpenTravelPreferences()
                                         "Notifications" -> viewModel.openNotificationDialog()
                                         "Saved places" -> onOpenSavedPlaces()
-                                        "Payment methods" -> onOpenPaymentMethods()
                                     }
                                 }
                                 .padding(12.dp),
@@ -682,14 +652,14 @@ fun ProfileScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = icon, fontSize = 14.sp)
+                                Text(text = icon, fontSize = 15.sp)
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
-                                    Text(text = title, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                    Text(text = subtitle, color = Color(0xFF8A99AD), fontSize = 10.sp)
+                                    Text(text = title, color = TextNavyDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    Text(text = subtitle, color = TextNavyBody, fontSize = 10.sp)
                                 }
                             }
-                            Text(text = "›", color = Color(0xFF8A99AD), fontSize = 14.sp)
+                            Text(text = "›", color = SkyBluePrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -699,8 +669,8 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF1F1215))
-                        .border(1.dp, Color(0xFF4A1F25), RoundedCornerShape(14.dp))
+                        .background(Color(0xFFFEF2F2))
+                        .border(1.dp, Color(0xFFFCA5A5), RoundedCornerShape(14.dp))
                         .clickable { viewModel.promptLogout() }
                         .padding(14.dp)
                 ) {
@@ -715,20 +685,20 @@ fun ProfileScreen(
                             Column {
                                 Text(
                                     text = "Log Out",
-                                    color = Color(0xFFFF6B6B),
+                                    color = Color(0xFFDC2626),
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = "Sign out of your MoveSmart account",
-                                    color = Color(0xFF8A99AD),
+                                    color = TextMuted,
                                     fontSize = 10.sp
                                 )
                             }
                         }
                         Text(
                             text = "Exit ›",
-                            color = Color(0xFFFF6B6B),
+                            color = Color(0xFFDC2626),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -743,8 +713,8 @@ fun ProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "${uiState.versionText} · Connected to MoveSmart AI Backend",
-                        color = Color(0xFF475569),
+                        text = "MoveSmart AI 2.0 · Tamil Nadu Smart Tourism & Mobility",
+                        color = TextMuted,
                         fontSize = 10.sp
                     )
                 }
@@ -756,8 +726,9 @@ fun ProfileScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF0B111E))
-                    .padding(vertical = 8.dp),
+                    .background(SurfaceWhite)
+                    .border(1.dp, BorderLight)
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -778,7 +749,7 @@ fun ProfileScreen(
                         Text(text = lines[0], fontSize = 16.sp)
                         Text(
                             text = lines[1],
-                            color = if (isActive) Color(0xFFC6FF00) else Color(0xFF64748B),
+                            color = if (isActive) SkyBluePrimary else TextMuted,
                             fontSize = 10.sp,
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
                         )
@@ -792,7 +763,7 @@ fun ProfileScreen(
     if (uiState.showNotificationDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.closeNotificationDialog() },
-            containerColor = Color(0xFF0F172A),
+            containerColor = SurfaceWhite,
             shape = RoundedCornerShape(18.dp),
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -800,7 +771,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Notification Settings",
-                        color = Color.White,
+                        color = TextNavyDark,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -816,35 +787,34 @@ fun ProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0xFF142018))
-                            .border(1.dp, Color(0xFF1E4028), RoundedCornerShape(10.dp))
+                            .background(PastelCardTeal)
+                            .border(1.dp, TealLight, RoundedCornerShape(10.dp))
                             .padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = "Allow Notifications", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                            Text(text = "Enable all notifications from MoveSmart", color = Color(0xFF8A99AD), fontSize = 10.sp)
+                            Text(text = "Allow Notifications", color = TextNavyDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "Enable all notifications from MoveSmart", color = TextNavyBody, fontSize = 10.sp)
                         }
                         Switch(
                             checked = uiState.notificationsEnabled,
                             onCheckedChange = { viewModel.toggleMasterNotification(it) },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color(0xFF070B14),
-                                checkedTrackColor = Color(0xFFC6FF00),
-                                uncheckedThumbColor = Color(0xFF8A99AD),
-                                uncheckedTrackColor = Color(0xFF1E293B)
+                                checkedThumbColor = SurfaceWhite,
+                                checkedTrackColor = TealSecondary,
+                                uncheckedThumbColor = TextMuted,
+                                uncheckedTrackColor = BorderLight
                             )
                         )
                     }
 
                     if (uiState.notificationsEnabled) {
-                        // Sub items
                         val toggles = listOf(
                             Triple("Journey Reminders", "Alerts before scheduled trips", uiState.journeyReminders) to { v: Boolean -> viewModel.toggleJourneyReminders(v) },
-                            Triple("Booking Updates", "Ticket and fare confirmations", uiState.bookingUpdates) to { v: Boolean -> viewModel.toggleBookingUpdates(v) },
-                            Triple("Tourist Recommendations", "Explore new places & attractions", uiState.touristRecommendations) to { v: Boolean -> viewModel.toggleTouristRecommendations(v) },
-                            Triple("Travel Alerts", "Transit delays and green rerouting", uiState.travelAlerts) to { v: Boolean -> viewModel.toggleTravelAlerts(v) }
+                            Triple("Booking Updates", "Ticket and transit confirmations", uiState.bookingUpdates) to { v: Boolean -> viewModel.toggleBookingUpdates(v) },
+                            Triple("Tourist Recommendations", "Explore new Tamil Nadu places", uiState.touristRecommendations) to { v: Boolean -> viewModel.toggleTouristRecommendations(v) },
+                            Triple("Travel Alerts", "Transit delays and smart rerouting", uiState.travelAlerts) to { v: Boolean -> viewModel.toggleTravelAlerts(v) }
                         )
 
                         toggles.forEach { (item, onToggle) ->
@@ -857,17 +827,17 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = title, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                    Text(text = sub, color = Color(0xFF8A99AD), fontSize = 10.sp)
+                                    Text(text = title, color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                    Text(text = sub, color = TextNavyBody, fontSize = 10.sp)
                                 }
                                 Switch(
                                     checked = isChecked,
                                     onCheckedChange = onToggle,
                                     colors = SwitchDefaults.colors(
-                                        checkedThumbColor = Color(0xFF070B14),
-                                        checkedTrackColor = Color(0xFFC6FF00),
-                                        uncheckedThumbColor = Color(0xFF8A99AD),
-                                        uncheckedTrackColor = Color(0xFF1E293B)
+                                        checkedThumbColor = SurfaceWhite,
+                                        checkedTrackColor = SkyBluePrimary,
+                                        uncheckedThumbColor = TextMuted,
+                                        uncheckedTrackColor = BorderLight
                                     )
                                 )
                             }
@@ -880,21 +850,18 @@ fun ProfileScreen(
                     onClick = { viewModel.saveNotificationSettings(context) },
                     enabled = !uiState.isSavingNotifications,
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFC6FF00),
-                        disabledContainerColor = Color(0x66C6FF00)
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
                 ) {
                     if (uiState.isSavingNotifications) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
-                            color = Color(0xFF070B14),
+                            color = SurfaceWhite,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Text(
                             text = "Save Settings",
-                            color = Color(0xFF070B14),
+                            color = SurfaceWhite,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -905,9 +872,9 @@ fun ProfileScreen(
                 Button(
                     onClick = { viewModel.closeNotificationDialog() },
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B))
+                    colors = ButtonDefaults.buttonColors(containerColor = PastelCardBlue)
                 ) {
-                    Text(text = "Cancel", color = Color.White, fontSize = 12.sp)
+                    Text(text = "Cancel", color = SkyBlueDark, fontSize = 12.sp)
                 }
             }
         )
@@ -917,12 +884,12 @@ fun ProfileScreen(
     if (uiState.showChangePasswordDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.closeChangePasswordDialog() },
-            containerColor = Color(0xFF0F172A),
+            containerColor = SurfaceWhite,
             shape = RoundedCornerShape(18.dp),
             title = {
                 Text(
                     text = "Change Password",
-                    color = Color.White,
+                    color = TextNavyDark,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -937,13 +904,13 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0x22EF4444))
-                                .border(1.dp, Color(0xFFEF4444), RoundedCornerShape(8.dp))
+                                .background(Color(0xFFFEF2F2))
+                                .border(1.dp, Color(0xFFFCA5A5), RoundedCornerShape(8.dp))
                                 .padding(8.dp)
                         ) {
                             Text(
                                 text = "⚠️ ${uiState.passwordErrorMessage}",
-                                color = Color(0xFFFF8B8B),
+                                color = Color(0xFFDC2626),
                                 fontSize = 11.sp
                             )
                         }
@@ -982,21 +949,18 @@ fun ProfileScreen(
                     onClick = { viewModel.submitChangePassword() },
                     enabled = !uiState.isChangingPassword,
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFC6FF00),
-                        disabledContainerColor = Color(0x66C6FF00)
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
                 ) {
                     if (uiState.isChangingPassword) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
-                            color = Color(0xFF070B14),
+                            color = SurfaceWhite,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Text(
                             text = "Update Password",
-                            color = Color(0xFF070B14),
+                            color = SurfaceWhite,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -1007,9 +971,9 @@ fun ProfileScreen(
                 Button(
                     onClick = { viewModel.closeChangePasswordDialog() },
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B))
+                    colors = ButtonDefaults.buttonColors(containerColor = PastelCardBlue)
                 ) {
-                    Text(text = "Cancel", color = Color.White, fontSize = 12.sp)
+                    Text(text = "Cancel", color = SkyBlueDark, fontSize = 12.sp)
                 }
             }
         )
@@ -1019,20 +983,20 @@ fun ProfileScreen(
     if (uiState.showLogoutConfirmDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissLogoutPrompt() },
-            containerColor = Color(0xFF0F172A),
+            containerColor = SurfaceWhite,
             shape = RoundedCornerShape(18.dp),
             title = {
                 Text(
                     text = "Sign out of MoveSmart?",
-                    color = Color.White,
+                    color = TextNavyDark,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = "Your current session will be cleared on this device. You will need to sign in again to access personalized routes and profiles.",
-                    color = Color(0xFF8A99AD),
+                    text = "Your current session will be cleared on this device. You will need to sign in again to access personalized Tamil Nadu routes and preferences.",
+                    color = TextNavyBody,
                     fontSize = 13.sp
                 )
             },
@@ -1040,18 +1004,18 @@ fun ProfileScreen(
                 Button(
                     onClick = { viewModel.logout(context, onSignOut) },
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626))
                 ) {
-                    Text(text = "Log Out", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Log Out", color = SurfaceWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 Button(
                     onClick = { viewModel.dismissLogoutPrompt() },
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B))
+                    colors = ButtonDefaults.buttonColors(containerColor = PastelCardBlue)
                 ) {
-                    Text(text = "Stay Signed In", color = Color.White, fontSize = 12.sp)
+                    Text(text = "Stay Signed In", color = SkyBlueDark, fontSize = 12.sp)
                 }
             }
         )
@@ -1073,17 +1037,17 @@ private fun DetailRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = icon, fontSize = 13.sp)
+            Text(text = icon, fontSize = 14.sp)
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
                     text = label,
-                    color = Color(0xFF8A99AD),
+                    color = TextMuted,
                     fontSize = 10.sp
                 )
                 Text(
                     text = value,
-                    color = Color.White,
+                    color = TextNavyDark,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -1093,13 +1057,13 @@ private fun DetailRow(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFF112017))
-                    .border(1.dp, Color(0xFF1E4D2B), RoundedCornerShape(8.dp))
+                    .background(PastelCardTeal)
+                    .border(1.dp, TealSoft, RoundedCornerShape(8.dp))
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
                 Text(
                     text = badge,
-                    color = Color(0xFFC6FF00),
+                    color = TealDark,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -1120,7 +1084,7 @@ private fun ProfileInputField(
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = label,
-            color = Color(0xFF8A99AD),
+            color = TextNavyBody,
             fontSize = 11.sp
         )
         Row(
@@ -1128,8 +1092,8 @@ private fun ProfileInputField(
                 .fillMaxWidth()
                 .height(46.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Color(0xFF070B14))
-                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp))
+                .background(SurfaceWhite)
+                .border(1.dp, BorderLight, RoundedCornerShape(10.dp))
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1140,10 +1104,10 @@ private fun ProfileInputField(
                 onValueChange = onValueChange,
                 singleLine = true,
                 textStyle = TextStyle(
-                    color = Color.White,
+                    color = TextNavyDark,
                     fontSize = 13.sp
                 ),
-                cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                cursorBrush = SolidColor(SkyBluePrimary),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = keyboardType,
                     imeAction = ImeAction.Next
@@ -1152,7 +1116,7 @@ private fun ProfileInputField(
                     if (value.isEmpty()) {
                         Text(
                             text = placeholder,
-                            color = Color(0xFF475569),
+                            color = TextLight,
                             fontSize = 13.sp
                         )
                     }
@@ -1173,14 +1137,14 @@ private fun PasswordField(
     onToggleVisibility: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(text = label, color = Color(0xFF8A99AD), fontSize = 11.sp)
+        Text(text = label, color = TextNavyBody, fontSize = 11.sp)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(44.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFF070B14))
-                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(8.dp))
+                .background(SurfaceWhite)
+                .border(1.dp, BorderLight, RoundedCornerShape(8.dp))
                 .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -1196,12 +1160,12 @@ private fun PasswordField(
                     onValueChange = onValueChange,
                     singleLine = true,
                     visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    textStyle = TextStyle(color = Color.White, fontSize = 13.sp),
-                    cursorBrush = SolidColor(Color(0xFFC6FF00)),
+                    textStyle = TextStyle(color = TextNavyDark, fontSize = 13.sp),
+                    cursorBrush = SolidColor(SkyBluePrimary),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     decorationBox = { inner ->
                         if (value.isEmpty()) {
-                            Text(text = "••••••••", color = Color(0xFF475569), fontSize = 12.sp)
+                            Text(text = "••••••••", color = TextLight, fontSize = 12.sp)
                         }
                         inner()
                     },
@@ -1215,10 +1179,4 @@ private fun PasswordField(
             )
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun ProfileScreenPreview() {
-    ProfileScreen()
 }
