@@ -51,7 +51,6 @@ fun ProfileScreen(
     onSignOut: () -> Unit = {},
     onOpenTravelPreferences: () -> Unit = {},
     onOpenSavedPlaces: () -> Unit = {},
-    onOpenPaymentMethods: () -> Unit = {},
     onNavigateTab: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()

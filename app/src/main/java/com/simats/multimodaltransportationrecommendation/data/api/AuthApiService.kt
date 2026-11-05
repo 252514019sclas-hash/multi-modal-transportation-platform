@@ -5,9 +5,6 @@ import com.simats.multimodaltransportationrecommendation.data.model.auth.LoginRe
 import com.simats.multimodaltransportationrecommendation.data.model.auth.LoginResponse
 import com.simats.multimodaltransportationrecommendation.data.model.auth.SignUpRequest
 import com.simats.multimodaltransportationrecommendation.data.model.auth.SignUpResponse
-import com.simats.multimodaltransportationrecommendation.data.model.payment.AddPaymentMethodRequest
-import com.simats.multimodaltransportationrecommendation.data.model.payment.DeletePaymentMethodRequest
-import com.simats.multimodaltransportationrecommendation.data.model.payment.PaymentMethodsResponse
 import com.simats.multimodaltransportationrecommendation.data.model.places.PlaceDetailsResponse
 import com.simats.multimodaltransportationrecommendation.data.model.places.PlacesResponse
 import com.simats.multimodaltransportationrecommendation.data.model.places.SavePlaceRequest
@@ -118,20 +115,29 @@ interface AuthApiService {
     @POST("trips/update_status.php")
     suspend fun updateTripStatus(@Body request: UpdateTripStatusRequest): Response<BaseResponse>
 
-    // Payment Methods
-    @GET("payment/methods_fetch.php")
-    suspend fun fetchPaymentMethods(@Query("user_id") userId: Int): Response<PaymentMethodsResponse>
-
-    @POST("payment/add_method.php")
-    suspend fun addPaymentMethod(@Body request: AddPaymentMethodRequest): Response<BaseResponse>
-
-    @POST("payment/delete_method.php")
-    suspend fun deletePaymentMethod(@Body request: DeletePaymentMethodRequest): Response<BaseResponse>
-
     // Notifications
     @GET("notifications/notifications_fetch.php")
     suspend fun fetchNotifications(@Query("user_id") userId: Int): Response<com.simats.multimodaltransportationrecommendation.data.model.notifications.NotificationsResponse>
 
     @POST("notifications/mark_read.php")
     suspend fun markNotificationRead(@Body request: com.simats.multimodaltransportationrecommendation.data.model.notifications.MarkReadRequest): Response<BaseResponse>
+
+    // Smart Travel Tickets & QR Scanner
+    @GET("tickets/tickets_fetch.php")
+    suspend fun fetchTickets(
+        @Query("user_id") userId: Int,
+        @Query("status") status: String = "all"
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.tickets.TicketsResponse>
+
+    @POST("tickets/ticket_verify.php")
+    suspend fun verifyTicket(
+        @Body request: com.simats.multimodaltransportationrecommendation.data.model.tickets.VerifyTicketRequest
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.tickets.VerifyTicketResponse>
+
+    @GET("payment/payment_status.php")
+    suspend fun getPaymentStatus(
+        @Query("booking_reference") bookingReference: String? = null,
+        @Query("journey_id") journeyId: Int? = null,
+        @Query("transaction_id") transactionId: String? = null
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.tickets.PaymentStatusResponse>
 }

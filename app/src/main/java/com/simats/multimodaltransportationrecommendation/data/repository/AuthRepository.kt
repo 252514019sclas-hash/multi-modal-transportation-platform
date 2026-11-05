@@ -8,9 +8,6 @@ import com.simats.multimodaltransportationrecommendation.data.model.auth.LoginRe
 import com.simats.multimodaltransportationrecommendation.data.model.auth.LoginResponse
 import com.simats.multimodaltransportationrecommendation.data.model.auth.SignUpRequest
 import com.simats.multimodaltransportationrecommendation.data.model.auth.SignUpResponse
-import com.simats.multimodaltransportationrecommendation.data.model.payment.AddPaymentMethodRequest
-import com.simats.multimodaltransportationrecommendation.data.model.payment.DeletePaymentMethodRequest
-import com.simats.multimodaltransportationrecommendation.data.model.payment.PaymentMethodItem
 import com.simats.multimodaltransportationrecommendation.data.model.places.SavePlaceRequest
 import com.simats.multimodaltransportationrecommendation.data.model.places.TouristPlace
 import com.simats.multimodaltransportationrecommendation.data.model.preferences.PreferencesData
@@ -452,61 +449,6 @@ class AuthRepository(
         }
     }
 
-    // Payment Methods
-    suspend fun fetchPaymentMethods(userId: Int): NetworkResult<List<PaymentMethodItem>> = withContext(Dispatchers.IO) {
-        try {
-            val response = authService.fetchPaymentMethods(userId)
-            if (response.isSuccessful && response.body() != null) {
-                val body = response.body()!!
-                if (body.success && body.paymentMethods != null) {
-                    NetworkResult.Success(body.paymentMethods)
-                } else {
-                    NetworkResult.Error(body.message ?: "Failed to load payment methods")
-                }
-            } else {
-                NetworkResult.Error(parseErrorMessage(response))
-            }
-        } catch (e: Exception) {
-            NetworkResult.Error(e.localizedMessage ?: "Unable to fetch payment methods.")
-        }
-    }
-
-    suspend fun addPaymentMethod(userId: Int, methodType: String, title: String, subtitle: String?): NetworkResult<String> = withContext(Dispatchers.IO) {
-        try {
-            val response = authService.addPaymentMethod(AddPaymentMethodRequest(userId, methodType, title, subtitle))
-            if (response.isSuccessful && response.body() != null) {
-                val body = response.body()!!
-                if (body.success) {
-                    NetworkResult.Success(body.message)
-                } else {
-                    NetworkResult.Error(body.message)
-                }
-            } else {
-                NetworkResult.Error(parseErrorMessage(response))
-            }
-        } catch (e: Exception) {
-            NetworkResult.Error(e.localizedMessage ?: "Unable to add payment method.")
-        }
-    }
-
-    suspend fun deletePaymentMethod(paymentId: Int, userId: Int): NetworkResult<String> = withContext(Dispatchers.IO) {
-        try {
-            val response = authService.deletePaymentMethod(DeletePaymentMethodRequest(paymentId, userId))
-            if (response.isSuccessful && response.body() != null) {
-                val body = response.body()!!
-                if (body.success) {
-                    NetworkResult.Success(body.message)
-                } else {
-                    NetworkResult.Error(body.message)
-                }
-            } else {
-                NetworkResult.Error(parseErrorMessage(response))
-            }
-        } catch (e: Exception) {
-            NetworkResult.Error(e.localizedMessage ?: "Unable to remove payment method.")
-        }
-    }
-
     // Notifications
     suspend fun fetchNotifications(userId: Int): NetworkResult<Pair<Int, List<com.simats.multimodaltransportationrecommendation.data.model.notifications.NotificationItem>>> = withContext(Dispatchers.IO) {
         try {
@@ -556,6 +498,52 @@ class AuthRepository(
             }
         } catch (_: Exception) {
             "Request failed with code ${response.code()}"
+        }
+    }
+
+    // Smart Travel Tickets & QR Verification
+    suspend fun fetchTickets(userId: Int, status: String = "all"): NetworkResult<List<com.simats.multimodaltransportationrecommendation.data.model.tickets.TicketItem>> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchTickets(userId, status)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) {
+                    NetworkResult.Success(body.tickets ?: emptyList())
+                } else {
+                    NetworkResult.Error(body.message ?: "Failed to fetch tickets")
+                }
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load travel tickets.")
+        }
+    }
+
+    suspend fun verifyTicket(qrData: String, markUsed: Boolean = false): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.tickets.VerifyTicketResponse> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.tickets.VerifyTicketRequest(qrData, markUsed)
+            val response = authService.verifyTicket(req)
+            if (response.isSuccessful && response.body() != null) {
+                NetworkResult.Success(response.body()!!)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to verify ticket.")
+        }
+    }
+
+    suspend fun getPaymentStatus(bookingReference: String? = null, journeyId: Int? = null, transactionId: String? = null): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.tickets.PaymentStatusResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.getPaymentStatus(bookingReference, journeyId, transactionId)
+            if (response.isSuccessful && response.body() != null) {
+                NetworkResult.Success(response.body()!!)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to fetch payment status.")
         }
     }
 }

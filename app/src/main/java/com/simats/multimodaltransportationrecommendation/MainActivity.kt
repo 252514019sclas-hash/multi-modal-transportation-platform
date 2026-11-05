@@ -24,7 +24,6 @@ import com.simats.multimodaltransportationrecommendation.ui.home.HomeScreen
 import com.simats.multimodaltransportationrecommendation.ui.journey.OnYourWayScreen
 import com.simats.multimodaltransportationrecommendation.ui.onboarding.OnboardingScreen
 import com.simats.multimodaltransportationrecommendation.ui.options.TripOptionsScreen
-import com.simats.multimodaltransportationrecommendation.ui.payment.PaymentMethodScreen
 import com.simats.multimodaltransportationrecommendation.ui.places.TouristPlaceDetailScreen
 import com.simats.multimodaltransportationrecommendation.ui.preferences.TravelPreferencesScreen
 import com.simats.multimodaltransportationrecommendation.ui.profile.ProfileScreen
@@ -214,26 +213,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-                    "paymentmethod" -> PaymentMethodScreen(
-                        route = selectedRouteOption,
-                        origin = searchOrigin,
-                        destination = searchDestination,
-                        isManagementOnly = false,
-                        onBack = {
-                            currentScreen = "reviewbooking"
-                        },
-                        onPaySuccess = { booked ->
-                            activeTicketBooking = booked
-                            activeTicketTrip = null
-                            currentScreen = "yourticket"
-                        }
-                    )
-                    "paymentmanagement" -> PaymentMethodScreen(
-                        isManagementOnly = true,
-                        onBack = {
-                            currentScreen = "profile"
-                        }
-                    )
+
                     "yourticket" -> YourTicketScreen(
                         bookedJourney = activeTicketBooking,
                         trip = activeTicketTrip,
@@ -325,9 +305,7 @@ class MainActivity : ComponentActivity() {
                         onOpenSavedPlaces = {
                             currentScreen = "saved"
                         },
-                        onOpenPaymentMethods = {
-                            currentScreen = "paymentmanagement"
-                        },
+
                         onNavigateTab = { tab ->
                             when (tab) {
                                 "Explore" -> currentScreen = "home"
