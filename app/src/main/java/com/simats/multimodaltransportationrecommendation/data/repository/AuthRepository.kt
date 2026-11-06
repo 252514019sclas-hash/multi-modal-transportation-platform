@@ -587,4 +587,358 @@ class AuthRepository(
             NetworkResult.Error(e.localizedMessage ?: "Unable to fetch payment status.")
         }
     }
+
+    // ==========================================
+    // GROUP TRAVEL & LIVE LOCATION SHARING
+    // ==========================================
+
+    suspend fun createGroup(
+        userId: Int,
+        groupName: String,
+        destination: String,
+        startingLocation: String,
+        travelDate: String,
+        travelTime: String,
+        description: String? = null,
+        privacy: String = "invite_only"
+    ): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.group.GroupActionResponse> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.CreateGroupRequest(
+                userId = userId,
+                groupName = groupName,
+                destination = destination,
+                startingLocation = startingLocation,
+                travelDate = travelDate,
+                travelTime = travelTime,
+                description = description,
+                privacy = privacy
+            )
+            val response = authService.createGroup(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to create travel group.")
+        }
+    }
+
+    suspend fun joinGroup(
+        userId: Int,
+        invitationCode: String,
+        startingLocation: String
+    ): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.group.GroupActionResponse> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.JoinGroupRequest(
+                userId = userId,
+                invitationCode = invitationCode,
+                startingLocation = startingLocation
+            )
+            val response = authService.joinGroup(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to join group.")
+        }
+    }
+
+    suspend fun fetchGroups(userId: Int): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.group.GroupFetchResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchGroups(userId)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body) else NetworkResult.Error("Failed to fetch groups")
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load travel groups.")
+        }
+    }
+
+    suspend fun fetchGroupDetails(userId: Int, groupId: Int): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.group.GroupDetailsData> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchGroupDetails(userId, groupId)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success && body.group != null) {
+                    NetworkResult.Success(body.group)
+                } else {
+                    NetworkResult.Error(body.message ?: "Failed to load group details")
+                }
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load group details.")
+        }
+    }
+
+    suspend fun fetchGroupMembers(userId: Int, groupId: Int): NetworkResult<List<com.simats.multimodaltransportationrecommendation.data.model.group.GroupMember>> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchGroupMembers(userId, groupId)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.members) else NetworkResult.Error("Failed to fetch members")
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load group members.")
+        }
+    }
+
+    suspend fun manageGroupMember(
+        userId: Int,
+        groupId: Int,
+        action: String,
+        targetUserId: Int? = null,
+        startingLocation: String? = null
+    ): NetworkResult<String> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.ManageMemberRequest(
+                userId = userId,
+                groupId = groupId,
+                action = action,
+                targetUserId = targetUserId,
+                startingLocation = startingLocation
+            )
+            val response = authService.manageGroupMember(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.message) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Failed to update member.")
+        }
+    }
+
+    suspend fun updateGroupLocation(
+        userId: Int,
+        groupId: Int,
+        latitude: Double,
+        longitude: Double,
+        accuracy: Float = 0f,
+        speed: Float = 0f,
+        batteryLevel: Int? = null,
+        locationName: String? = null
+    ): NetworkResult<String> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.UpdateGroupLocationRequest(
+                userId = userId,
+                groupId = groupId,
+                latitude = latitude,
+                longitude = longitude,
+                accuracy = accuracy,
+                speed = speed,
+                batteryLevel = batteryLevel,
+                locationName = locationName
+            )
+            val response = authService.updateGroupLocation(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.message) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Failed to update live location.")
+        }
+    }
+
+    suspend fun fetchGroupLocations(userId: Int, groupId: Int): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.group.GroupLocationFetchResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchGroupLocations(userId, groupId)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body) else NetworkResult.Error("Failed to fetch live locations")
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load live locations.")
+        }
+    }
+
+    suspend fun updateLocationSettings(userId: Int, groupId: Int, isSharing: Boolean): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.group.LocationSettingsResponse> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.LocationSettingsRequest(
+                userId = userId,
+                groupId = groupId,
+                isSharing = if (isSharing) 1 else 0
+            )
+            val response = authService.updateLocationSettings(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Failed to update location settings.")
+        }
+    }
+
+    suspend fun fetchGroupItinerary(userId: Int, groupId: Int): NetworkResult<List<com.simats.multimodaltransportationrecommendation.data.model.group.GroupItineraryItem>> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchGroupItinerary(userId, groupId)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.itinerary) else NetworkResult.Error("Failed to load itinerary")
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load itinerary.")
+        }
+    }
+
+    suspend fun addItineraryStop(
+        userId: Int,
+        groupId: Int,
+        placeId: Int? = null,
+        customPlaceName: String,
+        locationAddress: String? = null,
+        stopType: String = "attraction",
+        plannedTime: String = "10:00 AM",
+        notes: String? = null
+    ): NetworkResult<String> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.AddItineraryStopRequest(
+                userId = userId,
+                groupId = groupId,
+                placeId = placeId,
+                customPlaceName = customPlaceName,
+                locationAddress = locationAddress,
+                stopType = stopType,
+                plannedTime = plannedTime,
+                notes = notes
+            )
+            val response = authService.addItineraryStop(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.message) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Failed to add stop to itinerary.")
+        }
+    }
+
+    suspend fun removeItineraryStop(userId: Int, groupId: Int, itineraryId: Int): NetworkResult<String> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.RemoveItineraryStopRequest(
+                userId = userId,
+                groupId = groupId,
+                itineraryId = itineraryId
+            )
+            val response = authService.removeItineraryStop(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.message) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Failed to remove stop.")
+        }
+    }
+
+    suspend fun fetchGroupPlaces(userId: Int, groupId: Int, category: String? = null): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.group.GroupPlacesResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchGroupPlaces(userId, groupId, category)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body) else NetworkResult.Error("Failed to fetch places")
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load tourist places.")
+        }
+    }
+
+    suspend fun voteGroupPlace(userId: Int, groupId: Int, placeId: Int, vote: Int = 1): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.group.VoteActionResponse> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.PlaceVoteRequest(
+                userId = userId,
+                groupId = groupId,
+                placeId = placeId,
+                vote = vote
+            )
+            val response = authService.voteGroupPlace(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Failed to record vote.")
+        }
+    }
+
+    suspend fun fetchGroupChat(userId: Int, groupId: Int): NetworkResult<List<com.simats.multimodaltransportationrecommendation.data.model.group.GroupChatMessage>> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchGroupChat(userId, groupId)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.messages) else NetworkResult.Error("Failed to load chat")
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load group chat.")
+        }
+    }
+
+    suspend fun sendGroupMessage(
+        userId: Int,
+        groupId: Int,
+        messageContent: String,
+        messageType: String = "text",
+        attachedPlaceId: Int? = null
+    ): NetworkResult<String> = withContext(Dispatchers.IO) {
+        try {
+            val req = com.simats.multimodaltransportationrecommendation.data.model.group.SendGroupMessageRequest(
+                userId = userId,
+                groupId = groupId,
+                messageType = messageType,
+                messageContent = messageContent,
+                attachedPlaceId = attachedPlaceId
+            )
+            val response = authService.sendGroupMessage(req)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.message) else NetworkResult.Error(body.message)
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Failed to send message.")
+        }
+    }
+
+    suspend fun fetchGroupNotifications(userId: Int): NetworkResult<List<com.simats.multimodaltransportationrecommendation.data.model.group.GroupNotificationItem>> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchGroupNotifications(userId)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) NetworkResult.Success(body.notifications) else NetworkResult.Error("Failed to load notifications")
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load group alerts.")
+        }
+    }
 }

@@ -47,6 +47,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
     onPlanJourney: (String, String) -> Unit = { _, _ -> },
     onOpenPlaceDetail: (TouristPlace) -> Unit = {},
+    onOpenGroupTravel: () -> Unit = {},
     onNavigateTab: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -442,6 +443,75 @@ fun HomeScreen(
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
+                            }
+                        }
+                    }
+                }
+
+                // Group Travel Feature Card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(PastelCardTeal)
+                        .border(1.dp, TealLight, RoundedCornerShape(16.dp))
+                        .clickable { onOpenGroupTravel() }
+                        .padding(14.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(SurfaceWhite)
+                                    .border(1.dp, TealSoft, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "👨‍👩‍👧‍👦", fontSize = 20.sp)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "NEW",
+                                        color = WarmOrangeDark,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Group Travel & Live Map",
+                                        color = TextNavyDark,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Text(
+                                    text = "Coordinate family trips from different starting points",
+                                    color = TextNavyBody,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(TealSecondary)
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = "Open", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Text(text = "➔", color = Color.White, fontSize = 10.sp)
                             }
                         }
                     }

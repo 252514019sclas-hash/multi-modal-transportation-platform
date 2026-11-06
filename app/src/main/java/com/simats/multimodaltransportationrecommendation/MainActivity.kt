@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
                 var searchOrigin by rememberSaveable { mutableStateOf("Chennai Central") }
                 var searchDestination by rememberSaveable { mutableStateOf("Marina Beach & Promenade") }
                 var preferencesReturnScreen by rememberSaveable { mutableStateOf("home") }
+                var activeGroupId by rememberSaveable { mutableStateOf(1) }
 
                 var selectedTouristPlace by androidx.compose.runtime.remember { mutableStateOf<TouristPlace?>(null) }
                 var selectedRouteOption by androidx.compose.runtime.remember { mutableStateOf<RouteOption?>(null) }
@@ -110,6 +111,9 @@ class MainActivity : ComponentActivity() {
                             selectedTouristPlace = place
                             currentScreen = "placedetail"
                         },
+                        onOpenGroupTravel = {
+                            currentScreen = "grouptravel"
+                        },
                         onNavigateTab = { tab ->
                             when (tab) {
                                 "Explore" -> currentScreen = "home"
@@ -119,6 +123,69 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     )
+                    "grouptravel" -> {
+                        val groupVm: com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupTravelViewModel = viewModel()
+                        com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupTravelDashboardScreen(
+                            viewModel = groupVm,
+                            onBack = { currentScreen = "home" },
+                            onCreateGroup = { currentScreen = "creategroup" },
+                            onJoinGroup = { currentScreen = "joingroup" },
+                            onOpenGroupDetails = { gId ->
+                                activeGroupId = gId
+                                currentScreen = "groupdetails"
+                            }
+                        )
+                    }
+                    "creategroup" -> {
+                        val groupVm: com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupTravelViewModel = viewModel()
+                        com.simats.multimodaltransportationrecommendation.ui.grouptravel.CreateGroupScreen(
+                            viewModel = groupVm,
+                            onBack = { currentScreen = "grouptravel" },
+                            onGroupCreated = { group ->
+                                activeGroupId = group.groupId
+                                currentScreen = "groupdetails"
+                            }
+                        )
+                    }
+                    "joingroup" -> {
+                        val groupVm: com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupTravelViewModel = viewModel()
+                        com.simats.multimodaltransportationrecommendation.ui.grouptravel.JoinGroupScreen(
+                            viewModel = groupVm,
+                            onBack = { currentScreen = "grouptravel" },
+                            onJoinedSuccess = {
+                                currentScreen = "grouptravel"
+                            }
+                        )
+                    }
+                    "groupdetails" -> {
+                        val groupVm: com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupTravelViewModel = viewModel()
+                        com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupDetailsScreen(
+                            viewModel = groupVm,
+                            groupId = activeGroupId,
+                            onBack = { currentScreen = "grouptravel" },
+                            onViewTransitRoute = { origin, dest ->
+                                searchOrigin = origin
+                                searchDestination = dest
+                                currentScreen = "routeresults"
+                            }
+                        )
+                    }
+                    "groupmembers" -> {
+                        val groupVm: com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupTravelViewModel = viewModel()
+                        com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupMembersScreen(
+                            viewModel = groupVm,
+                            groupId = activeGroupId,
+                            onBack = { currentScreen = "groupdetails" }
+                        )
+                    }
+                    "grouplocationsettings" -> {
+                        val groupVm: com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupTravelViewModel = viewModel()
+                        com.simats.multimodaltransportationrecommendation.ui.grouptravel.GroupLocationSettingsScreen(
+                            viewModel = groupVm,
+                            groupId = activeGroupId,
+                            onBack = { currentScreen = "groupdetails" }
+                        )
+                    }
                     "placedetail" -> TouristPlaceDetailScreen(
                         initialPlace = selectedTouristPlace,
                         onBack = {

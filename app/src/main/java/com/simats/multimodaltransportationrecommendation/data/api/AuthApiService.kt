@@ -147,4 +147,75 @@ interface AuthApiService {
         @Query("journey_id") journeyId: Int? = null,
         @Query("transaction_id") transactionId: String? = null
     ): Response<com.simats.multimodaltransportationrecommendation.data.model.tickets.PaymentStatusResponse>
+
+    // Group Travel & Live Location Sharing
+    @POST("groups/group_create.php")
+    suspend fun createGroup(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.CreateGroupRequest): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupActionResponse>
+
+    @POST("groups/group_join.php")
+    suspend fun joinGroup(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.JoinGroupRequest): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupActionResponse>
+
+    @GET("groups/group_fetch.php")
+    suspend fun fetchGroups(@Query("user_id") userId: Int): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupFetchResponse>
+
+    @GET("groups/group_details.php")
+    suspend fun fetchGroupDetails(
+        @Query("user_id") userId: Int,
+        @Query("group_id") groupId: Int
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupDetailsResponse>
+
+    @GET("groups/group_members.php")
+    suspend fun fetchGroupMembers(
+        @Query("user_id") userId: Int,
+        @Query("group_id") groupId: Int
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupMembersResponse>
+
+    @POST("groups/group_members.php")
+    suspend fun manageGroupMember(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.ManageMemberRequest): Response<BaseResponse>
+
+    @POST("groups/group_location_update.php")
+    suspend fun updateGroupLocation(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.UpdateGroupLocationRequest): Response<BaseResponse>
+
+    @GET("groups/group_location_fetch.php")
+    suspend fun fetchGroupLocations(
+        @Query("user_id") userId: Int,
+        @Query("group_id") groupId: Int
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupLocationFetchResponse>
+
+    @POST("groups/group_location_settings.php")
+    suspend fun updateLocationSettings(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.LocationSettingsRequest): Response<com.simats.multimodaltransportationrecommendation.data.model.group.LocationSettingsResponse>
+
+    @GET("groups/group_itinerary.php")
+    suspend fun fetchGroupItinerary(
+        @Query("user_id") userId: Int,
+        @Query("group_id") groupId: Int
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupItineraryResponse>
+
+    @POST("groups/group_itinerary.php")
+    suspend fun addItineraryStop(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.AddItineraryStopRequest): Response<BaseResponse>
+
+    @POST("groups/group_itinerary.php")
+    suspend fun removeItineraryStop(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.RemoveItineraryStopRequest): Response<BaseResponse>
+
+    @GET("groups/group_places.php")
+    suspend fun fetchGroupPlaces(
+        @Query("user_id") userId: Int,
+        @Query("group_id") groupId: Int,
+        @Query("category") category: String? = null
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupPlacesResponse>
+
+    @POST("groups/group_places.php")
+    suspend fun voteGroupPlace(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.PlaceVoteRequest): Response<com.simats.multimodaltransportationrecommendation.data.model.group.VoteActionResponse>
+
+    @GET("groups/group_chat.php")
+    suspend fun fetchGroupChat(
+        @Query("user_id") userId: Int,
+        @Query("group_id") groupId: Int
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupChatResponse>
+
+    @POST("groups/group_chat.php")
+    suspend fun sendGroupMessage(@Body request: com.simats.multimodaltransportationrecommendation.data.model.group.SendGroupMessageRequest): Response<BaseResponse>
+
+    @GET("groups/group_notifications.php")
+    suspend fun fetchGroupNotifications(@Query("user_id") userId: Int): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupNotificationsResponse>
 }
