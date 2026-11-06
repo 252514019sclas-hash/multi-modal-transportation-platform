@@ -56,18 +56,18 @@ class CompareRoutesViewModel : ViewModel() {
 }
 
 data class CompareRoutesUiState(
-    val origin: String = "Ferry Building",
-    val destination: String = "California Academy of Sciences",
-    val selectedRouteTitle: String = "Walk + N Judah",
+    val origin: String = "Chennai Central",
+    val destination: String = "Mahabalipuram",
+    val selectedRouteTitle: String = "MTC Express Bus 588",
     val selectedRouteOption: RouteOption? = null,
     val routes: List<ComparisonRoute> = listOf(
-        ComparisonRoute("Walk + N Judah", "42 min", "$3.00", "14 min", "0.4 kg", "96%", true),
-        ComparisonRoute("Muni bus - 5 Fulton", "48 min", "$3.00", "12 min", "0.6 kg", "92%", false),
-        ComparisonRoute("Rideshare", "24 min", "$22.40", "2 min", "2.8 kg", "88%", false),
-        ComparisonRoute("Bay Wheels bicycle", "39 min", "$4.50", "4 min", "0 kg", "94%", false)
+        ComparisonRoute("MTC Express Bus 588", "1 hr 45 min", "₹45", "8 min", "1.1 kg", "92%", true),
+        ComparisonRoute("Suburban Rail + TNSTC Bus", "1 hr 35 min", "₹35", "12 min", "0.8 kg", "96%", false),
+        ComparisonRoute("Tourist Taxi / Cab", "1 hr 15 min", "₹1,250", "2 min", "6.2 kg", "88%", false),
+        ComparisonRoute("SETC AC Coach", "1 hr 30 min", "₹95", "10 min", "1.4 kg", "90%", false)
     ),
-    val aiInsight: String = "N Judah balances price and reliability with 86% less CO₂ than a rideshare.",
-    val note: String = "Estimated fares and emissions. Reliability is the share of recent trips arriving within 5 minutes of schedule."
+    val aiInsight: String = "MTC Express Bus 588 offers direct ECR connectivity with optimal balance of fare and travel comfort.",
+    val note: String = "Estimated fares and emissions. Reliability is based on recent Tamil Nadu transit fleet telemetry."
 )
 
 data class ComparisonRoute(

@@ -131,11 +131,15 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                     "destination" -> DestinationScreen(
+                        initialOrigin = searchOrigin,
+                        initialDestination = searchDestination,
                         onBack = {
                             currentScreen = "home"
                         },
-                        onUseDestination = {
-                            currentScreen = "tripoptions"
+                        onSearchRoutes = { origin, dest ->
+                            searchOrigin = origin
+                            searchDestination = dest
+                            currentScreen = "routeresults"
                         }
                     )
                     "tripoptions" -> TripOptionsScreen(
@@ -159,6 +163,10 @@ class MainActivity : ComponentActivity() {
                         onCompareRoutes = { route, _ ->
                             selectedRouteOption = route
                             currentScreen = "compareroutes"
+                        },
+                        onOpenPlaceDetail = { place ->
+                            selectedTouristPlace = place
+                            currentScreen = "placedetail"
                         }
                     )
                     "compareroutes" -> {

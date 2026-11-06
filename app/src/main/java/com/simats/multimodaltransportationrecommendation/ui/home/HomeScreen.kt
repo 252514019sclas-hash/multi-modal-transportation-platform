@@ -289,6 +289,29 @@ fun HomeScreen(
                             }
                         }
 
+                        // Swap Button Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(PastelCardBlue)
+                                    .border(1.dp, SkyBlueSoft, CircleShape)
+                                    .clickable { viewModel.swapLocations() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "⇅",
+                                    color = SkyBluePrimary,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
                         // Destination Input
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(text = "DESTINATION / TOURIST PLACE", color = TextNavyBody, fontSize = 10.sp, fontWeight = FontWeight.Bold)
@@ -354,7 +377,7 @@ fun HomeScreen(
 
                             Button(
                                 onClick = {
-                                    val dest = if (uiState.destination.isBlank()) "Marina Beach & Promenade" else uiState.destination
+                                    val dest = if (uiState.destination.isBlank()) "Mahabalipuram" else uiState.destination
                                     val start = if (uiState.origin.isBlank()) "Chennai Central" else uiState.origin
                                     onPlanJourney(start, dest)
                                 },
@@ -486,7 +509,7 @@ fun HomeScreen(
                     }
 
                     // Category Filter Pills
-                    val categories = listOf("All", "Temples", "Historical", "Beaches", "Nature")
+                    val categories = listOf("All", "Temples", "Beaches", "Historical Places", "Nature", "Museums")
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()

@@ -7,6 +7,7 @@ import com.simats.multimodaltransportationrecommendation.data.model.auth.SignUpR
 import com.simats.multimodaltransportationrecommendation.data.model.auth.SignUpResponse
 import com.simats.multimodaltransportationrecommendation.data.model.places.PlaceDetailsResponse
 import com.simats.multimodaltransportationrecommendation.data.model.places.PlacesResponse
+import com.simats.multimodaltransportationrecommendation.data.model.places.RouteRecommendationsResponse
 import com.simats.multimodaltransportationrecommendation.data.model.places.SavePlaceRequest
 import com.simats.multimodaltransportationrecommendation.data.model.places.SavePlaceResponse
 import com.simats.multimodaltransportationrecommendation.data.model.places.SavedPlacesResponse
@@ -28,23 +29,18 @@ import com.simats.multimodaltransportationrecommendation.data.model.trips.Update
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface AuthApiService {
 
-    // Auth
-    @POST("auth/signup.php")
-    suspend fun signUp(@Body request: SignUpRequest): Response<SignUpResponse>
-
+    // Authentication
     @POST("auth/login.php")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    @POST("auth/change_password.php")
+    @POST("auth/signup.php")
+    suspend fun signUp(@Body request: SignUpRequest): Response<SignUpResponse>
+
+    @POST("auth/password_reset.php")
     suspend fun changePassword(@Body request: ChangePasswordRequest): Response<BaseResponse>
 
     // Profile & Stats
@@ -71,13 +67,15 @@ interface AuthApiService {
     @POST("profile/preferences_update.php")
     suspend fun updatePreferences(@Body request: UpdatePreferencesRequest): Response<BaseResponse>
 
-    // Tourist Places
+    // Tourist Places & Recommendations
     @GET("places/places_fetch.php")
     suspend fun fetchPlaces(
         @Query("user_id") userId: Int = 0,
         @Query("city") city: String? = null,
         @Query("category") category: String? = null,
-        @Query("search") search: String? = null
+        @Query("search") search: String? = null,
+        @Query("lat") lat: Double? = null,
+        @Query("lng") lng: Double? = null
     ): Response<PlacesResponse>
 
     @GET("places/place_details.php")
@@ -86,13 +84,22 @@ interface AuthApiService {
         @Query("user_id") userId: Int = 0
     ): Response<PlaceDetailsResponse>
 
+    @GET("places/route_recommendations.php")
+    suspend fun fetchRouteRecommendations(
+        @Query("origin") origin: String,
+        @Query("destination") destination: String
+    ): Response<RouteRecommendationsResponse>
+
     @POST("places/save_place.php")
     suspend fun savePlace(@Body request: SavePlaceRequest): Response<SavePlaceResponse>
 
     @GET("places/saved_fetch.php")
     suspend fun fetchSavedPlaces(@Query("user_id") userId: Int): Response<SavedPlacesResponse>
 
-    // Multi-Modal Routes
+    // Multi-Modal Location & Routes
+    @GET("routes/location_search.php")
+    suspend fun searchLocations(@Query("q") query: String): Response<com.simats.multimodaltransportationrecommendation.data.model.location.LocationSearchResponse>
+
     @POST("routes/search_routes.php")
     suspend fun searchRoutes(@Body request: SearchRoutesRequest): Response<SearchRoutesResponse>
 

@@ -8,6 +8,7 @@ import com.simats.multimodaltransportationrecommendation.data.model.auth.LoginRe
 import com.simats.multimodaltransportationrecommendation.data.model.auth.LoginResponse
 import com.simats.multimodaltransportationrecommendation.data.model.auth.SignUpRequest
 import com.simats.multimodaltransportationrecommendation.data.model.auth.SignUpResponse
+import com.simats.multimodaltransportationrecommendation.data.model.location.LocationSearchResult
 import com.simats.multimodaltransportationrecommendation.data.model.places.SavePlaceRequest
 import com.simats.multimodaltransportationrecommendation.data.model.places.TouristPlace
 import com.simats.multimodaltransportationrecommendation.data.model.preferences.PreferencesData
@@ -260,10 +261,12 @@ class AuthRepository(
         userId: Int = 0,
         city: String? = null,
         category: String? = null,
-        search: String? = null
+        search: String? = null,
+        lat: Double? = null,
+        lng: Double? = null
     ): NetworkResult<List<TouristPlace>> = withContext(Dispatchers.IO) {
         try {
-            val response = authService.fetchPlaces(userId, city, category, search)
+            val response = authService.fetchPlaces(userId, city, category, search, lat, lng)
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
                 if (body.success && body.places != null) {
@@ -391,6 +394,44 @@ class AuthRepository(
             }
         } catch (e: Exception) {
             NetworkResult.Error(e.localizedMessage ?: "Unable to load saved routes.")
+        }
+    }
+
+    // Location Search & Autocomplete
+    suspend fun searchLocations(query: String): NetworkResult<List<LocationSearchResult>> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.searchLocations(query)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success && body.locations != null) {
+                    NetworkResult.Success(body.locations)
+                } else {
+                    NetworkResult.Error(body.message ?: "No matching locations found")
+                }
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to search locations.")
+        }
+    }
+
+    // Route Recommendations
+    suspend fun fetchRouteRecommendations(origin: String, destination: String): NetworkResult<List<TouristPlace>> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchRouteRecommendations(origin, destination)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success && body.places != null) {
+                    NetworkResult.Success(body.places)
+                } else {
+                    NetworkResult.Error(body.message ?: "No attractions found along this route")
+                }
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load route recommendations.")
         }
     }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.simats.multimodaltransportationrecommendation.data.local.SessionManager
+import com.simats.multimodaltransportationrecommendation.data.model.places.TouristPlace
 import com.simats.multimodaltransportationrecommendation.data.model.routes.RouteOption
 import com.simats.multimodaltransportationrecommendation.data.model.routes.SaveRouteRequest
 import com.simats.multimodaltransportationrecommendation.data.repository.AuthRepository
@@ -14,16 +15,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class RouteResultsUiState(
-    val origin: String = "Ferry Building",
-    val destination: String = "California Academy of Sciences",
+    val origin: String = "Chennai Central",
+    val destination: String = "Mahabalipuram",
     val dateTime: String = "Today, 9:15 AM",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val aiInsight: String = "A low-carbon ride with no transit transfers. Minimal carbon footprint and a comfortable walk.",
+    val aiInsight: String = "Finding the optimal low-carbon multi-modal transit connection across Tamil Nadu.",
     val recommendedRoute: RouteOption? = null,
     val alternativeRoutes: List<RouteOption> = emptyList(),
     val allRoutes: List<RouteOption> = emptyList(),
     val selectedRoute: RouteOption? = null,
+    val routePlaces: List<TouristPlace> = emptyList(),
+    val isLoadingPlaces: Boolean = false,
+    val selectedPlaceForDetails: TouristPlace? = null,
+    val showMapSheet: Boolean = false,
     val saveMessage: String? = null
 )
 
@@ -41,17 +46,22 @@ class RouteResultsViewModel(
         dateTime: String = "Today, 9:15 AM"
     ) {
         val userId = SessionManager.getInstance(context).getUserId() ?: 1
+        val cleanOrigin = if (origin.isNotBlank()) origin.trim() else "Chennai Central"
+        val cleanDest = if (destination.isNotBlank()) destination.trim() else "Mahabalipuram"
+
         _uiState.value = _uiState.value.copy(
-            origin = origin,
-            destination = destination,
+            origin = cleanOrigin,
+            destination = cleanDest,
             dateTime = dateTime,
             isLoading = true,
+            isLoadingPlaces = true,
             errorMessage = null,
             saveMessage = null
         )
 
+        // 1. Fetch Multi-Modal Transit Routes
         viewModelScope.launch {
-            when (val result = authRepository.searchRoutes(origin, destination, dateTime, userId)) {
+            when (val result = authRepository.searchRoutes(cleanOrigin, cleanDest, dateTime, userId)) {
                 is NetworkResult.Success -> {
                     val resp = result.data
                     val routes = resp.routes ?: emptyList()
@@ -70,7 +80,25 @@ class RouteResultsViewModel(
                 is NetworkResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        errorMessage = result.message ?: "Failed to find routes"
+                        errorMessage = result.message ?: "No transit routes found between these locations"
+                    )
+                }
+            }
+        }
+
+        // 2. Fetch Tourist Places Along Route Corridor
+        viewModelScope.launch {
+            when (val placeRes = authRepository.fetchRouteRecommendations(cleanOrigin, cleanDest)) {
+                is NetworkResult.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingPlaces = false,
+                        routePlaces = placeRes.data
+                    )
+                }
+                is NetworkResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingPlaces = false,
+                        routePlaces = emptyList()
                     )
                 }
             }
@@ -81,11 +109,40 @@ class RouteResultsViewModel(
         _uiState.value = _uiState.value.copy(selectedRoute = route)
     }
 
-    fun saveRoute(
-        context: Context,
-        route: RouteOption,
-        onComplete: (Boolean, String) -> Unit = { _, _ -> }
-    ) {
+    fun toggleMapSheet(show: Boolean) {
+        _uiState.value = _uiState.value.copy(showMapSheet = show)
+    }
+
+    fun openPlaceDetails(place: TouristPlace) {
+        _uiState.value = _uiState.value.copy(selectedPlaceForDetails = place)
+    }
+
+    fun closePlaceDetails() {
+        _uiState.value = _uiState.value.copy(selectedPlaceForDetails = null)
+    }
+
+    fun toggleSavePlace(context: Context, place: TouristPlace) {
+        val userId = SessionManager.getInstance(context).getUserId() ?: 1
+        val newAction = if (place.isSaved) "remove" else "save"
+
+        viewModelScope.launch {
+            when (val result = authRepository.savePlace(userId, place.placeId, newAction)) {
+                is NetworkResult.Success -> {
+                    val isNowSaved = result.data
+                    val updatedPlaces = _uiState.value.routePlaces.map {
+                        if (it.placeId == place.placeId) it.copy(isSaved = isNowSaved) else it
+                    }
+                    _uiState.value = _uiState.value.copy(
+                        routePlaces = updatedPlaces,
+                        saveMessage = if (isNowSaved) "Saved to your places!" else "Removed from saved"
+                    )
+                }
+                is NetworkResult.Error -> {}
+            }
+        }
+    }
+
+    fun saveRoute(context: Context, route: RouteOption) {
         val userId = SessionManager.getInstance(context).getUserId() ?: 1
         viewModelScope.launch {
             val req = SaveRouteRequest(
@@ -95,19 +152,15 @@ class RouteResultsViewModel(
                 mode = route.mode,
                 durationText = route.durationText,
                 costText = route.fareText,
-                co2Text = "${route.co2EmittedKg} kg CO₂",
+                co2Text = "${route.co2SavedKg} kg CO2 saved",
                 action = "save"
             )
             when (val res = authRepository.saveRoute(req)) {
                 is NetworkResult.Success -> {
-                    val msg = res.data.ifBlank { "Route saved to your Saved list!" }
-                    _uiState.value = _uiState.value.copy(saveMessage = msg)
-                    onComplete(true, msg)
+                    _uiState.value = _uiState.value.copy(saveMessage = "Route saved to My Trips!")
                 }
                 is NetworkResult.Error -> {
-                    val msg = res.message ?: "Could not save route"
-                    _uiState.value = _uiState.value.copy(saveMessage = msg)
-                    onComplete(false, msg)
+                    _uiState.value = _uiState.value.copy(saveMessage = res.message ?: "Failed to save route")
                 }
             }
         }

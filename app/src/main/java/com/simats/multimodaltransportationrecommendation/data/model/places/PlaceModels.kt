@@ -27,6 +27,18 @@ data class TouristPlace(
     val distanceKm: Double = 2.5,
     @SerializedName("duration_visit")
     val durationVisit: String? = "2-3 hours",
+    @SerializedName("latitude")
+    val latitude: Double? = null,
+    @SerializedName("longitude")
+    val longitude: Double? = null,
+    @SerializedName("nearby_transit")
+    val nearbyTransit: String? = null,
+    @SerializedName("distance_from_route_km")
+    val distanceFromRouteKm: Double? = null,
+    @SerializedName("route_note")
+    val routeNote: String? = null,
+    @SerializedName("is_along_route")
+    val isAlongRoute: Boolean = false,
     @SerializedName("is_saved")
     val isSaved: Boolean = false,
     @SerializedName("is_recommended")
@@ -38,6 +50,12 @@ data class TouristPlace(
 data class PlacesResponse(
     @SerializedName("success")
     val success: Boolean,
+    @SerializedName("city")
+    val city: String? = null,
+    @SerializedName("category")
+    val category: String? = null,
+    @SerializedName("total")
+    val total: Int = 0,
     @SerializedName("places")
     val places: List<TouristPlace>? = null,
     @SerializedName("message")
@@ -49,6 +67,23 @@ data class PlaceDetailsResponse(
     val success: Boolean,
     @SerializedName("place")
     val place: TouristPlace? = null,
+    @SerializedName("message")
+    val message: String? = null
+)
+
+data class RouteRecommendationsResponse(
+    @SerializedName("success")
+    val success: Boolean,
+    @SerializedName("origin")
+    val origin: String? = null,
+    @SerializedName("destination")
+    val destination: String? = null,
+    @SerializedName("corridor_distance_km")
+    val corridorDistanceKm: Double = 0.0,
+    @SerializedName("total_attractions")
+    val totalAttractions: Int = 0,
+    @SerializedName("places")
+    val places: List<TouristPlace>? = null,
     @SerializedName("message")
     val message: String? = null
 )
@@ -79,4 +114,3 @@ data class SavedPlacesResponse(
     @SerializedName("message")
     val message: String? = null
 )
-

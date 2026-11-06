@@ -186,6 +186,15 @@ class HomeViewModel(
         _uiState.value = _uiState.value.copy(destination = dest)
     }
 
+    fun swapLocations() {
+        val curOrigin = _uiState.value.origin
+        val curDest = _uiState.value.destination
+        _uiState.value = _uiState.value.copy(
+            origin = curDest,
+            destination = curOrigin
+        )
+    }
+
     fun clearMessages() {
         _uiState.value = _uiState.value.copy(errorMessage = null, successMessage = null)
     }

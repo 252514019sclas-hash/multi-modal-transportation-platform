@@ -29,6 +29,12 @@ data class RouteOption(
     val co2SavedKg: Double = 0.0,
     @SerializedName("steps")
     val steps: List<String> = emptyList(),
+    @SerializedName("intermediate_stops")
+    val intermediateStops: List<String> = emptyList(),
+    @SerializedName("transfer_points")
+    val transferPoints: List<String> = emptyList(),
+    @SerializedName("source_agency")
+    val sourceAgency: String? = null,
     @SerializedName("route_details")
     val routeDetails: String,
     @SerializedName("badge")
@@ -57,10 +63,12 @@ data class SearchRoutesResponse(
     val destination: String? = null,
     @SerializedName("date_time")
     val dateTime: String? = null,
+    @SerializedName("distance_km")
+    val distanceKm: Double = 0.0,
     @SerializedName("ai_insight")
     val aiInsight: String? = null,
-    @SerializedName("data_source")
-    val dataSource: String? = null,
+    @SerializedName("total_routes")
+    val totalRoutes: Int = 0,
     @SerializedName("routes")
     val routes: List<RouteOption>? = null,
     @SerializedName("message")
@@ -104,7 +112,7 @@ data class SavedRoute(
     @SerializedName("co2_text")
     val co2Text: String,
     @SerializedName("created_at")
-    val createdAt: String? = null
+    val createdAt: String
 )
 
 data class SavedRoutesResponse(
@@ -115,4 +123,3 @@ data class SavedRoutesResponse(
     @SerializedName("message")
     val message: String? = null
 )
-
