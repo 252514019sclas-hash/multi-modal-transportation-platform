@@ -1,7 +1,11 @@
 package com.simats.multimodaltransportationrecommendation.ui.journey
 
+import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -39,8 +43,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.simats.multimodaltransportationrecommendation.ui.map.MapMarkerItem
+import com.simats.multimodaltransportationrecommendation.ui.map.MoveSmartGoogleMapView
 import com.simats.multimodaltransportationrecommendation.ui.theme.*
 import java.util.Locale
 
@@ -49,7 +58,8 @@ fun OnYourWayScreen(
     viewModel: OnYourWayViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onBack: () -> Unit = {},
     onViewTicket: () -> Unit = {},
-    onSimulateDelay: () -> Unit = {}
+    onSimulateDelay: () -> Unit = {},
+    onCompleteJourney: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -808,6 +818,63 @@ fun OnYourWayScreen(
                                 text = "Build Smart Plan →",
                                 color = SkyBlueDark,
                                 fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // 10. ARRIVED AT DESTINATION / COMPLETE JOURNEY ACTION
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(2.dp, RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(PastelCardTeal)
+                        .border(1.dp, TealSecondary, RoundedCornerShape(16.dp))
+                        .clickable { onCompleteJourney() }
+                        .padding(14.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(SurfaceWhite),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "🏁", fontSize = 16.sp)
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "Arrived at Destination?",
+                                    color = TealDark,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Tap to finish journey & view AI summary",
+                                    color = TextNavyDark,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(TealDark)
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Finish 🎉",
+                                color = Color.White,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }

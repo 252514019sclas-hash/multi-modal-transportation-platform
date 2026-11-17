@@ -122,6 +122,17 @@ interface AuthApiService {
     @POST("trips/update_status.php")
     suspend fun updateTripStatus(@Body request: UpdateTripStatusRequest): Response<BaseResponse>
 
+    @GET("trips/trip_details.php")
+    suspend fun fetchTripDetails(
+        @Query("journey_id") journeyId: Int,
+        @Query("user_id") userId: Int
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.trips.TripDetailResponse>
+
+    @POST("trips/save_ai_itinerary.php")
+    suspend fun saveAiItinerary(
+        @Body request: com.simats.multimodaltransportationrecommendation.data.model.trips.SaveAiItineraryRequest
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.trips.BookJourneyResponse>
+
     // Notifications
     @GET("notifications/notifications_fetch.php")
     suspend fun fetchNotifications(@Query("user_id") userId: Int): Response<com.simats.multimodaltransportationrecommendation.data.model.notifications.NotificationsResponse>

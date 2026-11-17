@@ -490,6 +490,44 @@ class AuthRepository(
         }
     }
 
+    suspend fun fetchTripDetails(journeyId: Int, userId: Int): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.trips.TripDetailData> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchTripDetails(journeyId, userId)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success && body.journey != null) {
+                    NetworkResult.Success(body.journey)
+                } else {
+                    NetworkResult.Error(body.message ?: "Failed to fetch trip details")
+                }
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load trip details.")
+        }
+    }
+
+    suspend fun saveAiItinerary(
+        request: com.simats.multimodaltransportationrecommendation.data.model.trips.SaveAiItineraryRequest
+    ): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.trips.BookedJourneyData> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.saveAiItinerary(request)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success && body.journey != null) {
+                    NetworkResult.Success(body.journey)
+                } else {
+                    NetworkResult.Error(body.message)
+                }
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to save AI trip plan.")
+        }
+    }
+
     // Notifications
     suspend fun fetchNotifications(userId: Int): NetworkResult<Pair<Int, List<com.simats.multimodaltransportationrecommendation.data.model.notifications.NotificationItem>>> = withContext(Dispatchers.IO) {
         try {

@@ -38,6 +38,7 @@ import com.simats.multimodaltransportationrecommendation.ui.theme.MultiModalTran
 import com.simats.multimodaltransportationrecommendation.ui.ticket.YourTicketScreen
 import com.simats.multimodaltransportationrecommendation.ui.transitservice.TransitServiceScreen
 import com.simats.multimodaltransportationrecommendation.ui.trips.MyTripsScreen
+import com.simats.multimodaltransportationrecommendation.ui.trips.TripDetailScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -308,6 +309,9 @@ class MainActivity : ComponentActivity() {
                         },
                         onSimulateDelay = {
                             currentScreen = "smarterway"
+                        },
+                        onCompleteJourney = {
+                            currentScreen = "journeycompleted"
                         }
                     )
                     "smarterway" -> SmarterWayScreen(
@@ -323,10 +327,26 @@ class MainActivity : ComponentActivity() {
                     )
                     "journeycompleted" -> JourneyCompletedScreen(
                         onBack = {
-                            currentScreen = "smarterway"
+                            currentScreen = "onyourway"
                         },
-                        onBackToHome = {
+                        onViewJourneyDetails = { trip ->
+                            activeTicketTrip = trip
+                            currentScreen = "tripdetails"
+                        },
+                        onViewTicket = { trip ->
+                            activeTicketTrip = trip
+                            activeTicketBooking = null
+                            currentScreen = "yourticket"
+                        },
+                        onExploreNearbyPlaces = { place ->
+                            selectedTouristPlace = place
+                            currentScreen = "placedetail"
+                        },
+                        onBackToMyTrips = {
                             currentScreen = "mytrips"
+                        },
+                        onGoToExplore = {
+                            currentScreen = "home"
                         }
                     )
                     "mytrips" -> MyTripsScreen(
@@ -334,6 +354,10 @@ class MainActivity : ComponentActivity() {
                             activeTicketTrip = trip
                             activeTicketBooking = null
                             currentScreen = "yourticket"
+                        },
+                        onOpenTripDetails = { trip ->
+                            activeTicketTrip = trip
+                            currentScreen = "tripdetails"
                         },
                         onPlanNewJourney = {
                             currentScreen = "home"
@@ -347,6 +371,38 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     )
+                    "tripdetails" -> {
+                        val currentTrip = activeTicketTrip ?: TripItem(
+                            journeyId = 5,
+                            userId = 1,
+                            origin = "Chennai Central",
+                            destination = "Marina Beach, Chennai",
+                            mode = "CMRL Blue Line Metro",
+                            routeTitle = "Corridor Express",
+                            durationMinutes = 18,
+                            distanceKm = 6.4,
+                            fare = 30.0,
+                            fareText = "₹30",
+                            status = "completed",
+                            journeyDate = "Today · 09:30 AM",
+                            bookingReference = "TN-MS-126F13"
+                        )
+                        TripDetailScreen(
+                            trip = currentTrip,
+                            onBack = {
+                                currentScreen = "mytrips"
+                            },
+                            onViewTicket = {
+                                activeTicketTrip = currentTrip
+                                activeTicketBooking = null
+                                currentScreen = "yourticket"
+                            },
+                            onOpenPlaceDetail = { place ->
+                                selectedTouristPlace = place
+                                currentScreen = "placedetail"
+                            }
+                        )
+                    }
                     "saved" -> SavedScreen(
                         onOpenPlaceDetail = { place ->
                             selectedTouristPlace = place
