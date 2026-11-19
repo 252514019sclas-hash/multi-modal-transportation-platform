@@ -424,10 +424,7 @@ fun NearbyFacilitiesScreen(
                 ) {
                     items(uiState.facilities, key = { it.facilityId }) { facility ->
                         FacilityCardItem(
-                            facility = facility,
-                            onNavigateInMaps = { f ->
-                                launchGoogleMaps(context, f.latitude, f.longitude, f.name)
-                            }
+                            facility = facility
                         )
                     }
                 }
@@ -438,8 +435,7 @@ fun NearbyFacilitiesScreen(
 
 @Composable
 fun FacilityCardItem(
-    facility: TravelFacility,
-    onNavigateInMaps: (TravelFacility) -> Unit
+    facility: TravelFacility
 ) {
     val categoryBadgeColor = when (facility.category) {
         "Petrol Stations" -> Color(0xFFD97706) // Amber / Fuel
@@ -582,23 +578,6 @@ fun FacilityCardItem(
                         lineHeight = 14.sp
                     )
                 }
-            }
-
-            // Action Button (Navigate in Maps only - Call button removed)
-            Button(
-                onClick = { onNavigateInMaps(facility) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(38.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
-            ) {
-                Text(
-                    text = "Navigate ➔",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
             }
         }
     }
