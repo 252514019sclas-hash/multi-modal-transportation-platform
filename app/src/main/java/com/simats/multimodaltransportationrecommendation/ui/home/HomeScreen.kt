@@ -118,21 +118,12 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "06 / MOVESMART AI",
-                            color = SkyBluePrimary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp
-                        )
-                        Text(
-                            text = "Tamil Nadu Explorer",
-                            color = TextNavyDark,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "Tamil Nadu Explorer",
+                        color = TextNavyDark,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
                     // Weather Pill & Notification Bell
                     Row(

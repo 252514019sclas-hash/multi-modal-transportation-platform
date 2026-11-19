@@ -96,21 +96,12 @@ fun ProfileScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "20 / MOVESMART AI",
-                            color = SkyBluePrimary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp
-                        )
-                        Text(
-                            text = "Profile & Settings",
-                            color = TextNavyDark,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "Profile & Settings",
+                        color = TextNavyDark,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),

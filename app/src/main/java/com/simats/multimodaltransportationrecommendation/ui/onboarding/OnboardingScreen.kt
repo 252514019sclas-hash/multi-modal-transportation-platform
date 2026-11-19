@@ -45,14 +45,6 @@ fun OnboardingScreen(
             // Top Header
             Column(modifier = Modifier.padding(top = 8.dp)) {
                 Text(
-                    text = "02 / DISCOVER TAMIL NADU",
-                    color = SkyBluePrimary,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
                     text = "Smart Tourism & Seamless Transit",
                     color = TextNavyDark,
                     fontSize = 22.sp,
