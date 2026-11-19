@@ -4,12 +4,12 @@ data class AiStopoverItem(
     val id: String,
     val name: String,
     val type: String, // "start", "stop", "destination"
-    val badgeText: String, // "Start", "Stop 1 • 1h", "Stop 2 • 1h 30m", "Destination"
+    val badgeText: String, // "Start Hub", "Spot #1 • 1h", "Destination Attraction"
     val shortDescription: String,
-    val timeWindowText: String, // "1h (09:45 AM – 10:45 AM)" or "Departure: 09:00 AM"
+    val timeWindowText: String,
     val durationMinutes: Int,
     val distanceFromOriginKm: Double,
-    val distanceBadgeText: String, // "0 km", "12 km", "20 km"
+    val distanceBadgeText: String, // "0 km", "12 km", "72 km"
     val imageUrl: String,
     val rating: Double = 4.8,
     val category: String = "Attraction",
@@ -36,9 +36,9 @@ data class TravelInsightsData(
     val crowdLevel: String = "Moderate Crowd",
     val overallRating: String = "4.6 / 5",
     val bestTimeVisit: String = "Nov – Feb",
-    val summaryText: String = "Ideal weather conditions with gentle breeze and smooth highway traffic flow.",
-    val peakHours: String = "11:30 AM – 03:00 PM",
-    val localAdvice: String = "Carry light cotton clothing and stay hydrated. Temple visits are best before 11 AM."
+    val summaryText: String = "",
+    val peakHours: String = "",
+    val localAdvice: String = ""
 )
 
 data class SpecialOfferItem(
@@ -57,9 +57,10 @@ data class AiSmartStopoverPlan(
     val transitMode: String = "Bus & Train",
     val totalTravelTimeText: String = "~ 5h 30m",
     val totalDistanceKm: Double = 28.0,
+    val totalSpotsCount: Int = 0,
     val stops: List<AiStopoverItem>,
-    val detourOptions: List<AiDetourOption>,
-    val insights: TravelInsightsData,
-    val specialOffers: List<SpecialOfferItem>,
-    val routeOptimizationNote: String = "AI Optimized: Fastest scenic route saving 45 mins with 2 en-route attractions."
+    val detourOptions: List<AiDetourOption> = emptyList(),
+    val insights: TravelInsightsData? = null,
+    val specialOffers: List<SpecialOfferItem> = emptyList(),
+    val routeOptimizationNote: String = "AI Route Optimization: All tourist spots sequenced chronologically from starting point to destination to minimize travel detour."
 )
