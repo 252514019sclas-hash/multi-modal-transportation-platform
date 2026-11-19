@@ -229,4 +229,23 @@ interface AuthApiService {
 
     @GET("groups/group_notifications.php")
     suspend fun fetchGroupNotifications(@Query("user_id") userId: Int): Response<com.simats.multimodaltransportationrecommendation.data.model.group.GroupNotificationsResponse>
+
+    // AI Travel Adviser & Multi-Day Tour Itinerary Planner
+    @POST("ai/ai_trip_advisor.php")
+    suspend fun generateAiTripPlan(
+        @Body request: com.simats.multimodaltransportationrecommendation.data.model.ai.AiTripPlanRequest
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.ai.AiTripPlanResponse>
+
+    // Nearby Travel Facilities (Petrol, EV, Parking, Restrooms, Hospitals, ATMs)
+    @GET("facilities/nearby_facilities.php")
+    suspend fun fetchNearbyFacilities(
+        @Query("city") city: String? = null,
+        @Query("origin") origin: String? = null,
+        @Query("destination") destination: String? = null,
+        @Query("landmark") landmark: String? = null,
+        @Query("category") category: String? = null,
+        @Query("search") search: String? = null,
+        @Query("lat") lat: Double? = null,
+        @Query("lng") lng: Double? = null
+    ): Response<com.simats.multimodaltransportationrecommendation.data.model.facilities.NearbyFacilitiesResponse>
 }

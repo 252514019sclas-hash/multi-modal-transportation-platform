@@ -9,6 +9,8 @@ data class TouristPlace(
     val name: String,
     @SerializedName("city")
     val city: String,
+    @SerializedName("district")
+    val district: String? = null,
     @SerializedName("category")
     val category: String,
     @SerializedName("description")
@@ -33,6 +35,8 @@ data class TouristPlace(
     val longitude: Double? = null,
     @SerializedName("nearby_transit")
     val nearbyTransit: String? = null,
+    @SerializedName("facilities")
+    val facilities: String? = null,
     @SerializedName("distance_from_route_km")
     val distanceFromRouteKm: Double? = null,
     @SerializedName("route_note")

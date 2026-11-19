@@ -48,6 +48,7 @@ fun HomeScreen(
     onPlanJourney: (String, String) -> Unit = { _, _ -> },
     onOpenPlaceDetail: (TouristPlace) -> Unit = {},
     onOpenGroupTravel: () -> Unit = {},
+    onOpenAiTravelAdvisor: () -> Unit = {},
     onNavigateTab: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -443,6 +444,82 @@ fun HomeScreen(
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
+                            }
+                        }
+                    }
+                }
+
+                // AI Travel Adviser & Multi-Day Tour Card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(PastelCardBlue)
+                        .border(1.dp, SkyBluePrimary.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                        .clickable { onOpenAiTravelAdvisor() }
+                        .padding(14.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(SurfaceWhite)
+                                    .border(1.dp, SkyBluePrimary.copy(alpha = 0.3f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "🤖", fontSize = 20.sp)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(EmeraldGreen)
+                                            .padding(horizontal = 4.dp, vertical = 1.dp)
+                                    ) {
+                                        Text(
+                                            text = "FREE ADVISER",
+                                            color = Color.White,
+                                            fontSize = 8.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "AI Multi-Day Trip & Stay Planner",
+                                        color = TextNavyDark,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Text(
+                                    text = "Plan 1-7 days with en-route spots & night stays (e.g. Chennai ➔ Madurai 5 Days)",
+                                    color = TextNavyBody,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(SkyBluePrimary)
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = "Plan", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Text(text = "➔", color = Color.White, fontSize = 10.sp)
                             }
                         }
                     }

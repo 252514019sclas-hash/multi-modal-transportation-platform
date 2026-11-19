@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.*
 import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 data class MapMarkerItem(
+    val id: String = "",
     val title: String,
     val snippet: String? = null,
     val latitude: Double,
@@ -37,16 +38,22 @@ data class MapMarkerItem(
     val isUser: Boolean = false,
     val isDestination: Boolean = false,
     val isMeetingPoint: Boolean = false,
-    val iconColorHue: Float = BitmapDescriptorFactory.HUE_AZURE
+    val isTouristPlace: Boolean = false,
+    val iconColorHue: Float = BitmapDescriptorFactory.HUE_AZURE,
+    val extraData: Any? = null
 )
 
 @Composable
 fun MoveSmartGoogleMapView(
     modifier: Modifier = Modifier,
+    originLocation: LatLng? = null,
     userLocation: LatLng? = null,
     destinationLocation: LatLng? = null,
     routeWaypoints: List<LatLng> = emptyList(),
     additionalMarkers: List<MapMarkerItem> = emptyList(),
+    cameraFocusTarget: LatLng? = null,
+    triggerFitAll: Long = 0L,
+    triggerRecenter: Long = 0L,
     zoomLevel: Float = 14.5f,
     onRecenterClick: () -> Unit = {},
     onMarkerClick: (MapMarkerItem) -> Unit = {}
@@ -92,7 +99,7 @@ fun MoveSmartGoogleMapView(
     }
 
     // Update map elements when state or coordinates change
-    LaunchedEffect(googleMapInstance, userLocation, destinationLocation, routeWaypoints, additionalMarkers) {
+    LaunchedEffect(googleMapInstance, originLocation, userLocation, destinationLocation, routeWaypoints, additionalMarkers) {
         val map = googleMapInstance ?: return@LaunchedEffect
         try {
             map.clear()
@@ -100,7 +107,20 @@ fun MoveSmartGoogleMapView(
             val boundsBuilder = LatLngBounds.Builder()
             var hasPoints = false
 
-            // 1. User Location Marker
+            // 1. Origin Starting Point Marker
+            originLocation?.let { oLoc ->
+                map.addMarker(
+                    MarkerOptions()
+                        .position(oLoc)
+                        .title("Starting Point (Origin)")
+                        .snippet(String.format("Lat: %.4f, Lng: %.4f", oLoc.latitude, oLoc.longitude))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                )
+                boundsBuilder.include(oLoc)
+                hasPoints = true
+            }
+
+            // 2. User Current GPS Location Marker
             userLocation?.let { uLoc ->
                 map.addMarker(
                     MarkerOptions()
@@ -113,19 +133,19 @@ fun MoveSmartGoogleMapView(
                 hasPoints = true
             }
 
-            // 2. Destination Marker
+            // 3. Destination Marker
             destinationLocation?.let { dLoc ->
                 map.addMarker(
                     MarkerOptions()
                         .position(dLoc)
                         .title("Destination")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                 )
                 boundsBuilder.include(dLoc)
                 hasPoints = true
             }
 
-            // 3. Additional Markers (e.g. Group Members, Stops, Attractions)
+            // 4. Additional Markers (e.g. Group Members, En-Route Stations, Attractions)
             additionalMarkers.forEach { mItem ->
                 val pos = LatLng(mItem.latitude, mItem.longitude)
                 map.addMarker(
@@ -139,9 +159,9 @@ fun MoveSmartGoogleMapView(
                 hasPoints = true
             }
 
-            // 4. Draw Route Polyline
+            // 5. Draw Travel Route Polyline
             val fullPath = mutableListOf<LatLng>()
-            userLocation?.let { fullPath.add(it) }
+            originLocation?.let { fullPath.add(it) } ?: userLocation?.let { fullPath.add(it) }
             fullPath.addAll(routeWaypoints)
             destinationLocation?.let { if (!fullPath.contains(it)) fullPath.add(it) }
 
@@ -155,8 +175,23 @@ fun MoveSmartGoogleMapView(
                 )
             }
 
-            // 5. Initial Camera Positioning
-            if (userLocation != null) {
+            // 5. Initial Camera Positioning & Marker Click Listener
+            map.setOnMarkerClickListener { marker ->
+                val clicked = additionalMarkers.firstOrNull {
+                    Math.abs(it.latitude - marker.position.latitude) < 0.0005 &&
+                    Math.abs(it.longitude - marker.position.longitude) < 0.0005
+                }
+                if (clicked != null) {
+                    onMarkerClick(clicked)
+                    true
+                } else {
+                    false
+                }
+            }
+
+            if (cameraFocusTarget != null) {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraFocusTarget, 15f))
+            } else if (userLocation != null) {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel))
             } else if (hasPoints) {
                 try {
@@ -166,6 +201,35 @@ fun MoveSmartGoogleMapView(
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(it, zoomLevel))
                     }
                 }
+            }
+        } catch (_: Exception) {}
+    }
+
+    // Dynamic Camera Movements (Focus Target, Fit All Members, Recenter)
+    LaunchedEffect(googleMapInstance, cameraFocusTarget, triggerFitAll, triggerRecenter) {
+        val map = googleMapInstance ?: return@LaunchedEffect
+        try {
+            if (cameraFocusTarget != null) {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraFocusTarget, 15f))
+            } else if (triggerFitAll > 0L) {
+                val builder = LatLngBounds.Builder()
+                var hasAny = false
+                originLocation?.let { builder.include(it); hasAny = true }
+                userLocation?.let { builder.include(it); hasAny = true }
+                destinationLocation?.let { builder.include(it); hasAny = true }
+                routeWaypoints.forEach { builder.include(it); hasAny = true }
+                additionalMarkers.forEach { builder.include(LatLng(it.latitude, it.longitude)); hasAny = true }
+                if (hasAny) {
+                    try {
+                        map.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 120))
+                    } catch (_: Exception) {
+                        (originLocation ?: destinationLocation ?: userLocation)?.let {
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(it, zoomLevel))
+                        }
+                    }
+                }
+            } else if (triggerRecenter > 0L && userLocation != null) {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15.5f))
             }
         } catch (_: Exception) {}
     }

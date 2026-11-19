@@ -979,4 +979,60 @@ class AuthRepository(
             NetworkResult.Error(e.localizedMessage ?: "Unable to load group alerts.")
         }
     }
+
+    suspend fun generateAiTripPlan(
+        request: com.simats.multimodaltransportationrecommendation.data.model.ai.AiTripPlanRequest
+    ): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.ai.AiTripPlanResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.generateAiTripPlan(request)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) {
+                    NetworkResult.Success(body)
+                } else {
+                    NetworkResult.Error(body.message ?: "Failed to generate itinerary.")
+                }
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to connect to AI Travel Adviser.")
+        }
+    }
+
+    suspend fun fetchNearbyFacilities(
+        city: String? = null,
+        origin: String? = null,
+        destination: String? = null,
+        landmark: String? = null,
+        category: String? = null,
+        search: String? = null,
+        lat: Double? = null,
+        lng: Double? = null
+    ): NetworkResult<com.simats.multimodaltransportationrecommendation.data.model.facilities.NearbyFacilitiesResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = authService.fetchNearbyFacilities(
+                city = city,
+                origin = origin,
+                destination = destination,
+                landmark = landmark,
+                category = category,
+                search = search,
+                lat = lat,
+                lng = lng
+            )
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) {
+                    NetworkResult.Success(body)
+                } else {
+                    NetworkResult.Error(body.message ?: "Failed to fetch nearby travel facilities.")
+                }
+            } else {
+                NetworkResult.Error(parseErrorMessage(response))
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.localizedMessage ?: "Unable to load travel facilities.")
+        }
+    }
 }

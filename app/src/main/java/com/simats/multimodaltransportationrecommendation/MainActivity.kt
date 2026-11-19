@@ -56,6 +56,8 @@ class MainActivity : ComponentActivity() {
                 var selectedRouteOption by androidx.compose.runtime.remember { mutableStateOf<RouteOption?>(null) }
                 var activeTicketBooking by androidx.compose.runtime.remember { mutableStateOf<BookedJourneyData?>(null) }
                 var activeTicketTrip by androidx.compose.runtime.remember { mutableStateOf<TripItem?>(null) }
+                var selectedFacilityCategory by androidx.compose.runtime.remember { mutableStateOf<String?>(null) }
+                var selectedFacilityCity by androidx.compose.runtime.remember { mutableStateOf<String?>(null) }
 
                 when (currentScreen) {
                     "splash" -> SplashScreen(
@@ -114,6 +116,9 @@ class MainActivity : ComponentActivity() {
                         },
                         onOpenGroupTravel = {
                             currentScreen = "grouptravel"
+                        },
+                        onOpenAiTravelAdvisor = {
+                            currentScreen = "aitraveladvisor"
                         },
                         onNavigateTab = { tab ->
                             when (tab) {
@@ -198,6 +203,38 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "routeresults"
                         }
                     )
+                    "aitraveladvisor" -> com.simats.multimodaltransportationrecommendation.ui.aitravel.AiTravelAdvisorScreen(
+                        initialOrigin = searchOrigin,
+                        initialDestination = searchDestination,
+                        onBack = { currentScreen = "routeresults" },
+                        onOpenPlaceDetail = { place ->
+                            selectedTouristPlace = place
+                            currentScreen = "placedetail"
+                        },
+                        onViewMyTrips = { currentScreen = "mytrips" },
+                        onOpenNearbyFacilities = { origin, dest, targetCity, category ->
+                            searchOrigin = origin
+                            searchDestination = dest
+                            selectedFacilityCity = targetCity ?: dest
+                            selectedFacilityCategory = category
+                            currentScreen = "nearbyfacilities"
+                        }
+                    )
+                    "nearbyfacilities" -> com.simats.multimodaltransportationrecommendation.ui.facilities.NearbyFacilitiesScreen(
+                        origin = searchOrigin,
+                        destination = searchDestination,
+                        initialCity = selectedFacilityCity ?: searchDestination,
+                        initialCategory = selectedFacilityCategory,
+                        onBack = { currentScreen = "aitraveladvisor" },
+                        onOpenStopover = { currentScreen = "aismartstopover" }
+                    )
+                    "aismartstopover" -> com.simats.multimodaltransportationrecommendation.ui.stopover.AiSmartStopoverScreen(
+                        origin = searchOrigin,
+                        destination = searchDestination,
+                        onBack = { currentScreen = "nearbyfacilities" },
+                        onViewRouteMap = { currentScreen = "routeresults" },
+                        onStartJourney = { currentScreen = "onyourway" }
+                    )
                     "destination" -> DestinationScreen(
                         initialOrigin = searchOrigin,
                         initialDestination = searchDestination,
@@ -224,9 +261,9 @@ class MainActivity : ComponentActivity() {
                         onBack = {
                             currentScreen = "home"
                         },
-                        onViewRecommended = { route ->
+                        onStartJourney = { route ->
                             selectedRouteOption = route
-                            currentScreen = "reviewbooking"
+                            currentScreen = "onyourway"
                         },
                         onCompareRoutes = { route, _ ->
                             selectedRouteOption = route
@@ -235,6 +272,13 @@ class MainActivity : ComponentActivity() {
                         onOpenPlaceDetail = { place ->
                             selectedTouristPlace = place
                             currentScreen = "placedetail"
+                        },
+                        onPlanMultiDay = {
+                            currentScreen = "aitraveladvisor"
+                        },
+                        onOpenNearbyFacilities = {
+                            selectedFacilityCategory = null
+                            currentScreen = "nearbyfacilities"
                         }
                     )
                     "compareroutes" -> {
@@ -249,7 +293,7 @@ class MainActivity : ComponentActivity() {
                             },
                             onChooseRoute = { route ->
                                 if (route != null) selectedRouteOption = route
-                                currentScreen = "reviewbooking"
+                                currentScreen = "onyourway"
                             }
                         )
                     }
@@ -298,20 +342,30 @@ class MainActivity : ComponentActivity() {
                         },
                         onStartJourney = {
                             currentScreen = "onyourway"
+                        },
+                        onOpenStopover = {
+                            currentScreen = "aismartstopover"
                         }
                     )
                     "onyourway" -> OnYourWayScreen(
                         onBack = {
-                            currentScreen = "yourticket"
+                            currentScreen = "routeresults"
                         },
                         onViewTicket = {
-                            currentScreen = "yourticket"
+                            currentScreen = "routeresults"
                         },
                         onSimulateDelay = {
                             currentScreen = "smarterway"
                         },
                         onCompleteJourney = {
                             currentScreen = "journeycompleted"
+                        },
+                        onViewPlaceDetails = { place ->
+                            selectedTouristPlace = place
+                            currentScreen = "placedetail"
+                        },
+                        onOpenAiTravelAdvisor = {
+                            currentScreen = "aitraveladvisor"
                         }
                     )
                     "smarterway" -> SmarterWayScreen(

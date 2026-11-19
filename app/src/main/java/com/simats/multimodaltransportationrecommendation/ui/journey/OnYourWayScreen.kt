@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.simats.multimodaltransportationrecommendation.data.model.places.TouristPlace
 import com.simats.multimodaltransportationrecommendation.ui.map.MapMarkerItem
 import com.simats.multimodaltransportationrecommendation.ui.map.MoveSmartGoogleMapView
 import com.simats.multimodaltransportationrecommendation.ui.theme.*
@@ -59,15 +60,20 @@ fun OnYourWayScreen(
     onBack: () -> Unit = {},
     onViewTicket: () -> Unit = {},
     onSimulateDelay: () -> Unit = {},
-    onCompleteJourney: () -> Unit = {}
+    onCompleteJourney: () -> Unit = {},
+    onViewPlaceDetails: (TouristPlace) -> Unit = {},
+    onOpenAiTravelAdvisor: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
+    val isTracking = uiState.trackingStatus == "TRACKING"
+    val isPaused = uiState.trackingStatus == "PAUSED"
+
     var showFullRouteSheet by remember { mutableStateOf(false) }
     var showTransitHelpSheet by remember { mutableStateOf(false) }
-    var selectedPlaceDetail by remember { mutableStateOf<RouteAttractionItem?>(null) }
+    var selectedPlaceDetail by remember { mutableStateOf<TouristPlace?>(null) }
 
     // Pulsing animation for live badge & map marker
     val infiniteTransition = rememberInfiniteTransition(label = "pulseTransition")
@@ -110,6 +116,71 @@ fun OnYourWayScreen(
         } catch (e: Exception) {
             Toast.makeText(context, "Voice input not supported on this device", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // Location Permission Launcher
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { perms ->
+        val fine = perms[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val coarse = perms[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (fine || coarse) {
+            viewModel.startJourneyTracking(context)
+        } else {
+            Toast.makeText(context, "Location permission is required for real-time journey tracking", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.checkDeviceStatus(context)
+    }
+
+    // Prepare map markers for stations and attractions
+    val stationMarkers = remember(uiState.stations, uiState.showStationsLayer) {
+        if (!uiState.showStationsLayer) emptyList()
+        else uiState.stations.map { st ->
+            MapMarkerItem(
+                id = st.id,
+                title = st.name,
+                snippet = "${st.type.replaceFirstChar { it.uppercase() }} · Arrival ${st.time}",
+                latitude = st.latitude,
+                longitude = st.longitude,
+                iconColorHue = BitmapDescriptorFactory.HUE_AZURE
+            )
+        }
+    }
+
+    val attractionMarkers = remember(uiState.attractionsOnMap, uiState.showAttractionsLayer) {
+        if (!uiState.showAttractionsLayer) emptyList()
+        else uiState.attractionsOnMap.map { at ->
+            MapMarkerItem(
+                id = at.id,
+                title = at.name,
+                snippet = "${at.category} · ${at.rating} · ${at.fee}",
+                latitude = at.latitude,
+                longitude = at.longitude,
+                isTouristPlace = true,
+                iconColorHue = BitmapDescriptorFactory.HUE_ORANGE
+            )
+        }
+    }
+
+    val facilityMarkers = remember(uiState.facilitiesOnMap, uiState.showFacilitiesLayer) {
+        if (!uiState.showFacilitiesLayer) emptyList()
+        else uiState.facilitiesOnMap.map { fc ->
+            MapMarkerItem(
+                id = fc.facilityId.toString(),
+                title = fc.name,
+                snippet = "${fc.category} · ${if (fc.is24Hours) "Open 24/7" else fc.operatingHours}",
+                latitude = fc.latitude,
+                longitude = fc.longitude,
+                iconColorHue = BitmapDescriptorFactory.HUE_YELLOW
+            )
+        }
+    }
+
+    val allMapMarkers = remember(stationMarkers, attractionMarkers, facilityMarkers) {
+        stationMarkers + attractionMarkers + facilityMarkers
     }
 
     Box(
@@ -216,17 +287,26 @@ fun OnYourWayScreen(
                     }
 
                     // Live Pulsing Badge (Clickable to pause / resume)
-                    val isLive = uiState.isLiveTrackingActive
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(14.dp))
-                            .background(if (isLive) PastelCardTeal else PastelCardPeach)
+                            .background(
+                                when {
+                                    isTracking -> PastelCardTeal
+                                    isPaused -> PastelCardPeach
+                                    else -> PastelCardBlue
+                                }
+                            )
                             .border(
                                 1.dp,
-                                if (isLive) TealSecondary.copy(alpha = 0.45f) else WarmOrangeAccent.copy(alpha = 0.45f),
+                                when {
+                                    isTracking -> TealSecondary.copy(alpha = 0.45f)
+                                    isPaused -> WarmOrangeAccent.copy(alpha = 0.45f)
+                                    else -> BorderLight
+                                },
                                 RoundedCornerShape(14.dp)
                             )
-                            .clickable { viewModel.toggleLiveTracking() }
+                            .clickable { viewModel.toggleLiveTracking(context) }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -234,14 +314,26 @@ fun OnYourWayScreen(
                                 modifier = Modifier
                                     .size(8.dp)
                                     .background(
-                                        if (isLive) TealSecondary.copy(alpha = pulseAlpha) else Color.Gray,
+                                        when {
+                                            isTracking -> TealSecondary.copy(alpha = pulseAlpha)
+                                            isPaused -> WarmOrangeAccent
+                                            else -> TextMuted
+                                        },
                                         CircleShape
                                     )
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (isLive) "LIVE TRACKING" else "TRACKING PAUSED",
-                                color = if (isLive) TealSecondary else WarmOrangeDark,
+                                text = when {
+                                    isTracking -> "LIVE TRACKING ON"
+                                    isPaused -> "TRACKING PAUSED"
+                                    else -> "TRACKING OFF"
+                                },
+                                color = when {
+                                    isTracking -> TealSecondary
+                                    isPaused -> WarmOrangeDark
+                                    else -> TextNavyDark
+                                },
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
@@ -285,109 +377,164 @@ fun OnYourWayScreen(
                         )
                     }
 
-                    // Canvas Map
+                    // GPS Disabled Warning Banner
+                    if (!uiState.isGpsProviderEnabled) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = PastelCardPeach)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = "⚠️", fontSize = 18.sp)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = "Device GPS is Disabled",
+                                            color = WarmOrangeDark,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "Please turn on device location services to view real-time tracking.",
+                                            color = TextNavyDark,
+                                            fontSize = 10.sp
+                                        )
+                                    }
+                                }
+                                Button(
+                                    onClick = {
+                                        try {
+                                            context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                                        } catch (_: Exception) {}
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = WarmOrangeAccent),
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(30.dp)
+                                ) {
+                                    Text("Turn On", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+
+                    // Location Permission Banner
+                    if (!uiState.hasLocationPermission) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = PastelCardBlue)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = "📍", fontSize = 18.sp)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = "Location Permission Needed",
+                                            color = SkyBlueDark,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "Allow GPS location access to display your live marker along the route.",
+                                            color = TextNavyDark,
+                                            fontSize = 10.sp
+                                        )
+                                    }
+                                }
+                                Button(
+                                    onClick = {
+                                        locationPermissionLauncher.launch(
+                                            arrayOf(
+                                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                                Manifest.permission.ACCESS_COARSE_LOCATION
+                                            )
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary),
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(30.dp)
+                                ) {
+                                    Text("Allow", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+
+                    // Google Maps View Container
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp)
+                            .height(230.dp)
+                            .shadow(2.dp, RoundedCornerShape(18.dp))
                             .clip(RoundedCornerShape(18.dp))
                             .background(PastelCardBlue)
                             .border(1.dp, BorderLight, RoundedCornerShape(18.dp))
-                            .padding(10.dp)
                     ) {
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            val w = size.width
-                            val h = size.height
-                            val gridColor = SkyBluePrimary.copy(alpha = 0.12f)
-                            val cols = 6
-                            val rows = 5
-
-                            val dx = w / cols
-                            val dy = h / rows
-
-                            for (i in 1 until cols) {
-                                drawLine(gridColor, Offset(i * dx, 0f), Offset(i * dx, h), 1.dp.toPx())
-                            }
-                            for (j in 1 until rows) {
-                                drawLine(gridColor, Offset(0f, j * dy), Offset(w, j * dy), 1.dp.toPx())
-                            }
-
-                            // Transit Route Line
-                            val routePath = Path().apply {
-                                moveTo(w * 0.15f, h * 0.75f)
-                                lineTo(w * 0.35f, h * 0.62f)
-                                lineTo(w * 0.55f, h * 0.50f)
-                                lineTo(w * 0.72f, h * 0.35f)
-                                lineTo(w * 0.88f, h * 0.22f)
-                            }
-                            drawPath(routePath, SkyBluePrimary, style = Stroke(width = 4.dp.toPx()))
-
-                            // Station Markers along line
-                            if (uiState.showStationsLayer) {
-                                uiState.stations.forEach { st ->
-                                    drawCircle(
-                                        color = Color.White,
-                                        radius = 6.dp.toPx(),
-                                        center = Offset(w * st.xRatio, h * st.yRatio)
+                        MoveSmartGoogleMapView(
+                            modifier = Modifier.fillMaxSize(),
+                            userLocation = uiState.userGpsLatLng,
+                            destinationLocation = uiState.destinationLatLng,
+                            routeWaypoints = uiState.routeWaypoints,
+                            additionalMarkers = allMapMarkers,
+                            onRecenterClick = { viewModel.recenterMap() },
+                            onMarkerClick = { mItem ->
+                                viewModel.selectMarker(
+                                    MapPointDetail(
+                                        title = mItem.title,
+                                        subtitle = mItem.snippet ?: "Along Transit Route",
+                                        badge = if (mItem.isTouristPlace) "Tourist Spot" else "Transit Stop",
+                                        icon = if (mItem.isTouristPlace) "🏛️" else "🚇",
+                                        distance = "On Corridor"
                                     )
-                                    drawCircle(
-                                        color = SkyBlueDark,
-                                        radius = 3.5.dp.toPx(),
-                                        center = Offset(w * st.xRatio, h * st.yRatio)
-                                    )
-                                }
+                                )
                             }
+                        )
 
-                            // Attraction Points
-                            if (uiState.showAttractionsLayer) {
-                                uiState.attractionsOnMap.forEach { at ->
-                                    drawCircle(
-                                        color = WarmOrangeAccent.copy(alpha = 0.25f),
-                                        radius = 9.dp.toPx(),
-                                        center = Offset(w * at.xRatio, h * at.yRatio)
-                                    )
-                                    drawCircle(
-                                        color = WarmOrangeAccent,
-                                        radius = 4.5.dp.toPx(),
-                                        center = Offset(w * at.xRatio, h * at.yRatio)
-                                    )
-                                }
-                            }
-
-                            // Pulsing Vehicle Location Marker
-                            val vehicleCenter = Offset(w * 0.55f, h * 0.50f)
-                            drawCircle(
-                                color = SkyBluePrimary.copy(alpha = 0.35f * pulseAlpha),
-                                radius = 22.dp.toPx(),
-                                center = vehicleCenter
-                            )
-                            drawCircle(
-                                color = SkyBluePrimary,
-                                radius = 8.dp.toPx(),
-                                center = vehicleCenter
-                            )
-                            drawCircle(
-                                color = Color.White,
-                                radius = 3.5.dp.toPx(),
-                                center = vehicleCenter
-                            )
-                        }
-
-                        // Route Label Badge
+                        // Dynamic Route Badge & Corridor Switcher
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(RoundedCornerShape(8.dp))
                                 .background(SurfaceWhite)
-                                .border(1.dp, BorderLight, RoundedCornerShape(6.dp))
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                .border(1.dp, BorderLight, RoundedCornerShape(8.dp))
+                                .clickable { viewModel.setRouteSelectorOpen(true) }
+                                .padding(horizontal = 9.dp, vertical = 4.dp)
                         ) {
-                            Text(
-                                text = "${uiState.origin} ➔ Marina",
-                                color = TextNavyDark,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "${uiState.origin} ➔ ${uiState.destination}",
+                                    color = TextNavyDark,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.widthIn(max = 175.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = "⇄", color = SkyBluePrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
 
                         // Recenter Button
@@ -413,6 +560,164 @@ fun OnYourWayScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = "🎯", fontSize = 14.sp)
+                        }
+                    }
+
+                    // Live GPS Telemetry Chip
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "🛰️", fontSize = 14.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text(
+                                    text = uiState.userGpsLatLng?.let {
+                                        "GPS: ${String.format(Locale.US, "%.4f° N, %.4f° E", it.latitude, it.longitude)}"
+                                    } ?: "GPS: Acquiring satellite fix...",
+                                    color = TextNavyDark,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Accuracy: ${uiState.gpsAccuracyMeters?.toInt()?.let { "±${it}m" } ?: "Standby"} · Speed: ${uiState.gpsSpeedKmh?.toInt()?.let { "${it} km/h" } ?: "0 km/h"}",
+                                    color = TextMutedSlate,
+                                    fontSize = 10.sp
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = uiState.gpsLastUpdatedText,
+                            color = if (isTracking) EmeraldGreen else WarmOrangeDark,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    // Real-Time Journey Tracking Controls Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        when (uiState.trackingStatus) {
+                            "STOPPED" -> {
+                                Button(
+                                    onClick = {
+                                        val hasPerm = ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.ACCESS_FINE_LOCATION
+                                        ) == PackageManager.PERMISSION_GRANTED
+                                        if (!hasPerm) {
+                                            locationPermissionLauncher.launch(
+                                                arrayOf(
+                                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                                )
+                                            )
+                                        } else {
+                                            viewModel.startJourneyTracking(context)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
+                                ) {
+                                    Text(
+                                        text = "▶  Start Journey Tracking",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            "TRACKING" -> {
+                                Button(
+                                    onClick = { viewModel.pauseTracking() },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = WarmOrangeAccent)
+                                ) {
+                                    Text(
+                                        text = "⏸  Pause Tracking",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Button(
+                                    onClick = { viewModel.stopTracking() },
+                                    modifier = Modifier
+                                        .weight(0.7f)
+                                        .height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = TextMutedSlate)
+                                ) {
+                                    Text(
+                                        text = "⏹  Stop",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                OutlinedButton(
+                                    onClick = { viewModel.recenterMap() },
+                                    modifier = Modifier.height(44.dp),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(text = "🎯 Recenter", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            "PAUSED" -> {
+                                Button(
+                                    onClick = { viewModel.resumeTracking(context) },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = EmeraldGreen)
+                                ) {
+                                    Text(
+                                        text = "▶  Resume Tracking",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Button(
+                                    onClick = { viewModel.stopTracking() },
+                                    modifier = Modifier
+                                        .weight(0.7f)
+                                        .height(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = TextMutedSlate)
+                                ) {
+                                    Text(
+                                        text = "⏹  Stop",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                OutlinedButton(
+                                    onClick = { viewModel.recenterMap() },
+                                    modifier = Modifier.height(44.dp),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(text = "🎯 Recenter", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
                         }
                     }
 
@@ -673,57 +978,151 @@ fun OnYourWayScreen(
                             }
                         }
 
-                        // Open full chat button
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(38.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(PastelCardBlue)
-                                .clickable { viewModel.openAssistant(true) },
-                            contentAlignment = Alignment.Center
+                        // Open chat and AI Multi-day Planner buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = "💬 Open AI Travel Chatbot",
-                                color = SkyBlueDark,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(38.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(PastelCardBlue)
+                                    .clickable { viewModel.openAssistant(true) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "💬 AI Assistant",
+                                    color = SkyBlueDark,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1.1f)
+                                    .height(38.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(PastelCardTeal)
+                                    .clickable { onOpenAiTravelAdvisor() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "🤖 AI Multi-Day & Stays",
+                                    color = TealDark,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
 
-                // 7. AI TOURIST PLACES ALONG MY ROUTE
+                // 7. DYNAMIC TOURIST PLACES DISCOVERY ACROSS ALL 38 TAMIL NADU DISTRICTS
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Explore Places Along Route",
                                 color = TextNavyDark,
-                                fontSize = 15.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Attractions along the Chennai transit corridor",
+                                text = "Discover tourist destinations across all 38 districts of Tamil Nadu",
                                 color = TextMutedSlate,
                                 fontSize = 11.sp
                             )
                         }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(PastelCardTeal)
+                                .clickable { onOpenAiTravelAdvisor() }
+                                .padding(horizontal = 8.dp, vertical = 5.dp)
+                        ) {
+                            Text(
+                                text = "Plan Stays ➔",
+                                color = TealDark,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
 
-                    // Category filter chips
+                    // Dynamic Search Bar
+                    OutlinedTextField(
+                        value = uiState.touristSearchQuery,
+                        onValueChange = { viewModel.onSearchQueryChange(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(SurfaceWhite),
+                        placeholder = {
+                            Text(
+                                text = "Search district, city, place, or category (e.g. Madurai, Ooty)...",
+                                fontSize = 12.sp,
+                                color = TextMutedSlate
+                            )
+                        },
+                        leadingIcon = {
+                            Text(text = "🔍", fontSize = 14.sp)
+                        },
+                        trailingIcon = {
+                            if (uiState.touristSearchQuery.isNotEmpty()) {
+                                IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                                    Text(text = "✕", fontSize = 12.sp, color = TextMutedSlate)
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = SkyBluePrimary,
+                            unfocusedBorderColor = BorderLight,
+                            cursorColor = SkyBluePrimary
+                        ),
+                        shape = RoundedCornerShape(14.dp)
+                    )
+
+                    // 11 Required Tourist Categories Filter Chips
+                    val tnCategories = listOf(
+                        "All",
+                        "Beaches",
+                        "Hill Stations",
+                        "Historical Places",
+                        "Temples and Religious Places",
+                        "Waterfalls",
+                        "Nature and Wildlife",
+                        "Parks and Gardens",
+                        "Forts and Heritage Sites",
+                        "Adventure and Trekking",
+                        "Lakes and Dams"
+                    )
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        listOf("All", "Beaches", "Museums", "Religious", "Nature").forEach { cat ->
-                            val isSelected = uiState.selectedTouristCategory == cat
+                        tnCategories.forEach { cat ->
+                            val isSelected = uiState.selectedTouristCategory.equals(cat, ignoreCase = true)
+                            val displayLabel = when (cat) {
+                                "Temples and Religious Places" -> "Temples & Religious"
+                                "Nature and Wildlife" -> "Nature & Wildlife"
+                                "Parks and Gardens" -> "Parks & Gardens"
+                                "Forts and Heritage Sites" -> "Forts & Heritage"
+                                "Adventure and Trekking" -> "Adventure & Trekking"
+                                "Lakes and Dams" -> "Lakes & Dams"
+                                else -> cat
+                            }
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
@@ -737,7 +1136,7 @@ fun OnYourWayScreen(
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Text(
-                                    text = cat,
+                                    text = displayLabel,
                                     color = if (isSelected) Color.White else TextNavyDark,
                                     fontSize = 11.sp,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
@@ -746,41 +1145,81 @@ fun OnYourWayScreen(
                         }
                     }
 
-                    // Horizontal cards
-                    val filteredPlaces = if (uiState.selectedTouristCategory == "All") {
-                        uiState.placesAlongRoute
-                    } else {
-                        uiState.placesAlongRoute.filter { it.category == uiState.selectedTouristCategory }
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        filteredPlaces.forEach { place ->
-                            TouristCorridorCard(
-                                place = place,
-                                onViewDetails = { selectedPlaceDetail = place },
-                                onToggleSave = { viewModel.toggleSavePlace(place.id) }
-                            )
+                    // Dynamic Horizontal Cards with Real-time GPS distance
+                    if (uiState.isPlacesLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderLight, RoundedCornerShape(14.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = SkyBluePrimary,
+                                    strokeWidth = 2.dp
+                                )
+                                Text(
+                                    text = "Discovering top Tamil Nadu destinations...",
+                                    color = TextMutedSlate,
+                                    fontSize = 11.sp
+                                )
+                            }
                         }
-                    }
-                }
-
-                // 8. AI MULTI-MODAL JOURNEY SUGGESTIONS
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        text = "AI Multi-Modal Suggestions",
-                        color = TextNavyDark,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        uiState.journeySuggestions.forEach { option ->
-                            AlternativeRouteCard(option = option)
+                    } else if (uiState.placesAlongRoute.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(SurfaceWhite)
+                                .border(1.dp, BorderLight, RoundedCornerShape(14.dp))
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(text = "🏛️", fontSize = 24.sp)
+                                Text(
+                                    text = "No destinations found for '${uiState.touristSearchQuery}'",
+                                    color = TextNavyDark,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Try searching by district name (e.g. Madurai, Salem, Nilgiris) or choose 'All' category.",
+                                    color = TextMutedSlate,
+                                    fontSize = 11.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            uiState.placesAlongRoute.forEach { place ->
+                                TouristCorridorCard(
+                                    place = place,
+                                    onViewDetails = {
+                                        onViewPlaceDetails(place)
+                                    },
+                                    onToggleSave = {
+                                        viewModel.toggleSavePlace(place.placeId, context)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -918,25 +1357,25 @@ fun OnYourWayScreen(
                     }
                 }
 
-                // View Digital Ticket
+                // Complete Journey Button (Replacing ticket booking)
                 Box(
                     modifier = Modifier
                         .weight(1.3f)
                         .height(48.dp)
                         .clip(RoundedCornerShape(24.dp))
                         .background(PrimaryGradient)
-                        .clickable { onViewTicket() },
+                        .clickable { onCompleteJourney() },
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "View Digital Ticket",
+                            text = "Finish Journey",
                             color = Color.White,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "🎫", fontSize = 13.sp)
+                        Text(text = "🏁", fontSize = 13.sp)
                     }
                 }
             }
@@ -999,7 +1438,20 @@ fun OnYourWayScreen(
             AttractionDetailDialog(
                 place = place,
                 onDismiss = { selectedPlaceDetail = null },
-                onToggleSave = { viewModel.toggleSavePlace(place.id) }
+                onToggleSave = { viewModel.toggleSavePlace(place.placeId, context) },
+                onOpenFullDetails = {
+                    selectedPlaceDetail = null
+                    onViewPlaceDetails(place)
+                }
+            )
+        }
+
+        if (uiState.isRouteSelectorOpen) {
+            RouteSelectorDialog(
+                routes = uiState.availableRoutes,
+                selectedRouteId = uiState.selectedRouteId,
+                onSelectRoute = { route -> viewModel.selectRoute(route) },
+                onDismiss = { viewModel.setRouteSelectorOpen(false) }
             )
         }
 
@@ -1054,13 +1506,13 @@ fun MapFilterChip(
 
 @Composable
 fun TouristCorridorCard(
-    place: RouteAttractionItem,
+    place: TouristPlace,
     onViewDetails: () -> Unit,
     onToggleSave: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .width(230.dp)
+            .width(240.dp)
             .shadow(2.dp, RoundedCornerShape(14.dp))
             .clip(RoundedCornerShape(14.dp))
             .background(SurfaceWhite)
@@ -1072,7 +1524,7 @@ fun TouristCorridorCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp)
+                    .height(115.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(BorderSubtle)
             ) {
@@ -1092,13 +1544,20 @@ fun TouristCorridorCard(
                         .align(Alignment.TopStart)
                         .padding(6.dp)
                         .clip(RoundedCornerShape(6.dp))
-                        .background(TextNavyDark.copy(alpha = 0.75f))
+                        .background(TextNavyDark.copy(alpha = 0.8f))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
-                    Text(text = place.category, color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = place.category,
+                        color = Color.White,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
 
-                // Bookmark Icon
+                // Bookmark / Save Icon
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -1122,19 +1581,31 @@ fun TouristCorridorCard(
                 overflow = TextOverflow.Ellipsis
             )
 
+            // District & Location
+            val locationText = if (!place.district.isNullOrBlank()) "${place.district} · ${place.city}" else place.city
+            Text(
+                text = "📍 $locationText",
+                color = TextMutedSlate,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "⭐ ${place.rating}", color = WarmOrangeDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text(text = place.distanceOffRoute, color = TealSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                val distStr = if (place.distanceKm < 0.5) "At Destination" else "${String.format(Locale.US, "%.1f", place.distanceKm)} km away"
+                Text(text = distStr, color = TealSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
             }
 
             Text(
-                text = "Stop: ${place.nearbyStop}",
-                color = TextMutedSlate,
+                text = place.description,
+                color = TextNavyBody,
                 fontSize = 10.sp,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
@@ -1176,74 +1647,115 @@ fun TouristCorridorCard(
 }
 
 @Composable
-fun AlternativeRouteCard(option: AlternativeJourneyItem) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (option.isRecommended) PastelCardTeal else SurfaceWhite)
-            .border(
-                1.dp,
-                if (option.isRecommended) TealSecondary.copy(alpha = 0.5f) else BorderLight,
-                RoundedCornerShape(12.dp)
-            )
-            .padding(12.dp)
+fun RouteSelectorDialog(
+    routes: List<TamilNaduCorridorRoute>,
+    selectedRouteId: String,
+    onSelectRoute: (TamilNaduCorridorRoute) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = option.modeCombination,
-                        color = TextNavyDark,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (option.isRecommended) {
-                        Spacer(modifier = Modifier.width(6.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .clip(RoundedCornerShape(20.dp))
+                .background(SurfaceWhite)
+                .padding(18.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Select Tamil Nadu Route",
+                            color = TextNavyDark,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Dynamic transit corridors across all 38 districts",
+                            color = TextMutedSlate,
+                            fontSize = 11.sp
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(BorderSubtle)
+                            .clickable { onDismiss() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "✕", fontSize = 12.sp, color = TextNavyDark)
+                    }
+                }
+
+                HorizontalDivider(color = BorderLight)
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 380.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    routes.forEach { route ->
+                        val isSelected = route.id == selectedRouteId
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(TealSecondary)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) PastelCardTeal else SurfaceWhite)
+                                .border(
+                                    1.dp,
+                                    if (isSelected) TealSecondary else BorderLight,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable { onSelectRoute(route) }
+                                .padding(12.dp)
                         ) {
-                            Text(text = "Current", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = route.origin,
+                                            color = TextNavyDark,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(text = " ➔ ", color = SkyBluePrimary, fontSize = 13.sp)
+                                        Text(
+                                            text = route.destination,
+                                            color = TextNavyDark,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Text(
+                                        text = "${route.transitBadge} · ${route.originDistrict} to ${route.destinationDistrict}",
+                                        color = TextMutedSlate,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                                if (isSelected) {
+                                    Text(text = "✓ Active", color = TealDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                } else {
+                                    Text(text = "Select →", color = SkyBluePrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
                         }
                     }
                 }
-                Text(
-                    text = option.fareText,
-                    color = TealSecondary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Text(
-                text = option.transferPoints,
-                color = TextMutedSlate,
-                fontSize = 11.sp
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "⏱️ ${option.durationText} · ${option.transfers} transfers",
-                    color = TextNavyDark,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "🌱 ${option.co2Saved} CO₂ saved",
-                    color = EmeraldGreen,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
             }
         }
     }
@@ -1694,9 +2206,10 @@ fun ItineraryBuilderDialog(
 
 @Composable
 fun AttractionDetailDialog(
-    place: RouteAttractionItem,
+    place: TouristPlace,
     onDismiss: () -> Unit,
-    onToggleSave: () -> Unit
+    onToggleSave: () -> Unit,
+    onOpenFullDetails: () -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -1748,6 +2261,14 @@ fun AttractionDetailDialog(
                     fontWeight = FontWeight.Bold
                 )
 
+                val locInfo = if (!place.district.isNullOrBlank()) "${place.district} · ${place.city}" else place.city
+                Text(
+                    text = "📍 $locInfo",
+                    color = TextMutedSlate,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -1760,29 +2281,29 @@ fun AttractionDetailDialog(
 
                 HorizontalDivider(color = BorderLight)
 
-                Text(text = "Entry Fee: ${place.entryFee}", color = TextMutedSlate, fontSize = 11.sp)
-                Text(text = "Visit Duration: ${place.visitDuration}", color = TextMutedSlate, fontSize = 11.sp)
-                Text(text = "Transit Stop: ${place.nearbyStop}", color = TealSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                Text(text = "Entry Fee: ${place.entryFee ?: "Free"}", color = TextMutedSlate, fontSize = 11.sp)
+                Text(text = "Visit Duration: ${place.durationVisit ?: "2-3 hours"}", color = TextMutedSlate, fontSize = 11.sp)
+                Text(text = "Transit Stop: ${place.nearbyTransit ?: place.locationAddress}", color = TealSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(40.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(BorderSubtle)
-                            .clickable { onDismiss() },
+                            .background(PastelCardBlue)
+                            .clickable { onOpenFullDetails() },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Close", color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "View Details Page →", color = SkyBlueDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
 
                     Box(
                         modifier = Modifier
-                            .weight(1.3f)
+                            .weight(1f)
                             .height(40.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(if (place.isSaved) PastelCardTeal else TealSecondary)
@@ -1790,9 +2311,9 @@ fun AttractionDetailDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (place.isSaved) "Saved in My Trips ✓" else "+ Add to My Trip",
+                            text = if (place.isSaved) "Saved in Trips ✓" else "+ Add to Journey",
                             color = if (place.isSaved) TealDark else Color.White,
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }

@@ -62,7 +62,8 @@ fun YourTicketScreen(
     bookedJourney: BookedJourneyData? = null,
     trip: TripItem? = null,
     onBack: () -> Unit = {},
-    onStartJourney: () -> Unit = {}
+    onStartJourney: () -> Unit = {},
+    onOpenStopover: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -691,6 +692,28 @@ fun YourTicketScreen(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp)
+                        .clip(RoundedCornerShape(23.dp))
+                        .background(SkyBlueLight)
+                        .border(1.dp, SkyBluePrimary.copy(alpha = 0.4f), RoundedCornerShape(23.dp))
+                        .clickable { onOpenStopover() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "✨", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "AI Smart Stopovers & Day Plan  ➔",
+                            color = SkyBluePrimary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Box(
