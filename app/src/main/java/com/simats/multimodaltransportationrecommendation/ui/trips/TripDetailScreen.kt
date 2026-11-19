@@ -139,21 +139,12 @@ fun TripDetailScreen(
                         Text(text = "←", color = TextNavyDark, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "JOURNEY BREAKDOWN",
-                            color = SkyBluePrimary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp
-                        )
-                        Text(
-                            text = "Trip Details",
-                            color = TextNavyDark,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "Trip Details",
+                        color = TextNavyDark,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 // Booking Ref Pill

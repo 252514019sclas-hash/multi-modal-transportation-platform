@@ -91,21 +91,12 @@ fun GroupLocationSettingsScreen(
                         Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "LOCATION PRIVACY & CONTROLS",
-                            color = SkyBluePrimary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp
-                        )
-                        Text(
-                            text = "Live Location Settings",
-                            color = TextNavyDark,
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "Live Location Settings",
+                        color = TextNavyDark,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 // Success / Error Feedback

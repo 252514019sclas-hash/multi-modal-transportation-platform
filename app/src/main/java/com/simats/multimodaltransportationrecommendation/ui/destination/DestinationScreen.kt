@@ -107,21 +107,12 @@ fun DestinationScreen(
                         Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(14.dp))
-                    Column {
-                        Text(
-                            text = "TAMIL NADU TRANSIT & TOURISM",
-                            color = SkyBluePrimary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp
-                        )
-                        Text(
-                            text = "Find Multi-Modal Route",
-                            color = TextNavyDark,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "Find Multi-Modal Route",
+                        color = TextNavyDark,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 // Origin & Destination Input Card with Swap Action

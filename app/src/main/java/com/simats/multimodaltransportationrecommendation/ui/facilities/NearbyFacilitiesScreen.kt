@@ -90,21 +90,13 @@ fun NearbyFacilitiesScreen(
 
                 Spacer(modifier = Modifier.width(14.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "NEARBY TRAVEL FACILITIES",
-                        color = SkyBluePrimary,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.2.sp
-                    )
-                    Text(
-                        text = "Verified Tourist Spot Services",
-                        color = TextNavyDark,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = "Verified Tourist Spot Services",
+                    color = TextNavyDark,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
 
                 Spacer(modifier = Modifier.width(6.dp))
 

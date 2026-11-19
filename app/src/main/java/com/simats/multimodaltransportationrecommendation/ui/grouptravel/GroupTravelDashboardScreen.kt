@@ -80,21 +80,12 @@ fun GroupTravelDashboardScreen(
                             Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = "MOVE SMART AI",
-                                color = SkyBluePrimary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp
-                            )
-                            Text(
-                                text = "Group Travel & Live Map",
-                                color = TextNavyDark,
-                                fontSize = 19.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = "Group Travel & Live Map",
+                            color = TextNavyDark,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     // Refresh Button

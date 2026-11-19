@@ -227,21 +227,12 @@ fun OnYourWayScreen(
                             )
                         }
                         Spacer(modifier = Modifier.width(14.dp))
-                        Column {
-                            Text(
-                                text = "TAMIL NADU SMART TRANSIT",
-                                color = SkyBluePrimary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.4.sp
-                            )
-                            Text(
-                                text = "Live Journey Tracking",
-                                color = TextNavyDark,
-                                fontSize = 19.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = "Live Journey Tracking",
+                            color = TextNavyDark,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     // Options menu button (Opens Smart Notification settings)

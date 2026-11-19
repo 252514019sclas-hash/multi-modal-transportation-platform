@@ -67,21 +67,12 @@ fun SmarterWayScreen(
                         Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(14.dp))
-                    Column {
-                        Text(
-                            text = "TAMIL NADU SMART TRANSIT",
-                            color = SkyBluePrimary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp
-                        )
-                        Text(
-                            text = "Smart Reroute Suggestion",
-                            color = TextNavyDark,
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "Smart Reroute Suggestion",
+                        color = TextNavyDark,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 // Delay Alert Card

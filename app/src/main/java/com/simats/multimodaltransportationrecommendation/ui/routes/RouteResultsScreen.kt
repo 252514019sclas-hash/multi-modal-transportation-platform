@@ -120,21 +120,12 @@ fun RouteResultsScreen(
                             Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            Text(
-                                text = "TAMIL NADU AI TRAVEL PLANNER",
-                                color = SkyBluePrimary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.1.sp
-                            )
-                            Text(
-                                text = "Vehicles & Tourist Guide",
-                                color = TextNavyDark,
-                                fontSize = 17.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = "Vehicles & Tourist Guide",
+                            color = TextNavyDark,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     // Action Buttons: Map, Facilities & Multi-Day Tour

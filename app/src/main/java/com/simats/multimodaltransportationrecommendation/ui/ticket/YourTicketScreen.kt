@@ -157,21 +157,12 @@ fun YourTicketScreen(
                             Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = "MOVESMART AI · TAMIL NADU TRANSIT",
-                                color = SkyBluePrimary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp
-                            )
-                            Text(
-                                text = "Smart Travel Ticket & QR",
-                                color = TextNavyDark,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = "Smart Travel Ticket & QR",
+                            color = TextNavyDark,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     // Refresh Button

@@ -823,21 +823,12 @@ private fun TamilNaduRouteSearchDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "SEARCH ROUTE ACROSS TAMIL NADU",
-                            color = Color(0xFF6D28D9),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = "Scheduled Stops & Stations",
-                            color = Color(0xFF1E1B4B),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "Scheduled Stops & Stations",
+                        color = Color(0xFF1E1B4B),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                     Text(
                         text = "✕",
                         color = Color(0xFF64748B),

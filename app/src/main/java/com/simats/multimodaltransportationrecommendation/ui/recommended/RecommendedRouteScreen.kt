@@ -77,21 +77,12 @@ fun RecommendedRouteScreen(
                             Text(text = "←", color = TextNavyDark, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.width(14.dp))
-                        Column {
-                            Text(
-                                text = "TAMIL NADU SMART TRANSIT",
-                                color = SkyBluePrimary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.5.sp
-                            )
-                            Text(
-                                text = "Recommended Route",
-                                color = TextNavyDark,
-                                fontSize = 19.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = "Recommended Route",
+                            color = TextNavyDark,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     // Bookmark

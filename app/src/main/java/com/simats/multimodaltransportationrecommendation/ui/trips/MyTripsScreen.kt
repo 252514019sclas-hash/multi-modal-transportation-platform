@@ -95,21 +95,12 @@ fun MyTripsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "TAMIL NADU JOURNEYS",
-                            color = SkyBluePrimary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp
-                        )
-                        Text(
-                            text = "My Trips",
-                            color = TextNavyDark,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "My Trips",
+                        color = TextNavyDark,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         // AI Assistant Chat trigger

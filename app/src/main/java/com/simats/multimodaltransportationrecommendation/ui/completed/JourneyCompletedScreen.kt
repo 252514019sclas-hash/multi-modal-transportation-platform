@@ -110,21 +110,12 @@ fun JourneyCompletedScreen(
                             Text(text = "←", color = TextNavyDark, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = "TAMIL NADU SMART TRANSIT",
-                                color = SkyBluePrimary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.5.sp
-                            )
-                            Text(
-                                text = "Journey Completed",
-                                color = TextNavyDark,
-                                fontSize = 19.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = "Journey Completed",
+                            color = TextNavyDark,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     // Eco-friendly badge
