@@ -37,7 +37,8 @@ fun AiSmartStopoverScreen(
     destination: String = "Salem",
     onBack: () -> Unit = {},
     onViewRouteMap: () -> Unit = {},
-    onStartJourney: () -> Unit = {}
+    onStartJourney: () -> Unit = {},
+    onViewSummary: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -123,20 +124,50 @@ fun AiSmartStopoverScreen(
                     )
                 }
 
-                // AI Sparkle Badge
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .shadow(2.dp, CircleShape)
-                        .clip(CircleShape)
-                        .background(appLightTint)
-                        .border(1.dp, appPrimaryBlue.copy(alpha = 0.3f), CircleShape)
-                        .clickable {
-                            Toast.makeText(context, "${planState.stops.size} tourist spots curated on your route ✨", Toast.LENGTH_SHORT).show()
-                        },
-                    contentAlignment = Alignment.Center
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(text = "✨", fontSize = 18.sp)
+                    // Summary Pill Button
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(appPrimaryBlue)
+                            .clickable { onViewSummary() }
+                            .padding(horizontal = 12.dp, vertical = 7.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Summary",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "➔",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    // AI Sparkle Badge
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .shadow(2.dp, CircleShape)
+                            .clip(CircleShape)
+                            .background(appLightTint)
+                            .border(1.dp, appPrimaryBlue.copy(alpha = 0.3f), CircleShape)
+                            .clickable {
+                                onViewSummary()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "✨", fontSize = 18.sp)
+                    }
                 }
             }
 
@@ -268,6 +299,39 @@ fun AiSmartStopoverScreen(
                         appLightTint = appLightTint,
                         onClick = { selectedStopDetail = stopItem }
                     )
+                }
+
+                // Finish Journey & View Trip Summary Button
+                item {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Button(
+                        onClick = { onViewSummary() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp)
+                            .shadow(4.dp, RoundedCornerShape(16.dp)),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = appPrimaryBlue
+                        )
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = "🎉", fontSize = 18.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Complete Journey & View Summary",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(text = "➔", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
