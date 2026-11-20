@@ -37,8 +37,7 @@ fun AiSmartStopoverScreen(
     destination: String = "Salem",
     onBack: () -> Unit = {},
     onViewRouteMap: () -> Unit = {},
-    onStartJourney: () -> Unit = {},
-    onViewSummary: () -> Unit = {}
+    onStartJourney: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -124,50 +123,20 @@ fun AiSmartStopoverScreen(
                     )
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                // AI Sparkle Badge
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .shadow(2.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(appLightTint)
+                        .border(1.dp, appPrimaryBlue.copy(alpha = 0.3f), CircleShape)
+                        .clickable {
+                            Toast.makeText(context, "${planState.stops.size} tourist spots curated on your route ✨", Toast.LENGTH_SHORT).show()
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Summary Pill Button
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(appPrimaryBlue)
-                            .clickable { onViewSummary() }
-                            .padding(horizontal = 12.dp, vertical = 7.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "Summary",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "➔",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-
-                    // AI Sparkle Badge
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .shadow(2.dp, CircleShape)
-                            .clip(CircleShape)
-                            .background(appLightTint)
-                            .border(1.dp, appPrimaryBlue.copy(alpha = 0.3f), CircleShape)
-                            .clickable {
-                                onViewSummary()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "✨", fontSize = 18.sp)
-                    }
+                    Text(text = "✨", fontSize = 18.sp)
                 }
             }
 
@@ -301,37 +270,102 @@ fun AiSmartStopoverScreen(
                     )
                 }
 
-                // Finish Journey & View Trip Summary Button
+                // Terminal End of Route: Journey Completed
                 item {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Button(
-                        onClick = { onViewSummary() },
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp)
-                            .shadow(4.dp, RoundedCornerShape(16.dp)),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = appPrimaryBlue
-                        )
+                            .padding(top = 8.dp, bottom = 28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        // Vertical timeline connector line
+                        Box(
+                            modifier = Modifier
+                                .width(2.dp)
+                                .height(22.dp)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(appTealSecondary, Color(0xFF10B981))
+                                    )
+                                )
+                        )
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        // Celebratory Terminal Node Checkmark
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .shadow(4.dp, CircleShape)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(Color(0xFF0D9488), Color(0xFF059669))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "✓",
+                                color = Color.White,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Prominent Title: Journey Completed
+                        Text(
+                            text = "Journey Completed",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = appNavyDark,
+                            letterSpacing = 0.3.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "All tourist spots & destination reached successfully ✨",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = appSlateMuted
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Airplane flight divider & motto
                         Row(
+                            modifier = Modifier
+                                .fillMaxWidth(0.55f)
+                                .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(text = "🎉", fontSize = 18.sp)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Complete Journey & View Summary",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                            HorizontalDivider(
+                                modifier = Modifier.weight(1f),
+                                color = appCardBorder
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "➔", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "✈️", fontSize = 13.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.weight(1f),
+                                color = appCardBorder
+                            )
                         }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "Keep Exploring. Keep Travelling! ♡",
+                            fontSize = 11.sp,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            fontWeight = FontWeight.Medium,
+                            color = appSlateMuted
+                        )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -1038,17 +1072,37 @@ private fun StopDetailDialog(
 
 private fun launchGoogleMaps(context: Context, lat: Double, lng: Double, label: String) {
     try {
-        val gmmIntentUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})")
+        val encodedLabel = Uri.encode(label)
+        val gmmIntentUri = if (lat != 0.0 && lng != 0.0) {
+            Uri.parse("geo:$lat,$lng?q=$lat,$lng($encodedLabel)")
+        } else {
+            Uri.parse("geo:0,0?q=$encodedLabel")
+        }
         val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri).apply {
             setPackage("com.google.android.apps.maps")
         }
-        if (mapIntent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(mapIntent)
-        } else {
-            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng"))
-            context.startActivity(webIntent)
-        }
+        context.startActivity(mapIntent)
     } catch (e: Exception) {
-        Toast.makeText(context, "Unable to launch map navigation", Toast.LENGTH_SHORT).show()
+        try {
+            val genericUri = if (lat != 0.0 && lng != 0.0) {
+                Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})")
+            } else {
+                Uri.parse("geo:0,0?q=${Uri.encode(label)}")
+            }
+            val genericIntent = Intent(Intent.ACTION_VIEW, genericUri)
+            context.startActivity(genericIntent)
+        } catch (e2: Exception) {
+            try {
+                val webUrl = if (lat != 0.0 && lng != 0.0) {
+                    "https://www.google.com/maps/search/?api=1&query=$lat,$lng"
+                } else {
+                    "https://www.google.com/maps/search/?api=1&query=${Uri.encode(label)}"
+                }
+                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+                context.startActivity(webIntent)
+            } catch (e3: Exception) {
+                Toast.makeText(context, "Unable to launch map navigation: ${e3.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

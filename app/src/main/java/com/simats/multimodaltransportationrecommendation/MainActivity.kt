@@ -233,13 +233,7 @@ class MainActivity : ComponentActivity() {
                         destination = searchDestination,
                         onBack = { currentScreen = "nearbyfacilities" },
                         onViewRouteMap = { currentScreen = "routeresults" },
-                        onStartJourney = { currentScreen = "onyourway" },
-                        onViewSummary = { currentScreen = "tripsummary" }
-                    )
-                    "tripsummary" -> com.simats.multimodaltransportationrecommendation.ui.stopover.TripSummaryScreen(
-                        origin = searchOrigin,
-                        destination = searchDestination,
-                        onBack = { currentScreen = "aismartstopover" }
+                        onStartJourney = { currentScreen = "onyourway" }
                     )
                     "destination" -> DestinationScreen(
                         initialOrigin = searchOrigin,
