@@ -22,7 +22,30 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.automirrored.filled.DirectionsBike
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.DirectionsSubway
+import androidx.compose.material.icons.filled.DirectionsTransit
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.NearMe
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -138,7 +161,12 @@ fun HomeScreen(
                                 .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "⛅", fontSize = 12.sp)
+                                Icon(
+                                    imageVector = Icons.Default.WbSunny,
+                                    contentDescription = null,
+                                    tint = WarmOrangeAccent,
+                                    modifier = Modifier.size(13.dp)
+                                )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = uiState.temperature,
@@ -159,7 +187,12 @@ fun HomeScreen(
                                 .clickable { showNotificationsDialog = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "🔔", fontSize = 15.sp)
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "Notifications",
+                                tint = TextNavyDark,
+                                modifier = Modifier.size(18.dp)
+                            )
                             if (uiState.unreadNotifications > 0) {
                                 Box(
                                     modifier = Modifier
@@ -176,7 +209,7 @@ fun HomeScreen(
                 // Greeting & Subtitle
                 Column {
                     Text(
-                        text = "Vanakkam, ${uiState.userName} 🙏",
+                        text = "Vanakkam, ${uiState.userName}",
                         color = TextNavyDark,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
@@ -199,7 +232,12 @@ fun HomeScreen(
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "🌴", fontSize = 16.sp)
+                            Icon(
+                                imageVector = Icons.Default.Explore,
+                                contentDescription = null,
+                                tint = SurfaceWhite,
+                                modifier = Modifier.size(16.dp)
+                            )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "ENCHANTING TAMIL NADU",
@@ -246,7 +284,12 @@ fun HomeScreen(
                                     .padding(horizontal = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = "📍", fontSize = 14.sp)
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = null,
+                                    tint = Color(0xFFDC2626),
+                                    modifier = Modifier.size(16.dp)
+                                )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 BasicTextField(
                                     value = uiState.origin,
@@ -318,7 +361,12 @@ fun HomeScreen(
                                     .padding(horizontal = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = "🎯", fontSize = 14.sp)
+                                Icon(
+                                    imageVector = Icons.Default.Place,
+                                    contentDescription = null,
+                                    tint = SkyBluePrimary,
+                                    modifier = Modifier.size(16.dp)
+                                )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 BasicTextField(
                                     value = uiState.destination,
@@ -362,7 +410,12 @@ fun HomeScreen(
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(text = "🕒", fontSize = 12.sp)
+                                    Icon(
+                                        imageVector = Icons.Default.Schedule,
+                                        contentDescription = null,
+                                        tint = TealDark,
+                                        modifier = Modifier.size(14.dp)
+                                    )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(text = uiState.dateTime, color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.Medium)
                                 }
@@ -409,26 +462,34 @@ fun HomeScreen(
                     )
 
                     val transportShortcuts = listOf(
-                        "🚇 Metro (CMRL)" to "Chennai Metro",
-                        "🚌 Bus (MTC/TNSTC)" to "MTC Bus",
-                        "🚆 Rail (SR)" to "Southern Railway",
-                        "🚲 Cycling" to "Smart Cycle Track",
-                        "🚶 Walking" to "Heritage Corridor",
-                        "🚕 Taxi / Auto" to "Prepaid Auto"
+                        Triple("Metro (CMRL)", Icons.Default.DirectionsSubway, "Chennai Metro"),
+                        Triple("Bus (MTC/TNSTC)", Icons.Default.DirectionsBus, "MTC Bus"),
+                        Triple("Rail (SR)", Icons.Default.DirectionsTransit, "Southern Railway"),
+                        Triple("Cycling", Icons.AutoMirrored.Filled.DirectionsBike, "Smart Cycle Track"),
+                        Triple("Walking", Icons.AutoMirrored.Filled.DirectionsWalk, "Heritage Corridor"),
+                        Triple("Taxi / Auto", Icons.Default.DirectionsCar, "Prepaid Auto")
                     )
 
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(transportShortcuts) { (label, modeDesc) ->
-                            Box(
+                        items(transportShortcuts) { (label, icon, _) ->
+                            Row(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(PastelCardBlue)
                                     .border(1.dp, SkyBlueSoft, RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = SkyBluePrimary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = label,
                                     color = SkyBlueDark,
@@ -467,7 +528,12 @@ fun HomeScreen(
                                     .border(1.dp, SkyBluePrimary.copy(alpha = 0.3f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = "🤖", fontSize = 20.sp)
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = SkyBluePrimary,
+                                    modifier = Modifier.size(22.dp)
+                                )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
@@ -543,7 +609,12 @@ fun HomeScreen(
                                     .border(1.dp, TealSoft, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = "👨‍👩‍👧‍👦", fontSize = 20.sp)
+                                Icon(
+                                    imageVector = Icons.Default.Group,
+                                    contentDescription = null,
+                                    tint = TealDark,
+                                    modifier = Modifier.size(22.dp)
+                                )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
@@ -620,7 +691,12 @@ fun HomeScreen(
                             .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "🔍", fontSize = 13.sp)
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            tint = TextMuted,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         BasicTextField(
                             value = uiState.searchQuery,
@@ -769,7 +845,12 @@ fun HomeScreen(
                                     .background(PastelCardTeal),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = "🕒", fontSize = 14.sp)
+                                Icon(
+                                    imageVector = Icons.Default.Schedule,
+                                    contentDescription = null,
+                                    tint = TealDark,
+                                    modifier = Modifier.size(16.dp)
+                                )
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
@@ -804,22 +885,27 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val tabs = listOf(
-                    "🗺️\nExplore" to true,
-                    "🎫\nMy trips" to false,
-                    "🔖\nSaved" to false,
-                    "👤\nProfile" to false
+                    Triple("Explore", Icons.Default.Explore, true),
+                    Triple("My trips", Icons.Default.ConfirmationNumber, false),
+                    Triple("Saved", Icons.Default.Bookmark, false),
+                    Triple("Profile", Icons.Default.Person, false)
                 )
-                tabs.forEach { (tabInfo, isActive) ->
-                    val lines = tabInfo.split("\n")
+                tabs.forEach { (label, icon, isActive) ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
-                            onNavigateTab(lines[1])
+                            onNavigateTab(label)
                         }
                     ) {
-                        Text(text = lines[0], fontSize = 16.sp)
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            tint = if (isActive) SkyBluePrimary else TextMuted,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = lines[1],
+                            text = label,
                             color = if (isActive) SkyBluePrimary else TextMuted,
                             fontSize = 10.sp,
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
@@ -907,7 +993,12 @@ private fun TouristPlaceExploreCard(
                         )
                     } else {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "🏛️", fontSize = 28.sp)
+                            Icon(
+                                imageVector = Icons.Default.Place,
+                                contentDescription = null,
+                                tint = SkyBluePrimary,
+                                modifier = Modifier.size(28.dp)
+                            )
                         }
                     }
                 }
@@ -936,24 +1027,42 @@ private fun TouristPlaceExploreCard(
                                 .clickable { onToggleSave() },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = if (place.isSaved) "❤️" else "🤍", fontSize = 12.sp)
+                            Icon(
+                                imageVector = if (place.isSaved) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = null,
+                                tint = if (place.isSaved) Color(0xFFEF4444) else TextMuted,
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
 
-                    Text(
-                        text = "📍 ${place.city} · ${place.category}",
-                        color = TextNavyBody,
-                        fontSize = 11.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = null,
+                            tint = SkyBluePrimary,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = "${place.city} · ${place.category}",
+                            color = TextNavyBody,
+                            fontSize = 11.sp
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(3.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "★ ${place.rating}", color = WarmOrangeDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "🎟️ ${place.entryFee}", color = TextMuted, fontSize = 10.sp)
+                        Icon(imageVector = Icons.Default.ConfirmationNumber, contentDescription = null, tint = TextMuted, modifier = Modifier.size(11.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(text = place.entryFee ?: "Free", color = TextMuted, fontSize = 10.sp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "🧭 ${place.distanceKm} km", color = TextMuted, fontSize = 10.sp)
+                        Icon(imageVector = Icons.Default.NearMe, contentDescription = null, tint = TextMuted, modifier = Modifier.size(11.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(text = "${place.distanceKm} km", color = TextMuted, fontSize = 10.sp)
                     }
                 }
             }

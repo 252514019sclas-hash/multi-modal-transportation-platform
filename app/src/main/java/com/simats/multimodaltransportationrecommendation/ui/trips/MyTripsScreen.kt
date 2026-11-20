@@ -14,6 +14,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -318,20 +323,26 @@ fun MyTripsScreen(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                listOf(
-                    "🗺️\nExplore" to false,
-                    "🎫\nMy trips" to true,
-                    "🔖\nSaved" to false,
-                    "👤\nProfile" to false
-                ).forEach { (tabInfo, isActive) ->
-                    val lines = tabInfo.split("\n")
+                val tabs = listOf(
+                    Triple("Explore", Icons.Default.Explore, false),
+                    Triple("My trips", Icons.Default.ConfirmationNumber, true),
+                    Triple("Saved", Icons.Default.Bookmark, false),
+                    Triple("Profile", Icons.Default.Person, false)
+                )
+                tabs.forEach { (label, icon, isActive) ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clickable { onNavigateTab(lines[1]) }
+                        modifier = Modifier.clickable { onNavigateTab(label) }
                     ) {
-                        Text(text = lines[0], fontSize = 16.sp)
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            tint = if (isActive) SkyBluePrimary else TextMuted,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = lines[1],
+                            text = label,
                             color = if (isActive) SkyBluePrimary else TextMuted,
                             fontSize = 10.sp,
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal

@@ -11,7 +11,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -215,22 +221,27 @@ fun SavedScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val navTabs = listOf(
-                    "🗺️\nExplore" to false,
-                    "🎫\nMy trips" to false,
-                    "🔖\nSaved" to true,
-                    "👤\nProfile" to false
+                    Triple("Explore", Icons.Default.Explore, false),
+                    Triple("My trips", Icons.Default.ConfirmationNumber, false),
+                    Triple("Saved", Icons.Default.Bookmark, true),
+                    Triple("Profile", Icons.Default.Person, false)
                 )
-                navTabs.forEach { (tabInfo, isActive) ->
-                    val lines = tabInfo.split("\n")
+                navTabs.forEach { (label, icon, isActive) ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
-                            onNavigateTab(lines[1])
+                            onNavigateTab(label)
                         }
                     ) {
-                        Text(text = lines[0], fontSize = 16.sp)
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            tint = if (isActive) SkyBluePrimary else TextMuted,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = lines[1],
+                            text = label,
                             color = if (isActive) SkyBluePrimary else TextMuted,
                             fontSize = 10.sp,
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal

@@ -18,9 +18,19 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -723,22 +733,27 @@ fun ProfileScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val tabs = listOf(
-                    "🗺️\nExplore" to false,
-                    "🎫\nMy trips" to false,
-                    "🔖\nSaved" to false,
-                    "👤\nProfile" to true
+                    Triple("Explore", Icons.Default.Explore, false),
+                    Triple("My trips", Icons.Default.ConfirmationNumber, false),
+                    Triple("Saved", Icons.Default.Bookmark, false),
+                    Triple("Profile", Icons.Default.Person, true)
                 )
-                tabs.forEach { (tabInfo, isActive) ->
-                    val lines = tabInfo.split("\n")
+                tabs.forEach { (label, icon, isActive) ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable {
-                            onNavigateTab(lines[1])
+                            onNavigateTab(label)
                         }
                     ) {
-                        Text(text = lines[0], fontSize = 16.sp)
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            tint = if (isActive) SkyBluePrimary else TextMuted,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = lines[1],
+                            text = label,
                             color = if (isActive) SkyBluePrimary else TextMuted,
                             fontSize = 10.sp,
                             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
@@ -1143,7 +1158,12 @@ private fun PasswordField(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = "🔒", fontSize = 12.sp)
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "Password",
+                    tint = TextMutedSlate,
+                    modifier = Modifier.size(16.dp)
+                )
                 Spacer(modifier = Modifier.width(6.dp))
                 BasicTextField(
                     value = value,
@@ -1162,11 +1182,17 @@ private fun PasswordField(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            Text(
-                text = if (isVisible) "🙈" else "👁️",
-                fontSize = 13.sp,
-                modifier = Modifier.clickable { onToggleVisibility() }
-            )
+            IconButton(
+                onClick = onToggleVisibility,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = if (isVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = if (isVisible) "Hide password" else "Show password",
+                    tint = TextMutedSlate,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }

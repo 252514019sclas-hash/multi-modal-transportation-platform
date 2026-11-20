@@ -12,7 +12,20 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -93,9 +106,11 @@ fun CreateAccountScreen(
                         .background(PrimaryGradient),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "🌴",
-                        fontSize = 26.sp
+                    Icon(
+                        imageVector = Icons.Default.Explore,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
                     )
                 }
 
@@ -131,7 +146,12 @@ fun CreateAccountScreen(
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "⚠️", fontSize = 13.sp)
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = Color(0xFFDC2626),
+                                modifier = Modifier.size(16.dp)
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = uiState.errorMessage!!,
@@ -161,7 +181,12 @@ fun CreateAccountScreen(
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "👤", fontSize = 14.sp)
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Full name",
+                            tint = TextMutedSlate,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Spacer(modifier = Modifier.width(10.dp))
                         BasicTextField(
                             value = uiState.fullName,
@@ -209,7 +234,12 @@ fun CreateAccountScreen(
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "✉️", fontSize = 14.sp)
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "Email",
+                            tint = TextMutedSlate,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Spacer(modifier = Modifier.width(10.dp))
                         BasicTextField(
                             value = uiState.email,
@@ -262,7 +292,12 @@ fun CreateAccountScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(text = "🔒", fontSize = 14.sp)
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Password",
+                                tint = TextMutedSlate,
+                                modifier = Modifier.size(18.dp)
+                            )
                             Spacer(modifier = Modifier.width(10.dp))
                             BasicTextField(
                                 value = uiState.password,
@@ -296,14 +331,15 @@ fun CreateAccountScreen(
                                 }
                             )
                         }
-                        Box(
-                            modifier = Modifier
-                                .clickable { viewModel.togglePasswordVisibility() }
-                                .padding(4.dp)
+                        IconButton(
+                            onClick = { viewModel.togglePasswordVisibility() },
+                            modifier = Modifier.size(28.dp)
                         ) {
-                            Text(
-                                text = if (uiState.isPasswordVisible) "🙈" else "👁️",
-                                fontSize = 14.sp
+                            Icon(
+                                imageVector = if (uiState.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (uiState.isPasswordVisible) "Hide password" else "Show password",
+                                tint = TextMutedSlate,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
@@ -315,9 +351,11 @@ fun CreateAccountScreen(
                     modifier = Modifier.padding(top = 2.dp)
                 ) {
                     val isStrong = uiState.password.length >= 8
-                    Text(
-                        text = if (isStrong) "✅" else "ℹ️",
-                        fontSize = 11.sp
+                    Icon(
+                        imageVector = if (isStrong) Icons.Default.CheckCircle else Icons.Default.Info,
+                        contentDescription = null,
+                        tint = if (isStrong) TealSecondary else TextMuted,
+                        modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
@@ -395,7 +433,12 @@ fun CreateAccountScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "🛡️", fontSize = 11.sp)
+                    Icon(
+                        imageVector = Icons.Default.Security,
+                        contentDescription = null,
+                        tint = TextMuted,
+                        modifier = Modifier.size(14.dp)
+                    )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Private by design · MoveSmart AI",
