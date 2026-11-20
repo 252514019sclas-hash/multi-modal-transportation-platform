@@ -424,7 +424,10 @@ fun NearbyFacilitiesScreen(
                 ) {
                     items(uiState.facilities, key = { it.facilityId }) { facility ->
                         FacilityCardItem(
-                            facility = facility
+                            facility = facility,
+                            onNavigateInMaps = { f ->
+                                launchGoogleMaps(context, f.latitude, f.longitude, "${f.name}, ${f.city}")
+                            }
                         )
                     }
                 }
@@ -435,7 +438,8 @@ fun NearbyFacilitiesScreen(
 
 @Composable
 fun FacilityCardItem(
-    facility: TravelFacility
+    facility: TravelFacility,
+    onNavigateInMaps: (TravelFacility) -> Unit = {}
 ) {
     val categoryBadgeColor = when (facility.category) {
         "Petrol Stations" -> Color(0xFFD97706) // Amber / Fuel
@@ -579,6 +583,28 @@ fun FacilityCardItem(
                     )
                 }
             }
+
+            // Action Button (Navigate to see the correct location on map)
+            Button(
+                onClick = { onNavigateInMaps(facility) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = SkyBluePrimary)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Navigate ➔",
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     }
 }
@@ -586,18 +612,39 @@ fun FacilityCardItem(
 // Helpers for Intents
 fun launchGoogleMaps(context: Context, lat: Double, lng: Double, label: String) {
     try {
-        val gmmIntentUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})")
+        val encodedLabel = Uri.encode(label)
+        val gmmIntentUri = if (lat != 0.0 && lng != 0.0) {
+            Uri.parse("geo:$lat,$lng?q=$lat,$lng($encodedLabel)")
+        } else {
+            Uri.parse("geo:0,0?q=$encodedLabel")
+        }
         val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri).apply {
             setPackage("com.google.android.apps.maps")
         }
-        if (mapIntent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(mapIntent)
-        } else {
-            // Fallback to browser
-            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng"))
-            context.startActivity(webIntent)
-        }
+        context.startActivity(mapIntent)
     } catch (e: Exception) {
-        Toast.makeText(context, "Unable to launch map navigation", Toast.LENGTH_SHORT).show()
+        try {
+            // Fallback 1: Any map application installed on device
+            val genericUri = if (lat != 0.0 && lng != 0.0) {
+                Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})")
+            } else {
+                Uri.parse("geo:0,0?q=${Uri.encode(label)}")
+            }
+            val genericIntent = Intent(Intent.ACTION_VIEW, genericUri)
+            context.startActivity(genericIntent)
+        } catch (e2: Exception) {
+            try {
+                // Fallback 2: Google Maps Web browser link with exact coordinates
+                val webUrl = if (lat != 0.0 && lng != 0.0) {
+                    "https://www.google.com/maps/search/?api=1&query=$lat,$lng"
+                } else {
+                    "https://www.google.com/maps/search/?api=1&query=${Uri.encode(label)}"
+                }
+                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+                context.startActivity(webIntent)
+            } catch (e3: Exception) {
+                Toast.makeText(context, "Unable to launch map navigation: ${e3.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
