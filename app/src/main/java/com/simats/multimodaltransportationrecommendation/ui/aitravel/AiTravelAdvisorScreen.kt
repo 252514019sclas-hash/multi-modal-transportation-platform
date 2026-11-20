@@ -65,73 +65,84 @@ fun AiTravelAdvisorScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
+            // 1. TOP BAR (Fixed at the correct upper position)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .shadow(2.dp, CircleShape)
+                            .clip(CircleShape)
+                            .background(SurfaceWhite)
+                            .border(1.dp, BorderLight, CircleShape)
+                            .clickable { onBack() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "←",
+                            color = TextNavyDark,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Smart Multi-Day Trip Planner",
+                        color = TextNavyDark,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Top Action Buttons: Facilities & My Trips
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(PastelCardBlue)
+                            .clickable { onOpenNearbyFacilities(uiState.origin, uiState.destination, uiState.destination, null) }
+                            .padding(horizontal = 9.dp, vertical = 6.dp)
+                    ) {
+                        Text(text = "Facilities ⛽⚡", color = SkyBlueDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(PastelCardTeal)
+                            .clickable { onViewMyTrips() }
+                            .padding(horizontal = 9.dp, vertical = 6.dp)
+                    ) {
+                        Text(text = "My Trips ➔", color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
             // Scrollable Content
             Column(
                 modifier = Modifier
                     .weight(1f)
+                    .fillMaxWidth()
                     .verticalScroll(scrollState)
-                    .padding(horizontal = 18.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(horizontal = 18.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // 1. TOP BAR
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .shadow(2.dp, CircleShape)
-                                .clip(CircleShape)
-                                .background(SurfaceWhite)
-                                .border(1.dp, BorderLight, CircleShape)
-                                .clickable { onBack() },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "←",
-                                color = TextNavyDark,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "Smart Multi-Day Trip Planner",
-                            color = TextNavyDark,
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    // Top Action Buttons: Facilities & My Trips
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(PastelCardBlue)
-                                .clickable { onOpenNearbyFacilities(uiState.origin, uiState.destination, uiState.destination, null) }
-                                .padding(horizontal = 9.dp, vertical = 6.dp)
-                        ) {
-                            Text(text = "Facilities ⛽⚡", color = SkyBlueDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(PastelCardTeal)
-                                .clickable { onViewMyTrips() }
-                                .padding(horizontal = 9.dp, vertical = 6.dp)
-                        ) {
-                            Text(text = "My Trips ➔", color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
 
                 // Notice Banner if active
                 uiState.userNotice?.let { msg ->
