@@ -18,7 +18,6 @@ import com.simats.multimodaltransportationrecommendation.ui.booking.ReviewBookin
 import com.simats.multimodaltransportationrecommendation.ui.booking.ReviewBookingViewModel
 import com.simats.multimodaltransportationrecommendation.ui.compare.CompareRoutesScreen
 import com.simats.multimodaltransportationrecommendation.ui.compare.CompareRoutesViewModel
-import com.simats.multimodaltransportationrecommendation.ui.completed.JourneyCompletedScreen
 import com.simats.multimodaltransportationrecommendation.ui.destination.DestinationScreen
 import com.simats.multimodaltransportationrecommendation.ui.home.HomeScreen
 import com.simats.multimodaltransportationrecommendation.ui.journey.OnYourWayScreen
@@ -358,7 +357,7 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "smarterway"
                         },
                         onCompleteJourney = {
-                            currentScreen = "journeycompleted"
+                            currentScreen = "mytrips"
                         },
                         onViewPlaceDetails = { place ->
                             selectedTouristPlace = place
@@ -373,34 +372,10 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "onyourway"
                         },
                         onAcceptRoute = {
-                            currentScreen = "journeycompleted"
-                        },
-                        onKeepRoute = {
-                            currentScreen = "journeycompleted"
-                        }
-                    )
-                    "journeycompleted" -> JourneyCompletedScreen(
-                        onBack = {
-                            currentScreen = "onyourway"
-                        },
-                        onViewJourneyDetails = { trip ->
-                            activeTicketTrip = trip
-                            currentScreen = "tripdetails"
-                        },
-                        onViewTicket = { trip ->
-                            activeTicketTrip = trip
-                            activeTicketBooking = null
-                            currentScreen = "yourticket"
-                        },
-                        onExploreNearbyPlaces = { place ->
-                            selectedTouristPlace = place
-                            currentScreen = "placedetail"
-                        },
-                        onBackToMyTrips = {
                             currentScreen = "mytrips"
                         },
-                        onGoToExplore = {
-                            currentScreen = "home"
+                        onKeepRoute = {
+                            currentScreen = "mytrips"
                         }
                     )
                     "mytrips" -> MyTripsScreen(

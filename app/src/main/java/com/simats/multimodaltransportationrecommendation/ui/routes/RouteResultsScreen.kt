@@ -347,35 +347,15 @@ fun RouteResultsScreen(
                 }
             }
 
-            // 4. CLEAN BOTTOM ACTION BAR (NO TICKET BOOKING)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SurfaceWhite)
-                    .border(1.dp, BorderLight)
-                    .padding(horizontal = 18.dp, vertical = 10.dp)
-            ) {
-                if (uiState.selectedTab == 0) {
-                    val selRoute = uiState.selectedRoute ?: uiState.allRoutes.firstOrNull()
-                    if (selRoute != null) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(PrimaryGradient)
-                                .clickable { onStartJourney(selRoute) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "🚀 Start Live Tracking with ${selRoute.mode}  ➔",
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                } else {
+            // 4. CLEAN BOTTOM ACTION BAR (ONLY FOR TAB 1: SMART TRIP PLANNER)
+            if (uiState.selectedTab == 1) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(SurfaceWhite)
+                        .border(1.dp, BorderLight)
+                        .padding(horizontal = 18.dp, vertical = 10.dp)
+                ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -632,24 +612,11 @@ private fun VehicleCard(
                 }
             }
 
-            // Action Buttons: Start Tracking, Save, Compare
+            // Action Buttons: Save, Compare
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Start Live Tracking Button
-                Box(
-                    modifier = Modifier
-                        .weight(1.3f)
-                        .height(38.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(PrimaryGradient)
-                        .clickable { onStartJourney() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "🚀 Start Tracking", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                }
-
                 // Save Trip Plan
                 Box(
                     modifier = Modifier
@@ -660,20 +627,20 @@ private fun VehicleCard(
                         .clickable { onSavePlan() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "💾 Save Trip", color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "💾 Save Trip", color = TealDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
 
                 // Compare
                 Box(
                     modifier = Modifier
-                        .weight(0.9f)
+                        .weight(1f)
                         .height(38.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(PastelCardBlue)
                         .clickable { onCompare() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "⚖️ Compare", color = SkyBlueDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "⚖️ Compare", color = SkyBlueDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
