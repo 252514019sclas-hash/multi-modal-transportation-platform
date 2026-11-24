@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
                 var currentScreen by rememberSaveable { mutableStateOf("splash") }
                 var searchOrigin by rememberSaveable { mutableStateOf("Chennai Central") }
                 var searchDestination by rememberSaveable { mutableStateOf("Marina Beach & Promenade") }
+                var searchDateTime by rememberSaveable { mutableStateOf(com.simats.multimodaltransportationrecommendation.ui.home.HomeViewModel.getCurrentDynamicTime()) }
                 var preferencesReturnScreen by rememberSaveable { mutableStateOf("home") }
                 var activeGroupId by rememberSaveable { mutableStateOf(1) }
 
@@ -104,9 +105,10 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                     "home" -> HomeScreen(
-                        onPlanJourney = { origin, dest ->
+                        onPlanJourney = { origin, dest, dateTime ->
                             searchOrigin = origin
                             searchDestination = dest
+                            searchDateTime = dateTime
                             currentScreen = "routeresults"
                         },
                         onOpenPlaceDetail = { place ->
@@ -257,6 +259,7 @@ class MainActivity : ComponentActivity() {
                     "routeresults" -> RouteResultsScreen(
                         origin = searchOrigin,
                         destination = searchDestination,
+                        dateTime = searchDateTime,
                         onBack = {
                             currentScreen = "home"
                         },

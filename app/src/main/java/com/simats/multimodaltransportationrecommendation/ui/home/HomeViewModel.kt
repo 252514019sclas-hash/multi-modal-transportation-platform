@@ -12,19 +12,30 @@ import com.simats.multimodaltransportationrecommendation.data.local.SessionManag
 import com.simats.multimodaltransportationrecommendation.data.model.places.TouristPlace
 import com.simats.multimodaltransportationrecommendation.data.repository.AuthRepository
 import com.simats.multimodaltransportationrecommendation.data.repository.NetworkResult
+import com.simats.multimodaltransportationrecommendation.data.weather.WeatherManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 data class HomeUiState(
     val userName: String = "Traveler",
     val origin: String = "Chennai Central",
     val destination: String = "",
-    val dateTime: String = "Today, 9:15 AM",
+    val dateTime: String = HomeViewModel.getCurrentDynamicTime(),
     val location: String = "Chennai Central · Current location",
-    val temperature: String = "29°C · Pleasant Breeze",
+    val temperature: String = "28°C · Coastal Breeze",
+    val weatherCondition: String = "Coastal Breeze",
+    val weatherIconType: String = "breeze",
+    val weatherHumidity: String = "70%",
+    val weatherWind: String = "12 km/h",
+    val weatherCity: String = "Chennai",
+    val weatherZone: String = "Coastal Plain",
+    val weatherAdvisory: String = "Comfortable climatic conditions in Chennai. Great for multi-modal travel.",
+    val isLoadingWeather: Boolean = false,
     val recentDestination: String = "Marina Beach & Promenade",
     val recentLocationInfo: String = "Chennai · 2.5 km away",
     val selectedCategory: String = "All",
@@ -41,6 +52,13 @@ class HomeViewModel(
     private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
+    companion object {
+        fun getCurrentDynamicTime(): String {
+            val sdf = SimpleDateFormat("Today, h:mm a", Locale.getDefault())
+            return sdf.format(Date())
+        }
+    }
+
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
@@ -53,13 +71,15 @@ class HomeViewModel(
         val name = user?.fullName?.split(" ")?.firstOrNull() ?: "Traveler"
 
         _uiState.value = _uiState.value.copy(
-            userName = name
+            userName = name,
+            dateTime = if (_uiState.value.dateTime.startsWith("Today, 9:15")) getCurrentDynamicTime() else _uiState.value.dateTime
         )
 
         if (!isLoaded) {
             isLoaded = true
             fetchPlaces(userId, _uiState.value.selectedCategory)
             loadNotificationsCount(context)
+            refreshWeather(_uiState.value.origin)
         }
     }
 
@@ -107,6 +127,9 @@ class HomeViewModel(
 
     fun onOriginChange(origin: String) {
         _uiState.value = _uiState.value.copy(origin = origin)
+        if (origin.trim().length >= 3) {
+            refreshWeather(origin)
+        }
     }
 
     fun onDestinationChange(destination: String) {
@@ -117,8 +140,37 @@ class HomeViewModel(
         _uiState.value = _uiState.value.copy(searchQuery = query)
     }
 
+    fun updateDateTime(newTime: String) {
+        _uiState.value = _uiState.value.copy(dateTime = newTime)
+    }
+
+    fun refreshToLiveTime() {
+        _uiState.value = _uiState.value.copy(dateTime = getCurrentDynamicTime())
+    }
+
+    fun refreshWeather(customLocation: String? = null, customLat: Double? = null, customLng: Double? = null) {
+        val targetQuery = customLocation ?: _uiState.value.origin
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingWeather = true)
+            val weather = WeatherManager.getLiveOrClimaticWeather(targetQuery, customLat, customLng)
+            _uiState.value = _uiState.value.copy(
+                temperature = weather.fullDisplay,
+                weatherCondition = weather.conditionTitle,
+                weatherIconType = weather.iconType,
+                weatherHumidity = "${weather.humidityPercent}%",
+                weatherWind = "${String.format(Locale.US, "%.1f", weather.windSpeedKmh)} km/h",
+                weatherCity = weather.cityName,
+                weatherZone = weather.climateZone,
+                weatherAdvisory = weather.advisory,
+                isLoadingWeather = false
+            )
+        }
+    }
+
     fun useCurrentLocation(context: Context) {
         var detected = "Chennai Central (GPS)"
+        var detectedLat: Double? = null
+        var detectedLng: Double? = null
         try {
             val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
             if (locationManager != null) {
@@ -129,6 +181,8 @@ class HomeViewModel(
                     val lastNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
                     val loc = lastGps ?: lastNet
                     if (loc != null) {
+                        detectedLat = loc.latitude
+                        detectedLng = loc.longitude
                         try {
                             val geocoder = Geocoder(context, Locale.getDefault())
                             val list = geocoder.getFromLocation(loc.latitude, loc.longitude, 1)
@@ -151,6 +205,7 @@ class HomeViewModel(
             origin = detected,
             location = "$detected · GPS Active"
         )
+        refreshWeather(detected, detectedLat, detectedLng)
     }
 
     fun selectCategory(category: String, context: Context) {

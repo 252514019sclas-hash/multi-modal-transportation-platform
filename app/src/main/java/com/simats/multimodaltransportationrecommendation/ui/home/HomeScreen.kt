@@ -46,6 +46,15 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +77,7 @@ import com.simats.multimodaltransportationrecommendation.ui.theme.*
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
-    onPlanJourney: (String, String) -> Unit = { _, _ -> },
+    onPlanJourney: (String, String, String) -> Unit = { _, _, _ -> },
     onOpenPlaceDetail: (TouristPlace) -> Unit = {},
     onOpenGroupTravel: () -> Unit = {},
     onOpenAiTravelAdvisor: () -> Unit = {},
@@ -78,6 +87,8 @@ fun HomeScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     var showNotificationsDialog by remember { mutableStateOf(false) }
+    var showWeatherDialog by remember { mutableStateOf(false) }
+    var showTimePickerDialog by remember { mutableStateOf(false) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -158,13 +169,30 @@ fun HomeScreen(
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(PastelCardBlue)
                                 .border(1.dp, SkyBlueSoft, RoundedCornerShape(16.dp))
+                                .clickable { showWeatherDialog = true }
                                 .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
+                                val weatherIcon = when (uiState.weatherIconType) {
+                                    "sunny" -> Icons.Default.WbSunny
+                                    "night" -> Icons.Default.Nightlight
+                                    "cloudy" -> Icons.Default.Cloud
+                                    "rainy" -> Icons.Default.WaterDrop
+                                    "breeze" -> Icons.Default.Air
+                                    else -> Icons.Default.WbSunny
+                                }
+                                val iconTint = when (uiState.weatherIconType) {
+                                    "sunny" -> WarmOrangeAccent
+                                    "night" -> Color(0xFF6366F1)
+                                    "cloudy" -> Color(0xFF64748B)
+                                    "rainy" -> Color(0xFF0284C7)
+                                    "breeze" -> Color(0xFF0D9488)
+                                    else -> WarmOrangeAccent
+                                }
                                 Icon(
-                                    imageVector = Icons.Default.WbSunny,
-                                    contentDescription = null,
-                                    tint = WarmOrangeAccent,
+                                    imageVector = weatherIcon,
+                                    contentDescription = "Weather",
+                                    tint = iconTint,
                                     modifier = Modifier.size(13.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -406,18 +434,26 @@ fun HomeScreen(
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(PastelCardTeal)
                                     .border(1.dp, TealLight, RoundedCornerShape(10.dp))
+                                    .clickable { showTimePickerDialog = true }
                                     .padding(horizontal = 10.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.Schedule,
-                                        contentDescription = null,
+                                        contentDescription = "Select Departure Time",
                                         tint = TealDark,
                                         modifier = Modifier.size(14.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = uiState.dateTime, color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                    Text(
+                                        text = uiState.dateTime,
+                                        color = TealDark,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
                                 }
                             }
 
@@ -425,7 +461,7 @@ fun HomeScreen(
                                 onClick = {
                                     val dest = if (uiState.destination.isBlank()) "Mahabalipuram" else uiState.destination
                                     val start = if (uiState.origin.isBlank()) "Chennai Central" else uiState.origin
-                                    onPlanJourney(start, dest)
+                                    onPlanJourney(start, dest, uiState.dateTime)
                                 },
                                 modifier = Modifier
                                     .weight(1.3f)
@@ -806,7 +842,7 @@ fun HomeScreen(
                                     onPlanHere = {
                                         viewModel.setQuickDestination(place.name)
                                         val start = if (uiState.origin.isBlank()) "Chennai Central" else uiState.origin
-                                        onPlanJourney(start, place.name)
+                                        onPlanJourney(start, place.name, uiState.dateTime)
                                     }
                                 )
                             }
@@ -831,7 +867,7 @@ fun HomeScreen(
                             .background(SurfaceWhite)
                             .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                             .clickable {
-                                onPlanJourney("Chennai Central", uiState.recentDestination)
+                                onPlanJourney("Chennai Central", uiState.recentDestination, uiState.dateTime)
                             }
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -921,6 +957,22 @@ fun HomeScreen(
                     showNotificationsDialog = false
                     viewModel.loadNotificationsCount(context)
                 }
+            )
+        }
+
+        if (showWeatherDialog) {
+            WeatherDetailsDialog(
+                uiState = uiState,
+                onDismiss = { showWeatherDialog = false },
+                onRefresh = { viewModel.refreshWeather() }
+            )
+        }
+
+        if (showTimePickerDialog) {
+            DepartureTimeDialog(
+                currentDateTime = uiState.dateTime,
+                onDismiss = { showTimePickerDialog = false },
+                onTimeSelected = { viewModel.updateDateTime(it) }
             )
         }
     }
@@ -1102,6 +1154,371 @@ private fun TouristPlaceExploreCard(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                 ) {
                     Text(text = "Plan Journey", color = SurfaceWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeatherDetailsDialog(
+    uiState: HomeUiState,
+    onDismiss: () -> Unit,
+    onRefresh: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(SurfaceWhite)
+                .border(1.dp, BorderLight, RoundedCornerShape(20.dp))
+                .padding(20.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                // Top Row: Title & Close
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Live Climatic Conditions",
+                            color = TextNavyDark,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "${uiState.weatherCity} · ${uiState.weatherZone}",
+                            color = TextMutedSlate,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(PastelCardBlue)
+                            .clickable { onDismiss() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = TextNavyDark,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                // Main Weather Card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(PrimaryGradient)
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = uiState.temperature.substringBefore(" ·"),
+                                color = Color.White,
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = uiState.weatherCondition,
+                                color = Color.White.copy(alpha = 0.9f),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        val weatherIcon = when (uiState.weatherIconType) {
+                            "sunny" -> Icons.Default.WbSunny
+                            "night" -> Icons.Default.Nightlight
+                            "cloudy" -> Icons.Default.Cloud
+                            "rainy" -> Icons.Default.WaterDrop
+                            "breeze" -> Icons.Default.Air
+                            else -> Icons.Default.WbSunny
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(54.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = weatherIcon,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Climate Stats Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(PastelCardTeal)
+                            .padding(10.dp)
+                    ) {
+                        Column {
+                            Text(text = "Humidity", color = TextMutedSlate, fontSize = 10.sp)
+                            Text(text = uiState.weatherHumidity, color = TealDark, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(PastelCardBlue)
+                            .padding(10.dp)
+                    ) {
+                        Column {
+                            Text(text = "Wind Speed", color = TextMutedSlate, fontSize = 10.sp)
+                            Text(text = uiState.weatherWind, color = SkyBlueDark, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                // Traveler Climate Advisory
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFFEF3C7))
+                        .border(1.dp, Color(0xFFFDE68A), RoundedCornerShape(10.dp))
+                        .padding(10.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.Top) {
+                        Icon(
+                            imageVector = Icons.Default.Thermostat,
+                            contentDescription = null,
+                            tint = Color(0xFFB45309),
+                            modifier = Modifier.size(16.dp).offset(y = 2.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = uiState.weatherAdvisory,
+                            color = Color(0xFF92400E),
+                            fontSize = 11.5.sp,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                // Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(PastelCardTeal)
+                            .clickable { onRefresh() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (uiState.isLoadingWeather) {
+                                CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = TealDark)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = "Updating...", color = TealDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            } else {
+                                Icon(imageVector = Icons.Default.Refresh, contentDescription = null, tint = TealDark, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = "Refresh Live Weather", color = TealDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(0.7f)
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(BackgroundSoftCream)
+                            .border(1.dp, BorderLight, RoundedCornerShape(10.dp))
+                            .clickable { onDismiss() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Got It", color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DepartureTimeDialog(
+    currentDateTime: String,
+    onDismiss: () -> Unit,
+    onTimeSelected: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val liveNow = remember { HomeViewModel.getCurrentDynamicTime() }
+
+    val quickOptions = listOf(
+        "⚡ Leave Now (Live: ${liveNow.removePrefix("Today, ")})" to liveNow,
+        "☀️ Today Morning (09:00 AM)" to "Today, 9:00 AM",
+        "🌤️ Today Afternoon (02:00 PM)" to "Today, 2:00 PM",
+        "🌙 Tonight (08:30 PM)" to "Today, 8:30 PM",
+        "🌅 Tomorrow Early (06:30 AM)" to "Tomorrow, 6:30 AM"
+    )
+
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(SurfaceWhite)
+                .border(1.dp, BorderLight, RoundedCornerShape(20.dp))
+                .padding(20.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Journey Departure Time",
+                            color = TextNavyDark,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Currently set: $currentDateTime",
+                            color = TealDark,
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(PastelCardBlue)
+                            .clickable { onDismiss() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = TextNavyDark,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                Text(
+                    text = "Quick Departure Options:",
+                    color = TextNavyDark,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    quickOptions.forEach { (label, value) ->
+                        val isSelected = currentDateTime == value
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) PastelCardTeal else BackgroundSoftCream)
+                                .border(1.dp, if (isSelected) TealLight else BorderLight, RoundedCornerShape(10.dp))
+                                .clickable {
+                                    onTimeSelected(value)
+                                    onDismiss()
+                                }
+                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = if (isSelected) TealDark else TextNavyDark,
+                                    fontSize = 12.5.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                )
+                                if (isSelected) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .background(TealDark, CircleShape)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Custom Time Picker Button
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(PrimaryGradient)
+                        .clickable {
+                            val cal = java.util.Calendar.getInstance()
+                            val curHour = cal.get(java.util.Calendar.HOUR_OF_DAY)
+                            val curMin = cal.get(java.util.Calendar.MINUTE)
+                            android.app.TimePickerDialog(
+                                context,
+                                { _, hourOfDay, minute ->
+                                    val amPm = if (hourOfDay >= 12) "PM" else "AM"
+                                    val h = if (hourOfDay % 12 == 0) 12 else hourOfDay % 12
+                                    val m = String.format(java.util.Locale.US, "%02d", minute)
+                                    onTimeSelected("Today, $h:$m $amPm")
+                                    onDismiss()
+                                },
+                                curHour,
+                                curMin,
+                                false
+                            ).show()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.AccessTime,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Pick Custom Clock Time ➔",
+                            color = Color.White,
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

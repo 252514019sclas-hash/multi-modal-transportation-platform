@@ -46,6 +46,7 @@ import com.simats.multimodaltransportationrecommendation.ui.theme.*
 fun RouteResultsScreen(
     origin: String = "Chennai Central",
     destination: String = "Mahabalipuram",
+    dateTime: String = "Today, 9:15 AM",
     viewModel: RouteResultsViewModel = viewModel(),
     onBack: () -> Unit = {},
     onStartJourney: (RouteOption) -> Unit = {},
@@ -57,8 +58,8 @@ fun RouteResultsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(origin, destination) {
-        viewModel.searchRoutes(context, origin, destination)
+    LaunchedEffect(origin, destination, dateTime) {
+        viewModel.searchRoutes(context, origin, destination, dateTime)
     }
 
     LaunchedEffect(uiState.saveMessage) {
