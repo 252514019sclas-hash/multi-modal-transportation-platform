@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -106,7 +108,10 @@ fun RouteResultsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.weight(1f, fill = false),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(38.dp)
@@ -123,41 +128,42 @@ fun RouteResultsScreen(
                         Text(
                             text = "Vehicles & Tourist Guide",
                             color = TextNavyDark,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
-                    // Action Buttons: Map, Facilities & Multi-Day Tour
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(PastelCardTeal)
-                                .clickable { onPlanMultiDay() }
-                                .padding(horizontal = 8.dp, vertical = 6.dp)
-                        ) {
-                            Text(text = "✨ Multi-Day", color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        }
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFFFEF3C7))
-                                .clickable { onOpenNearbyFacilities() }
-                                .padding(horizontal = 8.dp, vertical = 6.dp)
+                    // Action Button: Facilities (Clean Horizontal Pill, No vertical wrapping)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0xFFFEF3C7))
+                            .border(1.dp, Color(0xFFFDE68A), RoundedCornerShape(10.dp))
+                            .clickable { onOpenNearbyFacilities() }
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text(text = "⛽ Facilities", color = Color(0xFFB45309), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(PastelCardBlue)
-                                .clickable { viewModel.toggleMapSheet(true) }
-                                .padding(horizontal = 8.dp, vertical = 6.dp)
-                        ) {
-                            Text(text = "🗺️ Map", color = SkyBluePrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Icon(
+                                imageVector = Icons.Default.LocalGasStation,
+                                contentDescription = "Facilities",
+                                tint = Color(0xFFB45309),
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = "Facilities",
+                                color = Color(0xFFB45309),
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                     }
                 }

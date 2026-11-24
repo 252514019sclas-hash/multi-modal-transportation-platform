@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -119,7 +121,25 @@ fun AiTravelAdvisorScreen(
                             .clickable { onOpenNearbyFacilities(uiState.origin, uiState.destination, uiState.destination, null) }
                             .padding(horizontal = 9.dp, vertical = 6.dp)
                     ) {
-                        Text(text = "Facilities ⛽⚡", color = SkyBlueDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocalGasStation,
+                                contentDescription = "Facilities",
+                                tint = SkyBlueDark,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "Facilities",
+                                color = SkyBlueDark,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
                     }
 
                     Box(
