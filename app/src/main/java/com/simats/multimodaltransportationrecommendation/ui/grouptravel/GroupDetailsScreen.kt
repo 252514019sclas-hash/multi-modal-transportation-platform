@@ -86,8 +86,13 @@ fun GroupDetailsScreen(
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold
                                 )
+                                val dateDisplay = if (group?.travelDate.isNullOrBlank() || group?.travelDate == "0000-00-00") {
+                                    "Today · ${group?.travelTime?.ifBlank { "08:45 PM" } ?: "08:45 PM"}"
+                                } else {
+                                    "${group?.travelDate} · ${group?.travelTime ?: ""}"
+                                }
                                 Text(
-                                    text = "🎯 ${group?.destination ?: "Tamil Nadu"} · ${group?.travelDate ?: ""}",
+                                    text = "🎯 ${group?.destination ?: "Tamil Nadu"} · $dateDisplay",
                                     color = TextNavyBody,
                                     fontSize = 11.sp
                                 )
@@ -161,6 +166,7 @@ fun GroupDetailsScreen(
                     when (uiState.selectedTab) {
                         0 -> OverviewTab(
                             group = group,
+                            uiState = uiState,
                             onPlanRoute = { start, dest -> onViewTransitRoute(start, dest) },
                             onOpenMap = { viewModel.setSelectedTab(1) },
                             onToggleSharing = { enable ->
@@ -203,11 +209,15 @@ fun GroupDetailsScreen(
 @Composable
 private fun OverviewTab(
     group: com.simats.multimodaltransportationrecommendation.data.model.group.GroupDetailsData?,
+    uiState: GroupTravelUiState,
     onPlanRoute: (String, String) -> Unit,
     onOpenMap: () -> Unit,
     onToggleSharing: (Boolean) -> Unit
 ) {
     if (group == null) return
+
+    val isSharingOn = group.userMembership?.isSharing == true || uiState.isSharingActive
+    val activeSharingCount = maxOf(group.sharingCount, if (uiState.isSharingActive) 1 else 0)
 
     LazyColumn(
         modifier = Modifier
@@ -223,7 +233,7 @@ private fun OverviewTab(
                     .shadow(2.dp, RoundedCornerShape(16.dp)),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (group.userMembership?.isSharing == true) PastelCardTeal else PastelCardPeach
+                    containerColor = if (isSharingOn) PastelCardTeal else PastelCardPeach
                 )
             ) {
                 Row(
@@ -233,14 +243,14 @@ private fun OverviewTab(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (group.userMembership?.isSharing == true) "🟢 Location Sharing On" else "🔒 Location Sharing Off",
-                            color = if (group.userMembership?.isSharing == true) TealDark else WarmOrangeDark,
+                            text = if (isSharingOn) "🟢 Location Sharing On" else "🔒 Location Sharing Off",
+                            color = if (isSharingOn) TealDark else WarmOrangeDark,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = if (group.userMembership?.isSharing == true)
-                                "${group.sharingCount} members live on map · Auto-expires"
+                            text = if (isSharingOn)
+                                "$activeSharingCount member live on map · Live GPS"
                             else
                                 "Enable to let family see your distance & transit arrival",
                             color = TextNavyBody,
@@ -249,15 +259,15 @@ private fun OverviewTab(
                     }
 
                     Button(
-                        onClick = { onToggleSharing(group.userMembership?.isSharing != true) },
+                        onClick = { onToggleSharing(!isSharingOn) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (group.userMembership?.isSharing == true) WarmOrangeAccent else SkyBluePrimary
+                            containerColor = if (isSharingOn) WarmOrangeAccent else SkyBluePrimary
                         ),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.height(34.dp)
                     ) {
                         Text(
-                            text = if (group.userMembership?.isSharing == true) "Pause" else "Share GPS",
+                            text = if (isSharingOn) "Pause" else "Share GPS",
                             color = Color.White,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
@@ -275,7 +285,7 @@ private fun OverviewTab(
             ) {
                 listOf(
                     "MEMBERS" to "${group.membersCount}",
-                    "SHARING GPS" to "${group.sharingCount}",
+                    "SHARING GPS" to "$activeSharingCount",
                     "STOPS" to "${group.itineraryCount}"
                 ).forEach { (label, value) ->
                     Box(
@@ -308,6 +318,7 @@ private fun OverviewTab(
         }
 
         items(group.approvedMembers) { mem ->
+            val isMemberLive = mem.isSharing || (mem.role == "creator" && uiState.isSharingActive)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -349,8 +360,8 @@ private fun OverviewTab(
 
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = if (mem.isSharing) "🟢 Live GPS" else "🔒 Sharing Off",
-                            color = if (mem.isSharing) EmeraldGreen else TextMuted,
+                            text = if (isMemberLive) "🟢 Live GPS" else "🔒 Sharing Off",
+                            color = if (isMemberLive) EmeraldGreen else TextMuted,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.SemiBold
                         )

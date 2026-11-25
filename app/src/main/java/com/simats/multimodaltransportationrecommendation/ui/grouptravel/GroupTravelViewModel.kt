@@ -13,6 +13,7 @@ import com.simats.multimodaltransportationrecommendation.data.local.SessionManag
 import com.simats.multimodaltransportationrecommendation.ui.journey.CorridorStopItem
 import com.simats.multimodaltransportationrecommendation.ui.journey.TamilNaduTransitResolver
 import com.simats.multimodaltransportationrecommendation.ui.journey.TamilNaduTravelRoute
+import kotlin.math.max
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,7 +85,9 @@ data class GroupTravelUiState(
     val joinStartLocation: String = "Chennai Central",
 
     // Action feedback
-    val newlyCreatedGroup: TravelGroup? = null
+    val newlyCreatedGroup: TravelGroup? = null,
+    val userEnteredDepartureTime: String = "08:45 PM",
+    val reachedStopIds: Set<String> = emptySet()
 )
 
 class GroupTravelViewModel(
@@ -299,19 +302,62 @@ class GroupTravelViewModel(
         val userId = SessionManager.getInstance(context).getUserId() ?: 1
         val tracker = getTracker(context)
 
-        if (!tracker.hasLocationPermission()) {
-            _uiState.value = _uiState.value.copy(errorMessage = "Location permission is required to share your live GPS position.")
-            return
-        }
-
-        viewModelScope.launch {
-            repository.updateLocationSettings(userId, groupId, true)
+        // Immediately reflect sharing in local active group state & UI
+        val currentGroup = _uiState.value.activeGroup
+        if (currentGroup != null) {
+            val updatedMembership = currentGroup.userMembership?.copy(isSharing = true)
+            val updatedApproved = currentGroup.approvedMembers.map { mem ->
+                if (mem.userId == userId) mem.copy(isSharing = true) else mem
+            }
+            val updatedGroup = currentGroup.copy(
+                userMembership = updatedMembership,
+                sharingCount = max(1, currentGroup.sharingCount + 1).coerceAtMost(currentGroup.membersCount),
+                approvedMembers = updatedApproved
+            )
+            _uiState.value = _uiState.value.copy(
+                activeGroup = updatedGroup,
+                isSharingActive = true,
+                isSharingPaused = false,
+                successMessage = "🟢 Live GPS location sharing enabled."
+            )
+        } else {
             _uiState.value = _uiState.value.copy(
                 isSharingActive = true,
                 isSharingPaused = false,
-                successMessage = "🟢 Live GPS location sharing started."
+                successMessage = "🟢 Live GPS location sharing enabled."
             )
+        }
 
+        // Establish initial coordinates: use member starting location as fallback (e.g. Kanchipuram)
+        val startLoc = currentGroup?.userMembership?.startingLocation ?: "Kanchipuram"
+        val fallbackLatLng = TamilNaduTransitResolver.resolveLatLng(startLoc)
+        val initialLatLng = _uiState.value.userGpsLatLng ?: fallbackLatLng
+        _uiState.value = _uiState.value.copy(
+            userGpsLatLng = initialLatLng,
+            gpsLastUpdated = "Live starting point ($startLoc)"
+        )
+
+        viewModelScope.launch {
+            repository.updateLocationSettings(userId, groupId, true)
+            repository.updateGroupLocation(
+                userId = userId,
+                groupId = groupId,
+                latitude = initialLatLng.latitude,
+                longitude = initialLatLng.longitude,
+                accuracy = 10f,
+                speed = 0f,
+                locationName = "Live: $startLoc"
+            )
+            val locRes = repository.fetchGroupLocations(userId, groupId)
+            if (locRes is NetworkResult.Success) {
+                _uiState.value = _uiState.value.copy(
+                    liveLocations = locRes.data.members,
+                    activeSharingCount = max(1, locRes.data.activeSharingCount)
+                )
+            }
+        }
+
+        if (tracker.hasLocationPermission()) {
             tracker.startLocationUpdates(intervalMs = 8000L) { loc ->
                 val newLatLng = LatLng(loc.latitude, loc.longitude)
                 val freshness = LocationTrackerManager.formatFreshness(System.currentTimeMillis())
@@ -340,7 +386,7 @@ class GroupTravelViewModel(
                     if (locRes is NetworkResult.Success) {
                         _uiState.value = _uiState.value.copy(
                             liveLocations = locRes.data.members,
-                            activeSharingCount = locRes.data.activeSharingCount
+                            activeSharingCount = max(1, locRes.data.activeSharingCount)
                         )
                     }
                 }
@@ -368,13 +414,35 @@ class GroupTravelViewModel(
     fun stopLocationSharing(context: Context, groupId: Int) {
         val userId = SessionManager.getInstance(context).getUserId() ?: 1
         locationTracker?.stopLocationUpdates()
-        _uiState.value = _uiState.value.copy(
-            isSharingActive = false,
-            isSharingPaused = false,
-            userGpsLatLng = null,
-            gpsLastUpdated = "Location sharing off",
-            successMessage = "🛑 Stopped location sharing. Your marker is removed."
-        )
+
+        val currentGroup = _uiState.value.activeGroup
+        if (currentGroup != null) {
+            val updatedMembership = currentGroup.userMembership?.copy(isSharing = false)
+            val updatedApproved = currentGroup.approvedMembers.map { mem ->
+                if (mem.userId == userId) mem.copy(isSharing = false) else mem
+            }
+            val updatedGroup = currentGroup.copy(
+                userMembership = updatedMembership,
+                sharingCount = max(0, currentGroup.sharingCount - 1),
+                approvedMembers = updatedApproved
+            )
+            _uiState.value = _uiState.value.copy(
+                activeGroup = updatedGroup,
+                isSharingActive = false,
+                isSharingPaused = false,
+                userGpsLatLng = null,
+                gpsLastUpdated = "Location sharing off",
+                successMessage = "🛑 Location sharing paused."
+            )
+        } else {
+            _uiState.value = _uiState.value.copy(
+                isSharingActive = false,
+                isSharingPaused = false,
+                userGpsLatLng = null,
+                gpsLastUpdated = "Location sharing off",
+                successMessage = "🛑 Location sharing paused."
+            )
+        }
 
         viewModelScope.launch {
             repository.updateLocationSettings(userId, groupId, false)
@@ -494,17 +562,40 @@ class GroupTravelViewModel(
     // EN-ROUTE STATIONS, PLACES & CORRIDOR SEARCH CONTROLS
     // ----------------------------------------------------
 
-    fun searchTravelRoute(origin: String, destination: String) {
-        val route = TamilNaduTransitResolver.resolveRoute(origin, destination)
+    fun searchTravelRoute(origin: String, destination: String, departureTime: String? = null) {
+        val effectiveTime = departureTime
+            ?: _uiState.value.activeGroup?.travelTime?.ifBlank { null }
+            ?: _uiState.value.userEnteredDepartureTime
+        val route = TamilNaduTransitResolver.resolveRoute(origin, destination, effectiveTime)
         _uiState.value = _uiState.value.copy(
             activeTravelRoute = route,
             routeOriginQuery = route.origin,
             routeDestQuery = route.destination,
+            userEnteredDepartureTime = route.departureTime,
             selectedEnRouteStop = null,
             cameraFocusLatLng = null,
             isRouteSearchSheetOpen = false,
             mapFitAllTrigger = System.currentTimeMillis()
         )
+    }
+
+    fun updateRouteDepartureTime(newTime: String) {
+        val currentRoute = _uiState.value.activeTravelRoute ?: return
+        val updated = TamilNaduTransitResolver.applyDynamicDepartureTime(currentRoute, newTime)
+        _uiState.value = _uiState.value.copy(
+            activeTravelRoute = updated,
+            userEnteredDepartureTime = updated.departureTime
+        )
+    }
+
+    fun toggleStopReached(stopId: String) {
+        val current = _uiState.value.reachedStopIds.toMutableSet()
+        if (current.contains(stopId)) {
+            current.remove(stopId)
+        } else {
+            current.add(stopId)
+        }
+        _uiState.value = _uiState.value.copy(reachedStopIds = current)
     }
 
     fun swapRouteOriginDest() {

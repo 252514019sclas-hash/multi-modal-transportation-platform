@@ -127,12 +127,286 @@ object TamilNaduTransitResolver {
         return LatLng(13.0827, 80.2707)
     }
 
+    fun parseTimeToMinutes(timeStr: String?): Int {
+        if (timeStr.isNullOrBlank()) return 8 * 60 + 45 // default 08:45 AM
+        val clean = timeStr.trim().uppercase()
+        return try {
+            val isPm = clean.contains("PM")
+            val isAm = clean.contains("AM")
+            val digits = clean.replace("AM", "").replace("PM", "").replace("TODAY", "").replace(",", "").trim()
+            val parts = digits.split(":").map { it.trim() }.filter { it.isNotEmpty() }
+            if (parts.isNotEmpty()) {
+                var h = parts[0].toInt()
+                val m = if (parts.size > 1) parts[1].take(2).toInt() else 0
+                if (isPm && h < 12) h += 12
+                if (isAm && h == 12) h = 0
+                h * 60 + m
+            } else {
+                8 * 60 + 45
+            }
+        } catch (_: Exception) {
+            8 * 60 + 45
+        }
+    }
+
+    fun formatMinutesToTime(totalMins: Int): String {
+        val norm = (totalMins % (24 * 60) + (24 * 60)) % (24 * 60)
+        val h = norm / 60
+        val m = norm % 60
+        val amPm = if (h >= 12) "PM" else "AM"
+        val h12 = if (h == 0) 12 else if (h > 12) h - 12 else h
+        return String.format(java.util.Locale.US, "%02d:%02d %s", h12, m, amPm)
+    }
+
+    fun applyDynamicDepartureTime(route: TamilNaduTravelRoute, departureTimeInput: String?): TamilNaduTravelRoute {
+        val effectiveInput = if (!departureTimeInput.isNullOrBlank()) departureTimeInput else route.departureTime
+        val startMins = parseTimeToMinutes(effectiveInput)
+        val startFormatted = formatMinutesToTime(startMins)
+        val totalTransitMins = max(35, round((route.totalDistanceKm / 52.0) * 60).toInt())
+
+        val updatedStops = route.intermediateStops.map { stop ->
+            val fraction = if (route.totalDistanceKm > 0.0) {
+                (stop.distanceFromOriginKm / route.totalDistanceKm).coerceIn(0.04, 0.96)
+            } else 0.5
+            val offsetMins = (totalTransitMins * fraction).toInt()
+            val arrMins = startMins + offsetMins
+            val depMins = arrMins + 2
+            stop.copy(
+                arrivalTime = formatMinutesToTime(arrMins),
+                departureTime = formatMinutesToTime(depMins)
+            )
+        }
+
+        val finalArrMins = startMins + totalTransitMins
+        val hrs = totalTransitMins / 60
+        val mins = totalTransitMins % 60
+        val durText = if (hrs > 0) "${hrs}h ${mins}m" else "${mins}m"
+
+        return route.copy(
+            departureTime = startFormatted,
+            arrivalTime = formatMinutesToTime(finalArrMins),
+            totalDurationText = durText,
+            intermediateStops = updatedStops
+        )
+    }
+
     /**
      * Resolves the complete travel route and all intermediate stations/places across Tamil Nadu.
+     * Departure time is fully dynamic based on what the user entered.
      */
-    fun resolveRoute(originRaw: String, destinationRaw: String): TamilNaduTravelRoute {
+    fun resolveRoute(originRaw: String, destinationRaw: String, userDepartureTime: String? = null): TamilNaduTravelRoute {
         val o = originRaw.lowercase().trim().ifBlank { "chennai" }
         val d = destinationRaw.lowercase().trim().ifBlank { "coimbatore" }
+
+        // -------------------------------------------------------------
+        // CORRIDOR 0: Kanchipuram <-> Trichy (Tiruchirappalli)
+        // -------------------------------------------------------------
+        if ((o.contains("kanchipuram") || o.contains("kanchi")) && (d.contains("trichy") || d.contains("tiruchirappalli")) ||
+            (o.contains("trichy") || o.contains("tiruchirappalli")) && (d.contains("kanchipuram") || d.contains("kanchi"))
+        ) {
+            val isReversed = o.contains("trichy") || o.contains("tiruchirappalli")
+
+            val kanchiTrichyStops = listOf(
+                CorridorStopItem(
+                    id = "kt_1_chengalpattu",
+                    name = "Chengalpattu",
+                    type = "station",
+                    typeLabel = "Railway Junction",
+                    latitude = 12.6840,
+                    longitude = 79.9836,
+                    distanceFromOriginKm = 34.0,
+                    stopOrder = 1,
+                    city = "Chengalpattu",
+                    description = "Major rail & highway junction connecting Kanchipuram to GST Highway",
+                    transitDetails = "Platform 2 · 2 min halt",
+                    isMajorHalt = true
+                ),
+                CorridorStopItem(
+                    id = "kt_2_tindivanam",
+                    name = "Tindivanam",
+                    type = "station",
+                    typeLabel = "Railway Station",
+                    latitude = 12.2333,
+                    longitude = 79.6500,
+                    distanceFromOriginKm = 78.0,
+                    stopOrder = 2,
+                    city = "Villupuram",
+                    description = "Key transit hub connecting Gingee heritage fort & Pondy arterial",
+                    transitDetails = "Platform 1 · 2 min halt",
+                    isMajorHalt = true
+                ),
+                CorridorStopItem(
+                    id = "kt_3_villupuram",
+                    name = "Villupuram",
+                    type = "station",
+                    typeLabel = "Major Rail Division Hub",
+                    latitude = 11.9398,
+                    longitude = 79.4897,
+                    distanceFromOriginKm = 116.0,
+                    stopOrder = 3,
+                    city = "Villupuram",
+                    description = "Central Tamil Nadu railway division & express highway intersection",
+                    transitDetails = "Platform 3 · 5 min halt",
+                    isMajorHalt = true
+                ),
+                CorridorStopItem(
+                    id = "kt_4_vriddhachalam",
+                    name = "Vriddhachalam",
+                    type = "station",
+                    typeLabel = "Railway Junction",
+                    latitude = 11.5167,
+                    longitude = 79.3333,
+                    distanceFromOriginKm = 172.0,
+                    stopOrder = 4,
+                    city = "Cuddalore",
+                    description = "Chord line junction connecting Cuddalore port & Neyveli",
+                    transitDetails = "Platform 2 · 3 min halt",
+                    isMajorHalt = true
+                ),
+                CorridorStopItem(
+                    id = "kt_5_perambalur",
+                    name = "Perambalur",
+                    type = "hub",
+                    typeLabel = "Highway Transit Hub",
+                    latitude = 11.2333,
+                    longitude = 78.8833,
+                    distanceFromOriginKm = 245.0,
+                    stopOrder = 5,
+                    city = "Perambalur",
+                    description = "Ranjankudi Fort gateway along the Chennai-Trichy NH 38 express corridor",
+                    transitDetails = "NH 38 Express Stop · 2 min halt",
+                    isMajorHalt = true
+                )
+            )
+
+            val polyline = listOf(
+                LatLng(12.8342, 79.7036), // Kanchipuram
+                LatLng(12.6840, 79.9836), // Chengalpattu
+                LatLng(12.2333, 79.6500), // Tindivanam
+                LatLng(11.9398, 79.4897), // Villupuram
+                LatLng(11.5167, 79.3333), // Vriddhachalam
+                LatLng(11.2333, 78.8833), // Perambalur
+                LatLng(10.7905, 78.6900)  // Trichy (Tiruchirappalli)
+            )
+
+            val orderedStops = if (!isReversed) kanchiTrichyStops else kanchiTrichyStops.reversed().mapIndexed { idx, s ->
+                s.copy(stopOrder = idx + 1, distanceFromOriginKm = round((305.0 - s.distanceFromOriginKm) * 10) / 10)
+            }
+
+            val route = TamilNaduTravelRoute(
+                routeId = "kanchipuram_trichy_intercity",
+                title = if (!isReversed) "Kanchipuram ➔ Trichy" else "Trichy ➔ Kanchipuram",
+                origin = if (!isReversed) "Kanchipuram" else "Tiruchirappalli (Trichy)",
+                destination = if (!isReversed) "Tiruchirappalli (Trichy)" else "Kanchipuram",
+                originDistrict = if (!isReversed) "Kanchipuram" else "Tiruchirappalli",
+                destinationDistrict = if (!isReversed) "Tiruchirappalli" else "Kanchipuram",
+                originLatLng = if (!isReversed) LatLng(12.8342, 79.7036) else LatLng(10.7905, 78.6900),
+                destinationLatLng = if (!isReversed) LatLng(10.7905, 78.6900) else LatLng(12.8342, 79.7036),
+                routePolyline = if (!isReversed) polyline else polyline.reversed(),
+                totalDistanceKm = 305.0,
+                totalDurationText = "4h 50m",
+                transitBadge = "Tamil Nadu Intercity Corridor",
+                intermediateStops = orderedStops,
+                highwayInfo = "SH 58 / GST Road & NH 38 Corridor",
+                serviceNumber = "Transit No. TN-38",
+                serviceName = "Cholan Express / Rockfort Transit Corridor",
+                departureTime = "08:45 PM",
+                arrivalTime = "01:35 AM",
+                bannerImageUrl = "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1000&q=80"
+            )
+
+            return applyDynamicDepartureTime(route, userDepartureTime)
+        }
+
+        // -------------------------------------------------------------
+        // CORRIDOR 0B: Kanchipuram <-> Coimbatore
+        // -------------------------------------------------------------
+        if ((o.contains("kanchipuram") || o.contains("kanchi")) && (d.contains("coimbatore") || d.contains("cbe")) ||
+            (o.contains("coimbatore") || o.contains("cbe")) && (d.contains("kanchipuram") || d.contains("kanchi"))
+        ) {
+            val isReversed = o.contains("coimbatore") || o.contains("cbe")
+            val kanchiCbeStops = listOf(
+                CorridorStopItem("kc_1", "Arakkonam", "station", "Railway Junction", 13.0786, 79.6677, 32.0, 1, "Ranipet", "Major junction on Chennai-Bangalore line", "Platform 1", isMajorHalt = true),
+                CorridorStopItem("kc_2", "Katpadi / Vellore", "station", "Railway Junction", 12.9734, 79.1352, 74.0, 2, "Vellore", "Vellore Fort & Golden Temple gateway", "Platform 1", isMajorHalt = true),
+                CorridorStopItem("kc_3", "Jolarpettai", "station", "Railway Junction", 12.5593, 78.5835, 150.0, 3, "Tirupattur", "Key Southern Rail bifurcation", "Platform 2", isMajorHalt = true),
+                CorridorStopItem("kc_4", "Salem", "station", "Divisional Junction", 11.6643, 78.1460, 275.0, 4, "Salem", "Steel City & Yercaud gateway", "Platform 1", isMajorHalt = true),
+                CorridorStopItem("kc_5", "Erode", "station", "Locomotive Hub", 11.3410, 77.7172, 338.0, 5, "Erode", "Textile capital on Cauvery river", "Platform 2", isMajorHalt = true),
+                CorridorStopItem("kc_6", "Tiruppur", "station", "Railway Station", 11.1085, 77.3411, 388.0, 6, "Tiruppur", "Knitwear city express halt", "Platform 1", isMajorHalt = true)
+            )
+            val polyline = listOf(
+                LatLng(12.8342, 79.7036),
+                LatLng(13.0786, 79.6677),
+                LatLng(12.9734, 79.1352),
+                LatLng(12.5593, 78.5835),
+                LatLng(11.6643, 78.1460),
+                LatLng(11.3410, 77.7172),
+                LatLng(11.1085, 77.3411),
+                LatLng(11.0016, 76.9629)
+            )
+            val route = TamilNaduTravelRoute(
+                routeId = "kanchipuram_cbe_corridor",
+                title = if (!isReversed) "Kanchipuram ➔ Coimbatore" else "Coimbatore ➔ Kanchipuram",
+                origin = if (!isReversed) "Kanchipuram" else "Coimbatore",
+                destination = if (!isReversed) "Coimbatore" else "Kanchipuram",
+                originDistrict = if (!isReversed) "Kanchipuram" else "Coimbatore",
+                destinationDistrict = if (!isReversed) "Coimbatore" else "Kanchipuram",
+                originLatLng = if (!isReversed) LatLng(12.8342, 79.7036) else LatLng(11.0016, 76.9629),
+                destinationLatLng = if (!isReversed) LatLng(11.0016, 76.9629) else LatLng(12.8342, 79.7036),
+                routePolyline = if (!isReversed) polyline else polyline.reversed(),
+                totalDistanceKm = 440.0,
+                totalDurationText = "7h 15m",
+                transitBadge = "Western Corridor Express",
+                intermediateStops = if (!isReversed) kanchiCbeStops else kanchiCbeStops.reversed(),
+                serviceNumber = "Train No. 12675",
+                serviceName = "Kovai Express Connection",
+                departureTime = "08:00 AM",
+                arrivalTime = "03:15 PM"
+            )
+            return applyDynamicDepartureTime(route, userDepartureTime)
+        }
+
+        // -------------------------------------------------------------
+        // CORRIDOR 0C: Kanchipuram <-> Salem
+        // -------------------------------------------------------------
+        if ((o.contains("kanchipuram") || o.contains("kanchi")) && d.contains("salem") ||
+            o.contains("salem") && (d.contains("kanchipuram") || d.contains("kanchi"))
+        ) {
+            val isReversed = o.contains("salem")
+            val kanchiSalemStops = listOf(
+                CorridorStopItem("ks_1", "Arakkonam", "station", "Railway Junction", 13.0786, 79.6677, 32.0, 1, "Ranipet", "Junction on Bangalore line", "Platform 1", isMajorHalt = true),
+                CorridorStopItem("ks_2", "Katpadi", "station", "Railway Junction", 12.9734, 79.1352, 74.0, 2, "Vellore", "Vellore fort junction", "Platform 1", isMajorHalt = true),
+                CorridorStopItem("ks_3", "Jolarpettai", "station", "Railway Junction", 12.5593, 78.5835, 150.0, 3, "Tirupattur", "Rail bifurcation", "Platform 2", isMajorHalt = true),
+                CorridorStopItem("ks_4", "Dharmapuri", "station", "Railway Station", 12.1211, 78.1582, 225.0, 4, "Dharmapuri", "Hogenakkal Falls gateway", "Platform 1", isMajorHalt = true)
+            )
+            val polyline = listOf(
+                LatLng(12.8342, 79.7036),
+                LatLng(13.0786, 79.6677),
+                LatLng(12.9734, 79.1352),
+                LatLng(12.5593, 78.5835),
+                LatLng(12.1211, 78.1582),
+                LatLng(11.6643, 78.1460)
+            )
+            val route = TamilNaduTravelRoute(
+                routeId = "kanchipuram_salem_corridor",
+                title = if (!isReversed) "Kanchipuram ➔ Salem" else "Salem ➔ Kanchipuram",
+                origin = if (!isReversed) "Kanchipuram" else "Salem",
+                destination = if (!isReversed) "Salem" else "Kanchipuram",
+                originDistrict = if (!isReversed) "Kanchipuram" else "Salem",
+                destinationDistrict = if (!isReversed) "Salem" else "Kanchipuram",
+                originLatLng = if (!isReversed) LatLng(12.8342, 79.7036) else LatLng(11.6643, 78.1460),
+                destinationLatLng = if (!isReversed) LatLng(11.6643, 78.1460) else LatLng(12.8342, 79.7036),
+                routePolyline = if (!isReversed) polyline else polyline.reversed(),
+                totalDistanceKm = 275.0,
+                totalDurationText = "4h 30m",
+                transitBadge = "Salem Intercity Express",
+                intermediateStops = if (!isReversed) kanchiSalemStops else kanchiSalemStops.reversed(),
+                serviceNumber = "Train No. 16811",
+                serviceName = "Salem Superfast Express",
+                departureTime = "08:00 AM",
+                arrivalTime = "12:30 PM"
+            )
+            return applyDynamicDepartureTime(route, userDepartureTime)
+        }
 
         // -------------------------------------------------------------
         // CORRIDOR 1: Chennai <-> Coimbatore (Matches Exact Second Screenshot)
@@ -284,7 +558,7 @@ object TamilNaduTransitResolver {
                 s.copy(stopOrder = idx + 1, distanceFromOriginKm = round((496.0 - s.distanceFromOriginKm) * 10) / 10)
             }
 
-            return TamilNaduTravelRoute(
+            val route = TamilNaduTravelRoute(
                 routeId = "chennai_coimbatore_egmore_exp",
                 title = if (!isReversed) "Chennai ➔ Coimbatore" else "Coimbatore ➔ Chennai",
                 origin = if (!isReversed) "Chennai Egmore" else "Coimbatore",
@@ -304,6 +578,7 @@ object TamilNaduTransitResolver {
                 departureTime = if (!isReversed) "06:20 AM" else "02:30 PM",
                 arrivalTime = if (!isReversed) "01:50 PM" else "10:00 PM"
             )
+            return applyDynamicDepartureTime(route, userDepartureTime)
         }
 
         // -------------------------------------------------------------
@@ -335,7 +610,7 @@ object TamilNaduTransitResolver {
                 LatLng(9.9195, 78.1100)
             )
 
-            return TamilNaduTravelRoute(
+            val route = TamilNaduTravelRoute(
                 routeId = "chennai_madurai_pandian",
                 title = if (!isReversed) "Chennai ➔ Madurai" else "Madurai ➔ Chennai",
                 origin = if (!isReversed) "Chennai Egmore" else "Madurai Junction",
@@ -355,6 +630,7 @@ object TamilNaduTransitResolver {
                 departureTime = "07:10 AM",
                 arrivalTime = "01:45 PM"
             )
+            return applyDynamicDepartureTime(route, userDepartureTime)
         }
 
         // -------------------------------------------------------------
@@ -386,7 +662,7 @@ object TamilNaduTransitResolver {
                 LatLng(8.0780, 77.5550)
             )
 
-            return TamilNaduTravelRoute(
+            val route = TamilNaduTravelRoute(
                 routeId = "chennai_kanyakumari_express",
                 title = if (!isReversed) "Chennai ➔ Kanyakumari" else "Kanyakumari ➔ Chennai",
                 origin = if (!isReversed) "Chennai Central" else "Kanyakumari",
@@ -406,6 +682,7 @@ object TamilNaduTransitResolver {
                 departureTime = "05:30 AM",
                 arrivalTime = "04:45 PM"
             )
+            return applyDynamicDepartureTime(route, userDepartureTime)
         }
 
         // -------------------------------------------------------------
@@ -432,7 +709,7 @@ object TamilNaduTransitResolver {
                 LatLng(11.4102, 76.6950)
             )
 
-            return TamilNaduTravelRoute(
+            val route = TamilNaduTravelRoute(
                 routeId = "cbe_ooty_mountain",
                 title = if (!isReversed) "Coimbatore ➔ Ooty" else "Ooty ➔ Coimbatore",
                 origin = if (!isReversed) "Coimbatore Junction" else "Ooty (Udhagamandalam)",
@@ -452,6 +729,7 @@ object TamilNaduTransitResolver {
                 departureTime = "07:10 AM",
                 arrivalTime = "10:25 AM"
             )
+            return applyDynamicDepartureTime(route, userDepartureTime)
         }
 
         // -------------------------------------------------------------
@@ -544,7 +822,7 @@ object TamilNaduTransitResolver {
         val fH12 = if (fH == 0) 12 else if (fH > 12) fH - 12 else fH
         val finalArrText = String.format("%02d:%02d %s", fH12, fM, fAmPm)
 
-        return TamilNaduTravelRoute(
+        val route = TamilNaduTravelRoute(
             routeId = "tamilnadu_corridor_${originRaw.hashCode()}_${destinationRaw.hashCode()}",
             title = "$origTitle ➔ $destTitle",
             origin = origTitle,
@@ -564,6 +842,7 @@ object TamilNaduTransitResolver {
             departureTime = "06:30 AM",
             arrivalTime = finalArrText
         )
+        return applyDynamicDepartureTime(route, userDepartureTime)
     }
 
     private fun haversine(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
