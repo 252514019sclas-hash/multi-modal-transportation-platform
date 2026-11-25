@@ -111,7 +111,7 @@ fun CompareRoutesScreen(
                     Text(text = "TIME", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     Text(text = "FARE", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     Text(text = "WALK", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "TRANSIT", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "DISTANCE", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     Text(text = "ON TIME", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
@@ -190,7 +190,7 @@ fun CompareRoutesScreen(
                                 Text(text = route.time, color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                                 Text(text = route.fare, color = WarmOrangeDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                 Text(text = route.walk, color = TextNavyBody, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                Text(text = route.co2, color = TealDark, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Text(text = route.distance, color = TealDark, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                                 Text(text = route.onTime, color = SkyBlueDark, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                             }
                         }

@@ -259,7 +259,7 @@ object SmartAiTransitEngine {
                 "Here is an optimal sequence: 1. Board at $origin at 09:30 AM → 2. Transit to $destination by 09:55 AM → 3. Spend 90 mins exploring the landmark → 4. Lunch break at 11:30 AM → 5. Short 10-min MTC bus to nearby temple."
             }
             else -> {
-                "MoveSmart AI recommendation: For travel between $origin and $destination, combining Metro with a short walk or feeder bus provides the most predictable travel time and saves 1.4 kg of CO2."
+                "Smart transit recommendation: For travel between $origin and $destination, combining public transit with a short walk or feeder bus provides the most predictable travel time."
             }
         }
     }
@@ -283,8 +283,8 @@ object SmartAiTransitEngine {
         val narrative = "Your journey from $cleanOrigin to $cleanDest has been successfully completed using $cleanMode. You covered $distanceKm km across $stopsCount transit stops in $durationMinutes minutes with zero transit bottlenecks."
 
         val onTimeScore = if (durationMinutes <= 25) "99% High Punctuality" else "95% On-Time"
-        val efficiencyBadge = "Eco-Commute Verified"
-        val ecoImpactHighlight = "You prevented ${(distanceKm * 0.12).coerceAtLeast(0.4).let { "%.2f".format(it) }} kg of CO2 emission compared to single-occupancy cabs."
+        val efficiencyBadge = "Verified Route"
+        val ecoImpactHighlight = "Comfortable transit journey completed on time across Tamil Nadu."
 
         val stopsList = listOf(
             "$cleanOrigin (Departed on schedule)",

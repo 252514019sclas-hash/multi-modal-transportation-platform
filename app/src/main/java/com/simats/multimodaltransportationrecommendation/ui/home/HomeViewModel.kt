@@ -54,8 +54,8 @@ class HomeViewModel(
 
     companion object {
         fun getCurrentDynamicTime(): String {
-            val sdf = SimpleDateFormat("Today, h:mm a", Locale.getDefault())
-            return sdf.format(Date())
+            val sdf = SimpleDateFormat("h:mm a", Locale.getDefault())
+            return "Today, ${sdf.format(Date())}"
         }
     }
 

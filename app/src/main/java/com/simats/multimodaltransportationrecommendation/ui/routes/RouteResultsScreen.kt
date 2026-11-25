@@ -403,27 +403,6 @@ private fun AvailableVehiclesTabContent(
         contentPadding = PaddingValues(vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // AI Transit Insight Card
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(PastelCardTeal)
-                    .border(1.dp, TealLight, RoundedCornerShape(12.dp))
-                    .padding(12.dp)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "💡", fontSize = 14.sp)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "MoveSmart AI Transit Recommendation", color = TealDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Text(text = uiState.aiInsight, color = TextNavyDark, fontSize = 11.sp, lineHeight = 16.sp)
-                }
-            }
-        }
-
         // Available Vehicle Cards List
         items(uiState.allRoutes) { route ->
             val isSelected = uiState.selectedRoute?.id == route.id
@@ -573,19 +552,12 @@ private fun VehicleCard(
                 }
             }
 
-            // Transit steps & environmental note
+            // Transit steps view toggle
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "🌱 ${route.co2SavedKg} kg CO2 saved",
-                    color = Color(0xFF047857),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
                 Text(
                     text = if (isExpanded) "Hide Stops ▲" else "View Transit Stops ▼",
                     color = SkyBlueDark,
@@ -682,54 +654,6 @@ private fun TouristSpotsPlannerTabContent(
         contentPadding = PaddingValues(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Multi-Day AI Planner Banner Shortcut (Clean & Uncluttered)
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(PrimaryGradient)
-                    .clickable { onPlanMultiDay() }
-                    .padding(14.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(3.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "🤖 ", fontSize = 14.sp)
-                            Text(
-                                text = "AI Multi-Day Trip & Stay Planner",
-                                color = Color.White,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Text(
-                            text = "Planning a 2–7 day tour to ${uiState.destination.replaceFirstChar { it.uppercase() }}? Plan en-route night stays & local food stops with 0 booking fee.",
-                            color = Color.White.copy(alpha = 0.92f),
-                            fontSize = 11.sp,
-                            lineHeight = 15.sp
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color.White)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(text = "Plan ➔", color = SkyBlueDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
-
         // Category Filter Chips
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

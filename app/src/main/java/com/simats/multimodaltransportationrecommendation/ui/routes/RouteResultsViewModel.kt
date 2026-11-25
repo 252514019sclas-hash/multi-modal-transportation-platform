@@ -21,7 +21,7 @@ data class RouteResultsUiState(
     val dateTime: String = "Today, 9:15 AM",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val aiInsight: String = "Finding the optimal low-carbon multi-modal transit connection across Tamil Nadu.",
+    val aiInsight: String = "Finding the optimal multi-modal transit connection across Tamil Nadu.",
     val recommendedRoute: RouteOption? = null,
     val alternativeRoutes: List<RouteOption> = emptyList(),
     val allRoutes: List<RouteOption> = emptyList(),

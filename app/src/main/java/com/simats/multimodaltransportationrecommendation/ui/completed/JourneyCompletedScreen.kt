@@ -202,10 +202,6 @@ fun JourneyCompletedScreen(
                                 Text(text = uiState.fareText, color = TealDark, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                                 Text(text = "Fare Paid", color = TextMutedSlate, fontSize = 10.sp)
                             }
-                            Column {
-                                Text(text = "${uiState.co2SavedKg} kg", color = EmeraldGreen, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "CO₂ Saved", color = TextMutedSlate, fontSize = 10.sp)
-                            }
                         }
 
                         // Modes used tag
@@ -478,7 +474,6 @@ fun JourneyCompletedScreen(
                                         }
                                         Column(horizontalAlignment = Alignment.End) {
                                             Text(text = alt.fareDiffText, color = if (alt.fareDiffText.contains("higher")) Color(0xFFDC2626) else EmeraldGreen, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                            Text(text = alt.co2Comparison, color = TextMutedSlate, fontSize = 9.sp)
                                         }
                                     }
                                 }

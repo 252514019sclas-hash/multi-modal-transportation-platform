@@ -258,10 +258,6 @@ fun TripDetailScreen(
                                         Text(text = data.fareText, color = TealDark, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                         Text(text = "Fare Paid", color = TextMutedSlate, fontSize = 10.sp)
                                     }
-                                    Column {
-                                        Text(text = "🌱 ${data.co2SavedKg} kg", color = EmeraldGreen, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                        Text(text = "CO₂ Saved", color = TextMutedSlate, fontSize = 10.sp)
-                                    }
                                 }
                             }
                         }
