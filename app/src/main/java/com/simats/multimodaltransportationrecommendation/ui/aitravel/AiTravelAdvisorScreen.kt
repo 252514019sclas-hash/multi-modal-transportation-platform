@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -100,7 +101,7 @@ fun AiTravelAdvisorScreen(
                     Text(
                         text = "Smart Multi-Day Trip Planner",
                         color = TextNavyDark,
-                        fontSize = 17.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -385,74 +386,68 @@ fun AiTravelAdvisorScreen(
                     }
                 }
 
-                // 3. TRIP OVERVIEW BANNER (IF PLAN IS LOADED)
+                // 3. TRIP OVERVIEW BANNER (IF PLAN IS LOADED - COMPACT & CLEAN)
                 uiState.tripPlan?.tripSummary?.let { summary ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .shadow(2.dp, RoundedCornerShape(16.dp))
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .background(PrimaryGradient)
-                            .padding(14.dp)
+                            .padding(horizontal = 12.dp, vertical = 9.dp)
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        text = "${summary.origin} ➔ ${summary.destination}",
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "${summary.totalDays} Days · ~${summary.totalDistanceKm} km · ${summary.tripTheme}",
-                                        color = Color.White.copy(alpha = 0.9f),
-                                        fontSize = 11.sp
-                                    )
-                                }
-
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(20.dp))
-                                        .background(SurfaceWhite)
-                                        .clickable { viewModel.saveItineraryToMyTrips(context) }
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        text = if (uiState.isSaving) "Saving..." else "💾 Save Plan",
-                                        color = SkyBlueDark,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 Text(
-                                    text = "✓ ${summary.totalAttractionsPlanned} En-route Attractions · ${summary.totalDays} Night Stays",
-                                    color = Color.White.copy(alpha = 0.95f),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    text = "${summary.origin} ➔ ${summary.destination}",
+                                    color = Color.White,
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(Color.White.copy(alpha = 0.2f))
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                Text(
+                                    text = "${summary.totalDays} Days · ~${summary.totalDistanceKm} km · ${summary.totalAttractionsPlanned} Spots",
+                                    color = Color.White.copy(alpha = 0.9f),
+                                    fontSize = 10.5.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            // Small, neat Save Plan pill (Horizontal, no vertical wrapping)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(SurfaceWhite)
+                                    .clickable { viewModel.saveItineraryToMyTrips(context) }
+                                    .padding(horizontal = 9.dp, vertical = 5.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Bookmark,
+                                        contentDescription = "Save Plan",
+                                        tint = TealDark,
+                                        modifier = Modifier.size(13.dp)
+                                    )
                                     Text(
-                                        text = "FREE ADVISORY",
-                                        color = Color.White,
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold
+                                        text = if (uiState.isSaving) "Saving..." else "Save Plan",
+                                        color = TealDark,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        softWrap = false
                                     )
                                 }
                             }
