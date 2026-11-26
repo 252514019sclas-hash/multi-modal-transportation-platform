@@ -13,6 +13,7 @@ import com.simats.multimodaltransportationrecommendation.data.local.SessionManag
 import com.simats.multimodaltransportationrecommendation.ui.journey.CorridorStopItem
 import com.simats.multimodaltransportationrecommendation.ui.journey.TamilNaduTransitResolver
 import com.simats.multimodaltransportationrecommendation.ui.journey.TamilNaduTravelRoute
+import com.simats.multimodaltransportationrecommendation.ui.notifications.NotificationHelper
 import kotlin.math.max
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -87,7 +88,8 @@ data class GroupTravelUiState(
     // Action feedback
     val newlyCreatedGroup: TravelGroup? = null,
     val userEnteredDepartureTime: String = "08:45 PM",
-    val reachedStopIds: Set<String> = emptySet()
+    val reachedStopIds: Set<String> = emptySet(),
+    val destinationReached: Boolean = false
 )
 
 class GroupTravelViewModel(
@@ -389,6 +391,36 @@ class GroupTravelViewModel(
                             activeSharingCount = max(1, locRes.data.activeSharingCount)
                         )
                     }
+
+                    // Automatic proximity detection to stops and destination
+                    val currentRoute = _uiState.value.activeTravelRoute
+                    if (currentRoute != null) {
+                        currentRoute.intermediateStops.forEach { stop ->
+                            if (!_uiState.value.reachedStopIds.contains(stop.id)) {
+                                val distMeters = FloatArray(1)
+                                android.location.Location.distanceBetween(
+                                    loc.latitude, loc.longitude,
+                                    stop.latitude, stop.longitude,
+                                    distMeters
+                                )
+                                if (distMeters[0] <= 1200f) {
+                                    toggleStopReached(context, stop.id, false)
+                                }
+                            }
+                        }
+
+                        if (!_uiState.value.reachedStopIds.contains("final_destination")) {
+                            val destMeters = FloatArray(1)
+                            android.location.Location.distanceBetween(
+                                loc.latitude, loc.longitude,
+                                currentRoute.destinationLatLng.latitude, currentRoute.destinationLatLng.longitude,
+                                destMeters
+                            )
+                            if (destMeters[0] <= 1500f) {
+                                toggleStopReached(context, "final_destination", true)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -588,14 +620,108 @@ class GroupTravelViewModel(
         )
     }
 
-    fun toggleStopReached(stopId: String) {
+    fun toggleStopReached(context: Context? = null, stopId: String, isDestination: Boolean = false) {
         val current = _uiState.value.reachedStopIds.toMutableSet()
-        if (current.contains(stopId)) {
-            current.remove(stopId)
-        } else {
+        val isNowReached = !current.contains(stopId)
+
+        if (isNowReached) {
             current.add(stopId)
+        } else {
+            current.remove(stopId)
         }
-        _uiState.value = _uiState.value.copy(reachedStopIds = current)
+
+        val route = _uiState.value.activeTravelRoute
+        val group = _uiState.value.activeGroup
+        val personName = group?.creatorName?.ifBlank { null }
+            ?: group?.approvedMembers?.firstOrNull()?.fullName
+            ?: "laxmi"
+
+        var feedbackMsg: String? = null
+
+        if (isNowReached && context != null) {
+            if (isDestination || stopId == "final_destination" || (route != null && stopId.equals(route.destination, ignoreCase = true))) {
+                val destName = route?.destination ?: group?.destination ?: "Destination"
+                NotificationHelper.notifyDestinationReached(
+                    context = context,
+                    personName = personName,
+                    destinationName = destName,
+                    arrivalTime = route?.arrivalTime ?: "",
+                    totalKm = route?.totalDistanceKm ?: 0.0
+                )
+                feedbackMsg = "🎉 Notification: $personName reached final stop $destName!"
+            } else {
+                val stop = route?.intermediateStops?.firstOrNull { it.id == stopId }
+                val stopIndex = route?.intermediateStops?.indexOfFirst { it.id == stopId } ?: -1
+                val nextStop = if (stopIndex >= 0 && stopIndex + 1 < (route?.intermediateStops?.size ?: 0)) {
+                    route?.intermediateStops?.get(stopIndex + 1)
+                } else null
+
+                val stopName = stop?.name ?: stopId
+                NotificationHelper.notifyStopReached(
+                    context = context,
+                    personName = personName,
+                    stopName = stopName,
+                    nextStopName = nextStop?.name ?: route?.destination,
+                    arrivalTime = stop?.arrivalTime ?: "",
+                    distanceKm = stop?.distanceFromOriginKm ?: 0.0
+                )
+                feedbackMsg = "🔔 Notification: $personName reached $stopName!"
+            }
+        }
+
+        val isDestReached = current.contains("final_destination") || (route != null && current.contains(route.destination.lowercase()))
+
+        _uiState.value = _uiState.value.copy(
+            reachedStopIds = current,
+            destinationReached = isDestReached,
+            successMessage = feedbackMsg ?: _uiState.value.successMessage
+        )
+    }
+
+    fun toggleStopReached(stopId: String) {
+        toggleStopReached(null, stopId, false)
+    }
+
+    fun testStopNotification(context: Context) {
+        val route = _uiState.value.activeTravelRoute
+        val group = _uiState.value.activeGroup
+        val personName = group?.creatorName?.ifBlank { null }
+            ?: group?.approvedMembers?.firstOrNull()?.fullName
+            ?: "laxmi"
+        val sampleStop = route?.intermediateStops?.firstOrNull()?.name ?: "Arakkonam"
+        val nextStop = route?.intermediateStops?.getOrNull(1)?.name ?: "Katpadi"
+
+        NotificationHelper.notifyStopReached(
+            context = context,
+            personName = personName,
+            stopName = sampleStop,
+            nextStopName = nextStop,
+            arrivalTime = "08:36 AM",
+            distanceKm = 32.0
+        )
+        _uiState.value = _uiState.value.copy(
+            successMessage = "🔔 Test Stop notification sent for $sampleStop!"
+        )
+    }
+
+    fun testDestinationNotification(context: Context) {
+        val route = _uiState.value.activeTravelRoute
+        val group = _uiState.value.activeGroup
+        val personName = group?.creatorName?.ifBlank { null }
+            ?: group?.approvedMembers?.firstOrNull()?.fullName
+            ?: "laxmi"
+        val destName = route?.destination ?: group?.destination ?: "Coimbatore"
+
+        NotificationHelper.notifyDestinationReached(
+            context = context,
+            personName = personName,
+            destinationName = destName,
+            arrivalTime = route?.arrivalTime ?: "04:28 PM",
+            totalKm = route?.totalDistanceKm ?: 440.0
+        )
+        _uiState.value = _uiState.value.copy(
+            successMessage = "🎉 Test Destination notification sent for $destName!"
+        )
     }
 
     fun swapRouteOriginDest() {

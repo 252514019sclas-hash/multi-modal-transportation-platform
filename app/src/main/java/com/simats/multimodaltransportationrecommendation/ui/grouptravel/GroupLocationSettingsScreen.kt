@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.simats.multimodaltransportationrecommendation.ui.notifications.NotificationHelper
 import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 @Composable
@@ -181,6 +182,114 @@ fun GroupLocationSettingsScreen(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
+                        }
+                    }
+                }
+
+                // Stop & Final Destination Arrival Notification Settings
+                var notifyStops by remember { mutableStateOf(NotificationHelper.isStopArrivalNotificationEnabled(context)) }
+                var notifyDest by remember { mutableStateOf(NotificationHelper.isDestinationNotificationEnabled(context)) }
+                var soundVibrate by remember { mutableStateOf(NotificationHelper.isSoundVibrateEnabled(context)) }
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(2.dp, RoundedCornerShape(16.dp))
+                        .border(1.dp, BorderLight, RoundedCornerShape(16.dp)),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "STOP & DESTINATION NOTIFICATIONS",
+                            color = SkyBluePrimary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+
+                        // Toggle 1: Intermediate Stops
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = "🚉 Notify on Each Stop", color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text(text = "Push alert when traveler reaches each stop", color = TextNavyBody, fontSize = 10.sp)
+                            }
+                            Switch(
+                                checked = notifyStops,
+                                onCheckedChange = {
+                                    notifyStops = it
+                                    NotificationHelper.setStopArrivalNotificationEnabled(context, it)
+                                }
+                            )
+                        }
+
+                        // Toggle 2: Final Destination
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = "🎯 Notify on Final Destination", color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text(text = "Arrival completion alert when reaching final destination", color = TextNavyBody, fontSize = 10.sp)
+                            }
+                            Switch(
+                                checked = notifyDest,
+                                onCheckedChange = {
+                                    notifyDest = it
+                                    NotificationHelper.setDestinationNotificationEnabled(context, it)
+                                }
+                            )
+                        }
+
+                        // Toggle 3: Sound & Vibration
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = "🔊 Sound & Vibration", color = TextNavyDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text(text = "Vibrate & play tone on stop arrivals", color = TextNavyBody, fontSize = 10.sp)
+                            }
+                            Switch(
+                                checked = soundVibrate,
+                                onCheckedChange = {
+                                    soundVibrate = it
+                                    NotificationHelper.setSoundVibrateEnabled(context, it)
+                                }
+                            )
+                        }
+
+                        // Test Action Buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { viewModel.testStopNotification(context) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(vertical = 4.dp)
+                            ) {
+                                Text("🧪 Test Stop Alert", fontSize = 10.sp, color = SkyBluePrimary, fontWeight = FontWeight.Bold)
+                            }
+
+                            OutlinedButton(
+                                onClick = { viewModel.testDestinationNotification(context) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(vertical = 4.dp)
+                            ) {
+                                Text("🎉 Test Final Alert", fontSize = 10.sp, color = TealDark, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }

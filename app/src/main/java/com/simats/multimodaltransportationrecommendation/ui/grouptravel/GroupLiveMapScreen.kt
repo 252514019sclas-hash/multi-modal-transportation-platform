@@ -1,9 +1,14 @@
 package com.simats.multimodaltransportationrecommendation.ui.grouptravel
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -34,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -43,12 +49,14 @@ import com.simats.multimodaltransportationrecommendation.ui.journey.TamilNaduTra
 import com.simats.multimodaltransportationrecommendation.ui.journey.TamilNaduTravelRoute
 import com.simats.multimodaltransportationrecommendation.ui.map.MapMarkerItem
 import com.simats.multimodaltransportationrecommendation.ui.map.MoveSmartGoogleMapView
+import com.simats.multimodaltransportationrecommendation.ui.notifications.NotificationHelper
 import com.simats.multimodaltransportationrecommendation.ui.theme.*
 
 /**
  * Modern Transit Route & Intermediate Stations Timeline Screen
  * Provides authentic scheduled stops, dynamic departure times entered by user,
- * waypoint reached tracking, and interactive map exploration.
+ * waypoint reached tracking, interactive map exploration, and notification settings
+ * for each stop arrival and final stopping arrival.
  */
 @Composable
 fun GroupLiveMapScreen(
@@ -63,12 +71,13 @@ fun GroupLiveMapScreen(
     var isSearchModalOpen by remember { mutableStateOf(false) }
     var showFullMapView by remember { mutableStateOf(false) }
     var showDepartureTimeDialog by remember { mutableStateOf(false) }
+    var showNotificationSettingsDialog by remember { mutableStateOf(false) }
 
     // Initialize with active group destination & start point and user-entered departure time
     LaunchedEffect(groupId, uiState.activeGroup) {
         val dest = uiState.activeGroup?.destination?.ifBlank { null }
             ?: uiState.routeDestQuery.ifBlank { null }
-            ?: "Trichy"
+            ?: "Coimbatore"
         val orig = uiState.activeGroup?.commonStartLocation?.ifBlank { null }
             ?: uiState.activeGroup?.userMembership?.startingLocation?.ifBlank { null }
             ?: uiState.routeOriginQuery.ifBlank { null }
@@ -82,7 +91,7 @@ fun GroupLiveMapScreen(
     val activeRoute = uiState.activeTravelRoute
         ?: TamilNaduTransitResolver.resolveRoute(
             uiState.routeOriginQuery.ifBlank { "Kanchipuram" },
-            uiState.routeDestQuery.ifBlank { "Trichy" },
+            uiState.routeDestQuery.ifBlank { "Coimbatore" },
             currentDepTime
         )
 
@@ -113,6 +122,17 @@ fun GroupLiveMapScreen(
         )
     }
 
+    // Transit & Stop Arrival Notification Settings Dialog
+    if (showNotificationSettingsDialog) {
+        TransitNotificationSettingsDialog(
+            context = context,
+            route = activeRoute,
+            onDismiss = { showNotificationSettingsDialog = false },
+            onTestStop = { viewModel.testStopNotification(context) },
+            onTestDestination = { viewModel.testDestinationNotification(context) }
+        )
+    }
+
     // Full Interactive Google Map Dialog View when user clicks "View Map"
     if (showFullMapView) {
         Dialog(
@@ -124,8 +144,10 @@ fun GroupLiveMapScreen(
                     .fillMaxSize()
                     .background(Color.White)
             ) {
+                val isDestReachedOnMap = uiState.destinationReached || uiState.reachedStopIds.contains("final_destination")
+
                 // Collect all markers: Origin, Stops (with reached status), Destination, and Live Member GPS
-                val mapMarkers = remember(activeRoute, uiState.reachedStopIds, uiState.isSharingActive, uiState.userGpsLatLng, uiState.liveLocations) {
+                val mapMarkers = remember(activeRoute, uiState.reachedStopIds, uiState.isSharingActive, uiState.userGpsLatLng, uiState.liveLocations, isDestReachedOnMap) {
                     val markers = mutableListOf<MapMarkerItem>()
 
                     // 1. Origin Marker
@@ -161,17 +183,18 @@ fun GroupLiveMapScreen(
                     markers.add(
                         MapMarkerItem(
                             id = "dest_stop",
-                            title = "🎯 Destination: ${activeRoute.destination}",
-                            snippet = "Expected Arrival: ${activeRoute.arrivalTime} (${activeRoute.totalDistanceKm.toInt()} km)",
+                            title = if (isDestReachedOnMap) "✓ Destination Reached: ${activeRoute.destination}" else "🎯 Destination: ${activeRoute.destination}",
+                            snippet = "Expected Arrival: ${activeRoute.arrivalTime} (${activeRoute.totalDistanceKm.toInt()} km)" +
+                                    if (isDestReachedOnMap) " · Completed ✓" else "",
                             latitude = activeRoute.destinationLatLng.latitude,
                             longitude = activeRoute.destinationLatLng.longitude,
-                            iconColorHue = BitmapDescriptorFactory.HUE_RED
+                            iconColorHue = if (isDestReachedOnMap) BitmapDescriptorFactory.HUE_GREEN else BitmapDescriptorFactory.HUE_RED
                         )
                     )
 
                     // 4. Live User GPS / Group Member Markers
                     if (uiState.isSharingActive || (uiState.activeGroup?.sharingCount ?: 0) > 0) {
-                        val selfLoc = uiState.userGpsLatLng ?: LatLng(12.8342, 79.7036) // Fallback to Kanchipuram
+                        val selfLoc = uiState.userGpsLatLng ?: LatLng(12.8342, 79.7036) // Fallback
                         val userName = uiState.activeGroup?.creatorName?.ifBlank { null }
                             ?: uiState.activeGroup?.approvedMembers?.firstOrNull()?.fullName
                             ?: "laxmi"
@@ -235,19 +258,33 @@ fun GroupLiveMapScreen(
                         Text(text = "←", color = Color(0xFF1E1B4B), fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color(0xFF6D28D9))
-                            .clickable { showFullMapView = false }
-                            .padding(horizontal = 14.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "📋 View Stops Timeline",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(42.dp)
+                                .shadow(6.dp, CircleShape)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .clickable { showNotificationSettingsDialog = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "🔔", fontSize = 18.sp)
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(Color(0xFF6D28D9))
+                                .clickable { showFullMapView = false }
+                                .padding(horizontal = 14.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = "📋 Stops Timeline",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
 
@@ -268,7 +305,6 @@ fun GroupLiveMapScreen(
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // Header: Route title & reached progress
                         val reachedCount = activeRoute.intermediateStops.count { uiState.reachedStopIds.contains(it.id) }
                         val totalCount = activeRoute.intermediateStops.size
 
@@ -308,9 +344,9 @@ fun GroupLiveMapScreen(
                             }
                         }
 
-                        // Horizontal Scrollable Stops for Rapid Reached Marking
+                        // Horizontal Scrollable Stops for Rapid Reached Marking & Alert Trigger
                         Text(
-                            text = "TAP STOP TO MARK WHEN REACHED:",
+                            text = "TAP STOP TO MARK REACHED & SEND NOTIFICATION:",
                             color = Color(0xFF64748B),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
@@ -332,7 +368,7 @@ fun GroupLiveMapScreen(
                                             if (isReached) Color(0xFF059669) else Color(0xFFDDD6FE),
                                             RoundedCornerShape(10.dp)
                                         )
-                                        .clickable { viewModel.toggleStopReached(stop.id) }
+                                        .clickable { viewModel.toggleStopReached(context, stop.id, false) }
                                         .padding(horizontal = 10.dp, vertical = 6.dp)
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -350,15 +386,45 @@ fun GroupLiveMapScreen(
                                     }
                                 }
                             }
+
+                            // Final Destination Stopping in Horizontal Row
+                            item {
+                                val isDestReached = uiState.destinationReached || uiState.reachedStopIds.contains("final_destination")
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(if (isDestReached) Color(0xFF10B981) else Color(0xFFEDE9FE))
+                                        .border(
+                                            1.dp,
+                                            if (isDestReached) Color(0xFF059669) else Color(0xFF8B5CF6),
+                                            RoundedCornerShape(10.dp)
+                                        )
+                                        .clickable { viewModel.toggleStopReached(context, "final_destination", true) }
+                                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = if (isDestReached) "✓ ${activeRoute.destination} (Final)" else "🏁 ${activeRoute.destination} (Final)",
+                                            color = if (isDestReached) Color.White else Color(0xFF5B21B6),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "Arr: ${activeRoute.arrivalTime}",
+                                            color = if (isDestReached) Color(0xFFDCFCE7) else Color(0xFF6D28D9),
+                                            fontSize = 9.sp
+                                        )
+                                    }
+                                }
+                            }
                         }
 
-                        // Bottom Actions: Open in Google Maps & Live Sharing Info
+                        // Bottom Actions: Open in Google Maps & Notification Settings
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Launch External Google Maps Navigation
                             Button(
                                 onClick = {
                                     val gmmIntentUri = Uri.parse(
@@ -373,42 +439,30 @@ fun GroupLiveMapScreen(
                                     }
                                 },
                                 modifier = Modifier
-                                    .weight(1f)
+                                    .weight(1.2f)
                                     .height(40.dp),
                                 shape = RoundedCornerShape(10.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
                             ) {
                                 Text(
-                                    text = "🧭 Open in Google Maps",
+                                    text = "🧭 Google Maps",
                                     color = Color.White,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
 
-                            // GPS Sharing Toggle Button
                             OutlinedButton(
-                                onClick = {
-                                    val nextSharing = !uiState.isSharingActive
-                                    viewModel.toggleLocationSharing(context, groupId, nextSharing)
-                                    Toast.makeText(
-                                        context,
-                                        if (nextSharing) "🟢 Live GPS Sharing Started" else "🔒 Live GPS Sharing Paused",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                },
+                                onClick = { showNotificationSettingsDialog = true },
                                 modifier = Modifier
-                                    .weight(1f)
+                                    .weight(0.9f)
                                     .height(40.dp),
                                 shape = RoundedCornerShape(10.dp),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp,
-                                    if (uiState.isSharingActive) Color(0xFF10B981) else Color(0xFF6D28D9)
-                                )
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF6D28D9))
                             ) {
                                 Text(
-                                    text = if (uiState.isSharingActive) "🟢 GPS Active" else "📍 Share GPS",
-                                    color = if (uiState.isSharingActive) Color(0xFF059669) else Color(0xFF6D28D9),
+                                    text = "🔔 Alerts",
+                                    color = Color(0xFF6D28D9),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -605,18 +659,33 @@ fun GroupLiveMapScreen(
                         }
                     }
 
-                    // Swap / Change Route Button
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .shadow(2.dp, CircleShape)
-                            .clip(CircleShape)
-                            .background(Color.White)
-                            .border(1.dp, Color(0xFFE2E8F0), CircleShape)
-                            .clickable { isSearchModalOpen = true },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "🔄", fontSize = 16.sp)
+                    // Notification Settings Bell & Route Change Buttons
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .shadow(2.dp, CircleShape)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .border(1.dp, Color(0xFFE2E8F0), CircleShape)
+                                .clickable { showNotificationSettingsDialog = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "🔔", fontSize = 16.sp)
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .shadow(2.dp, CircleShape)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .border(1.dp, Color(0xFFE2E8F0), CircleShape)
+                                .clickable { isSearchModalOpen = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "🔄", fontSize = 16.sp)
+                        }
                     }
                 }
             }
@@ -781,6 +850,57 @@ fun GroupLiveMapScreen(
                 }
             }
 
+            // Notification Status Quick Banner above Stops Timeline
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFA7F3D0))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 9.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Text(text = "🔔", fontSize = 13.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                text = "Stop & Destination Arrival Alerts: Active",
+                                color = Color(0xFF065F46),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Notifications fire for each scheduled stop & final stopping",
+                                color = Color(0xFF047857),
+                                fontSize = 9.sp
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0xFF10B981))
+                            .clickable { showNotificationSettingsDialog = true }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Settings ⚙️",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
             // 4. Vertical Stops & Timeline Section
             Column(
                 modifier = Modifier
@@ -801,14 +921,21 @@ fun GroupLiveMapScreen(
                         stop = stop,
                         isReached = isReached,
                         isLast = (index == activeRoute.intermediateStops.size - 1),
-                        onToggleReached = { viewModel.toggleStopReached(stop.id) }
+                        onToggleReached = {
+                            viewModel.toggleStopReached(context, stop.id, false)
+                        }
                     )
                 }
 
-                // DESTINATION STATION ROW
+                // DESTINATION STATION ROW (With Reached Marker & Alert Support)
+                val isDestReached = uiState.destinationReached || uiState.reachedStopIds.contains("final_destination")
                 TimelineDestinationCard(
                     stationName = activeRoute.destination,
-                    arrivalTime = activeRoute.arrivalTime
+                    arrivalTime = activeRoute.arrivalTime,
+                    isReached = isDestReached,
+                    onToggleReached = {
+                        viewModel.toggleStopReached(context, "final_destination", true)
+                    }
                 )
             }
 
@@ -1028,26 +1155,28 @@ private fun TimelineIntermediateRow(
 }
 
 /**
- * Destination Node Card with Purple Theme & Destination Badge
+ * Destination Node Card with Reached Marker & Final Destination Arrival Alert
  */
 @Composable
 private fun TimelineDestinationCard(
     stationName: String,
-    arrivalTime: String
+    arrivalTime: String,
+    isReached: Boolean,
+    onToggleReached: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Destination Icon Node
+        // Destination Icon Node: Emerald Green with Checkmark if Reached, else Purple
         Box(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF6D28D9)),
+                .background(if (isReached) Color(0xFF10B981) else Color(0xFF6D28D9)),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "🎯", fontSize = 16.sp)
+            Text(text = if (isReached) "✓" else "🎯", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -1056,8 +1185,13 @@ private fun TimelineDestinationCard(
         Card(
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF3E8FF)),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE9D5FF))
+            colors = CardDefaults.cardColors(
+                containerColor = if (isReached) Color(0xFFF0FDF4) else Color(0xFFF3E8FF)
+            ),
+            border = androidx.compose.foundation.BorderStroke(
+                1.dp,
+                if (isReached) Color(0xFFA7F3D0) else Color(0xFFE9D5FF)
+            )
         ) {
             Row(
                 modifier = Modifier
@@ -1075,24 +1209,357 @@ private fun TimelineDestinationCard(
                     )
                     Text(
                         text = "Arrival : $arrivalTime",
-                        color = Color(0xFF6D28D9),
+                        color = if (isReached) Color(0xFF047857) else Color(0xFF6D28D9),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFF6D28D9))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Mark Reached button for Final Stopping
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isReached) Color(0xFF10B981) else Color.White)
+                            .border(
+                                1.dp,
+                                if (isReached) Color(0xFF059669) else Color(0xFF8B5CF6),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clickable { onToggleReached() }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = if (isReached) "✓ Reached" else "⚪ Mark Reached",
+                            color = if (isReached) Color.White else Color(0xFF6D28D9),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isReached) Color(0xFF059669) else Color(0xFF6D28D9))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = if (isReached) "🎉 Arrived" else "🏁 Destination",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Transit & Stop Arrival Notification Settings Dialog
+ */
+@Composable
+private fun TransitNotificationSettingsDialog(
+    context: Context,
+    route: TamilNaduTravelRoute,
+    onDismiss: () -> Unit,
+    onTestStop: () -> Unit,
+    onTestDestination: () -> Unit
+) {
+    var notifyStops by remember { mutableStateOf(NotificationHelper.isStopArrivalNotificationEnabled(context)) }
+    var notifyDest by remember { mutableStateOf(NotificationHelper.isDestinationNotificationEnabled(context)) }
+    var soundVibrate by remember { mutableStateOf(NotificationHelper.isSoundVibrateEnabled(context)) }
+    var statusBar by remember { mutableStateOf(NotificationHelper.isStatusBarNotificationEnabled(context)) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            Toast.makeText(context, "Notification permission granted!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(8.dp, RoundedCornerShape(20.dp)),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🔔", fontSize = 18.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Notification Settings",
+                            color = Color(0xFF1E1B4B),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                     Text(
-                        text = "🏁 Destination",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold
+                        text = "✕",
+                        color = Color(0xFF64748B),
+                        fontSize = 16.sp,
+                        modifier = Modifier.clickable { onDismiss() }
                     )
+                }
+
+                Text(
+                    text = "Configure push notifications to be alerted whenever traveler reaches each intermediate stop and the final destination.",
+                    color = Color(0xFF64748B),
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp
+                )
+
+                // Android 13+ Runtime Permission Notice
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val hasPerm = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                    if (!hasPerm) {
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFBEB)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFDE68A)),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "⚠️ Notification permission needed",
+                                    color = Color(0xFF92400E),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Button(
+                                    onClick = { permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text("Allow", fontSize = 10.sp, color = Color.White)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Toggle 1: Notify on Each Stop
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFAF5FF)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE9D5FF)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "🚉 Notify on Each Stop",
+                                color = Color(0xFF1E1B4B),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Receive alert when person reaches each intermediate stop along route",
+                                color = Color(0xFF64748B),
+                                fontSize = 10.sp,
+                                lineHeight = 14.sp
+                            )
+                        }
+                        Switch(
+                            checked = notifyStops,
+                            onCheckedChange = {
+                                notifyStops = it
+                                NotificationHelper.setStopArrivalNotificationEnabled(context, it)
+                            },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF6D28D9))
+                        )
+                    }
+                }
+
+                // Toggle 2: Notify on Final Destination
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFAF5FF)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE9D5FF)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "🎯 Notify on Final Destination",
+                                color = Color(0xFF1E1B4B),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Receive completion alert when person reaches ${route.destination}",
+                                color = Color(0xFF64748B),
+                                fontSize = 10.sp,
+                                lineHeight = 14.sp
+                            )
+                        }
+                        Switch(
+                            checked = notifyDest,
+                            onCheckedChange = {
+                                notifyDest = it
+                                NotificationHelper.setDestinationNotificationEnabled(context, it)
+                            },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF6D28D9))
+                        )
+                    }
+                }
+
+                // Toggle 3: Sound & Vibration
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFAF5FF)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE9D5FF)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "🔊 Sound & Vibration",
+                                color = Color(0xFF1E1B4B),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Play alert tone and vibrate phone on stop arrival",
+                                color = Color(0xFF64748B),
+                                fontSize = 10.sp
+                            )
+                        }
+                        Switch(
+                            checked = soundVibrate,
+                            onCheckedChange = {
+                                soundVibrate = it
+                                NotificationHelper.setSoundVibrateEnabled(context, it)
+                            },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF6D28D9))
+                        )
+                    }
+                }
+
+                // Toggle 4: System Status Bar Tray
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFAF5FF)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE9D5FF)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "📲 Android Notification Tray",
+                                color = Color(0xFF1E1B4B),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Display notification banner in Android status bar",
+                                color = Color(0xFF64748B),
+                                fontSize = 10.sp
+                            )
+                        }
+                        Switch(
+                            checked = statusBar,
+                            onCheckedChange = {
+                                statusBar = it
+                                NotificationHelper.setStatusBarNotificationEnabled(context, it)
+                            },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF6D28D9))
+                        )
+                    }
+                }
+
+                // Test Notification Buttons
+                Text(
+                    text = "TEST NOTIFICATIONS",
+                    color = Color(0xFF1E1B4B),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onTestStop,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF6D28D9))
+                    ) {
+                        Text("🧪 Test Stop Alert", fontSize = 10.sp, color = Color(0xFF6D28D9), fontWeight = FontWeight.Bold)
+                    }
+
+                    OutlinedButton(
+                        onClick = onTestDestination,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF10B981))
+                    ) {
+                        Text("🎉 Test Final Alert", fontSize = 10.sp, color = Color(0xFF047857), fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                // Done Button
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6D28D9))
+                ) {
+                    Text("Save & Close Settings ✓", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -1385,7 +1852,7 @@ private fun TamilNaduRouteSearchDialog(
                 Button(
                     onClick = {
                         val cleanFrom = fromInput.trim().ifBlank { "Kanchipuram" }
-                        val cleanTo = toInput.trim().ifBlank { "Trichy" }
+                        val cleanTo = toInput.trim().ifBlank { "Coimbatore" }
                         onApplyRoute(cleanFrom, cleanTo)
                     },
                     modifier = Modifier
