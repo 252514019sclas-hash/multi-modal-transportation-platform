@@ -124,6 +124,8 @@ fun HomeScreen(
         }
     }
 
+    var showAllPlaces by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -833,8 +835,9 @@ fun HomeScreen(
                             )
                         }
                     } else {
+                        val placesToShow = if (showAllPlaces || displayedPlaces.size <= 8) displayedPlaces else displayedPlaces.take(8)
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            displayedPlaces.forEach { place ->
+                            placesToShow.forEach { place ->
                                 TouristPlaceExploreCard(
                                     place = place,
                                     onViewDetails = { onOpenPlaceDetail(place) },
@@ -845,6 +848,26 @@ fun HomeScreen(
                                         onPlanJourney(start, place.name, uiState.dateTime)
                                     }
                                 )
+                            }
+
+                            if (displayedPlaces.size > 8) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(PastelCardBlue)
+                                        .border(1.dp, SkyBlueSoft, RoundedCornerShape(10.dp))
+                                        .clickable { showAllPlaces = !showAllPlaces }
+                                        .padding(vertical = 10.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = if (showAllPlaces) "Show less attractions ▲" else "Show all (${displayedPlaces.size}) attractions ➔",
+                                        color = SkyBluePrimary,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
@@ -1038,6 +1061,8 @@ private fun TouristPlaceExploreCard(
                             model = ImageRequest.Builder(context)
                                 .data(place.imageUrl)
                                 .crossfade(true)
+                                .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                                .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
                                 .build(),
                             contentDescription = place.name,
                             contentScale = ContentScale.Crop,

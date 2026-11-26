@@ -74,17 +74,24 @@ fun GroupLiveMapScreen(
     var showNotificationSettingsDialog by remember { mutableStateOf(false) }
 
     // Initialize with active group destination & start point and user-entered departure time
-    LaunchedEffect(groupId, uiState.activeGroup) {
-        val dest = uiState.activeGroup?.destination?.ifBlank { null }
+    val activeGroup = uiState.activeGroup
+    LaunchedEffect(groupId, activeGroup?.groupId, activeGroup?.destination, activeGroup?.commonStartLocation) {
+        val dest = activeGroup?.destination?.ifBlank { null }
             ?: uiState.routeDestQuery.ifBlank { null }
             ?: "Coimbatore"
-        val orig = uiState.activeGroup?.commonStartLocation?.ifBlank { null }
-            ?: uiState.activeGroup?.userMembership?.startingLocation?.ifBlank { null }
+        val orig = activeGroup?.commonStartLocation?.ifBlank { null }
+            ?: activeGroup?.userMembership?.startingLocation?.ifBlank { null }
             ?: uiState.routeOriginQuery.ifBlank { null }
             ?: "Kanchipuram"
-        val depTime = uiState.activeGroup?.travelTime?.ifBlank { null }
+        val depTime = activeGroup?.travelTime?.ifBlank { null }
             ?: uiState.userEnteredDepartureTime
-        viewModel.searchTravelRoute(orig, dest, depTime)
+
+        if (uiState.activeTravelRoute == null ||
+            !uiState.activeTravelRoute?.origin.equals(orig, ignoreCase = true) ||
+            !uiState.activeTravelRoute?.destination.equals(dest, ignoreCase = true)
+        ) {
+            viewModel.searchTravelRoute(orig, dest, depTime)
+        }
     }
 
     val currentDepTime = uiState.activeGroup?.travelTime?.ifBlank { null } ?: uiState.userEnteredDepartureTime
@@ -234,7 +241,9 @@ fun GroupLiveMapScreen(
                     destinationLocation = activeRoute.destinationLatLng,
                     routeWaypoints = activeRoute.routePolyline,
                     additionalMarkers = mapMarkers,
-                    triggerFitAll = System.currentTimeMillis()
+                    cameraFocusTarget = uiState.cameraFocusLatLng,
+                    triggerFitAll = uiState.mapFitAllTrigger,
+                    triggerRecenter = uiState.mapRecenterTrigger
                 )
 
                 // Top Navigation Bar on Map View

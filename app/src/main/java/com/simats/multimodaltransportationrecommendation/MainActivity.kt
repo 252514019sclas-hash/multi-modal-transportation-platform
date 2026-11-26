@@ -38,10 +38,32 @@ import com.simats.multimodaltransportationrecommendation.ui.ticket.YourTicketScr
 import com.simats.multimodaltransportationrecommendation.ui.transitservice.TransitServiceScreen
 import com.simats.multimodaltransportationrecommendation.ui.trips.MyTripsScreen
 import com.simats.multimodaltransportationrecommendation.ui.trips.TripDetailScreen
+import coil.Coil
+import coil.ImageLoader
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize shared high-performance image cache to eliminate image loading lag
+        val imageLoader = ImageLoader.Builder(applicationContext)
+            .memoryCache {
+                MemoryCache.Builder(applicationContext)
+                    .maxSizePercent(0.25)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(applicationContext.cacheDir.resolve("image_cache"))
+                    .maxSizeBytes(60L * 1024 * 1024)
+                    .build()
+            }
+            .respectCacheHeaders(false)
+            .build()
+        Coil.setImageLoader(imageLoader)
+
         enableEdgeToEdge()
         setContent {
             MultiModalTransportationRecommendationTheme {

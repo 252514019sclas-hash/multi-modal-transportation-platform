@@ -809,6 +809,8 @@ private fun TouristSpotCard(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(place.imageUrl)
                             .crossfade(true)
+                            .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                            .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
                             .build(),
                         contentDescription = place.name,
                         contentScale = ContentScale.Crop,

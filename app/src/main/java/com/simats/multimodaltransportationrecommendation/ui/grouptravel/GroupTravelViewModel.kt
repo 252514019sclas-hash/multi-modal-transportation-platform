@@ -15,6 +15,7 @@ import com.simats.multimodaltransportationrecommendation.ui.journey.TamilNaduTra
 import com.simats.multimodaltransportationrecommendation.ui.journey.TamilNaduTravelRoute
 import com.simats.multimodaltransportationrecommendation.ui.notifications.NotificationHelper
 import kotlin.math.max
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class GroupTravelUiState(
     val isLoading: Boolean = false,
@@ -261,21 +263,26 @@ class GroupTravelViewModel(
 
     private fun startLivePolling(context: Context, groupId: Int) {
         pollJob?.cancel()
-        pollJob = viewModelScope.launch {
+        pollJob = viewModelScope.launch(Dispatchers.IO) {
             while (isActive) {
                 delay(12000) // Poll every 12 seconds for low battery impact
                 val userId = SessionManager.getInstance(context).getUserId() ?: 1
-                // Silent refresh of locations and chat
+                // Silent refresh of locations and chat on background thread
                 val locRes = repository.fetchGroupLocations(userId, groupId)
-                if (locRes is NetworkResult.Success) {
-                    _uiState.value = _uiState.value.copy(
-                        liveLocations = locRes.data.members,
-                        activeSharingCount = locRes.data.activeSharingCount
-                    )
-                }
                 val chatRes = repository.fetchGroupChat(userId, groupId)
-                if (chatRes is NetworkResult.Success) {
-                    _uiState.value = _uiState.value.copy(chatMessages = chatRes.data)
+
+                withContext(Dispatchers.Main) {
+                    var updatedState = _uiState.value
+                    if (locRes is NetworkResult.Success) {
+                        updatedState = updatedState.copy(
+                            liveLocations = locRes.data.members,
+                            activeSharingCount = locRes.data.activeSharingCount
+                        )
+                    }
+                    if (chatRes is NetworkResult.Success) {
+                        updatedState = updatedState.copy(chatMessages = chatRes.data)
+                    }
+                    _uiState.value = updatedState
                 }
             }
         }

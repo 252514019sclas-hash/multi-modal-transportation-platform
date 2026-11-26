@@ -64,6 +64,7 @@ fun MoveSmartGoogleMapView(
     var googleMapInstance by remember { mutableStateOf<GoogleMap?>(null) }
     var isMapAvailable by remember { mutableStateOf(true) }
     var mapInitError by remember { mutableStateOf<String?>(null) }
+    var hasInitialCameraPositioned by remember { mutableStateOf(false) }
 
     val mapView = remember {
         MapView(context).apply {
@@ -189,16 +190,22 @@ fun MoveSmartGoogleMapView(
                 }
             }
 
-            if (cameraFocusTarget != null) {
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraFocusTarget, 15f))
-            } else if (userLocation != null) {
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel))
-            } else if (hasPoints) {
-                try {
-                    map.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 120))
-                } catch (_: Exception) {
-                    destinationLocation?.let {
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(it, zoomLevel))
+            if (!hasInitialCameraPositioned) {
+                if (cameraFocusTarget != null) {
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraFocusTarget, 15f))
+                    hasInitialCameraPositioned = true
+                } else if (userLocation != null) {
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel))
+                    hasInitialCameraPositioned = true
+                } else if (hasPoints) {
+                    try {
+                        map.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 120))
+                        hasInitialCameraPositioned = true
+                    } catch (_: Exception) {
+                        destinationLocation?.let {
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(it, zoomLevel))
+                            hasInitialCameraPositioned = true
+                        }
                     }
                 }
             }

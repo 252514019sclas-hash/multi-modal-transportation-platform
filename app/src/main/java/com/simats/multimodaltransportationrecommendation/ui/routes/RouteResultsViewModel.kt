@@ -54,6 +54,15 @@ class RouteResultsViewModel(
         val cleanOrigin = if (origin.isNotBlank()) origin.trim() else "Chennai Central"
         val cleanDest = if (destination.isNotBlank()) destination.trim() else "Mahabalipuram"
 
+        // Prevent redundant fetch and screen reset flicker if results are already loaded for the same route
+        if (_uiState.value.allRoutes.isNotEmpty() &&
+            _uiState.value.origin.equals(cleanOrigin, ignoreCase = true) &&
+            _uiState.value.destination.equals(cleanDest, ignoreCase = true) &&
+            !_uiState.value.isLoading
+        ) {
+            return
+        }
+
         _uiState.value = _uiState.value.copy(
             origin = cleanOrigin,
             destination = cleanDest,
